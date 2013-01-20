@@ -2,7 +2,7 @@
 
 ## Overview
 
-Description of the FOXSI data files and level data. This file created with [Mou](http://mouapp.com) (The missing markdown editor for web developers).
+Description of the FOXSI data files and level data. This file created with [Mou](http://mouapp.com) (the missing markdown editor for web developers).
 
 ### Recorded Data Files
 Recorded flight data is in two formats:
