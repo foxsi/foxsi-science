@@ -14,22 +14,23 @@
 ;
 ; To process flight data into Level 0 IDL structures and save them:
 ;
-;	filename = '36.255_TM2_Flight_2012-11-02.log'
-; 	data_D0 = process_wsmr( filename, det=0 )
-; 	data_D1 = process_wsmr( filename, det=1 )
-; 	data_D2 = process_wsmr( filename, det=2 )
-; 	data_D3 = process_wsmr( filename, det=3 )
-; 	data_D4 = process_wsmr( filename, det=4 )
-; 	data_D5 = process_wsmr( filename, det=5 )
-; 	data_D6 = process_wsmr( filename, det=6 )
+;	filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+; 	data_D0 = wsmr_data_to_level0( filename, det=0 )
+; 	data_D1 = wsmr_data_to_level0( filename, det=1 )
+; 	data_D2 = wsmr_data_to_level0( filename, det=2 )
+; 	data_D3 = wsmr_data_to_level0( filename, det=3 )
+; 	data_D4 = wsmr_data_to_level0( filename, det=4 )
+; 	data_D5 = wsmr_data_to_level0( filename, det=5 )
+; 	data_D6 = wsmr_data_to_level0( filename, det=6 )
 ;	save, data_D0, data_D1, data_D2, data_D3, data_D4, data_D5, data_d6, $
 ;		file = 'foxsi_level0_data.sav'
 ;
 ; History:	Version 1, 2013-Jan-20, Lindsay Glesener
 ;-
 
-FUNCTION	PROCESS_WSMR, FILENAME, DETECTOR=DETECTOR, STOP=STOP
+FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
+	add_path, 'util'
 	if not keyword_set(filename) then filename = '36.255_TM2_Flight_2012-11-02.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
@@ -238,7 +239,7 @@ FUNCTION	PROCESS_WSMR, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	; Identify which events occurred after launch (17:55:00), or "in flight"
 	; Do this only if the file is the flight data file.
 	; Post-launch events will have a '1' in the 'inflight' tag.
-	if filename eq '36.255_TM2_Flight_2012-11-02.log' then begin
+	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
 		print, "  File is flight data.  Flagging post-launch events."
 		data_struct_compressed[ where( data_struct_compressed.wsmr_time gt 64500 ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
