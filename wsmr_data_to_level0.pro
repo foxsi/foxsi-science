@@ -23,7 +23,7 @@
 ; 	data_D5 = wsmr_data_to_level0( filename, det=5 )
 ; 	data_D6 = wsmr_data_to_level0( filename, det=6 )
 ;	save, data_D0, data_D1, data_D2, data_D3, data_D4, data_D5, data_d6, $
-;		file = 'foxsi_level0_data.sav'
+;		file = 'data_2012/foxsi_level0_data.sav'
 ;
 ; History:	Version 1, 2013-Jan-20, Lindsay Glesener
 ;-
@@ -31,7 +31,7 @@
 FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
 	add_path, 'util'
-	if not keyword_set(filename) then filename = '36.255_TM2_Flight_2012-11-02.log'
+	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
 
@@ -65,6 +65,7 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 		HV:uint(0),		$	; detector bias voltage value, with status bits
 		temperature:uint(0),	$	; raw A/D thermistor value if exists
 		inflight:uint(0),	$	; '1' if frame occurred post-launch (for flight data only!)
+		altitude:float(0),	$	; altitude data
 		error_flag:uint(0)	$	; '1' if obvious error is noticed in that frame's data
                 }
     	data_struct = replicate(data_struct, nFrames)
@@ -224,6 +225,32 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	if detector eq 6 then data_struct.temperature = temp6
 	; If detector is 0, 2, or 5 then temperature values remain zero.
 
+	; Identify which events occurred after launch (17:55:00), or "in flight"
+	; Do this only if the file is the flight data file.
+	; Post-launch events will have a '1' in the 'inflight' tag.
+	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
+		print, "  File is flight data.  Flagging post-launch events."
+		data_struct[ where( data_struct.wsmr_time gt 64500 ) ].inflight = 1
+	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
+
+	; Get altitude data from text file
+	data_alt=read_ascii('data_2012/36255.txt')
+	time_alt = data_alt.field01[1,*]
+	altitude = data_alt.field01[9,*] + 64500	; adjust altitude clock for time of launch.
+
+	; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
+	; So resize the altitude data by repeating values.
+	; I don't like the way "interpol" interpolates this, and I think the 
+	; "discrete" step nature is good so that you can see the real
+	; resolution of the altitude data.
+	
+	i_flight = long(0)
+	for i=long(0), nFrames-1 do begin
+		if not data_struct[i].inflight then continue
+		data_struct[i].altitude = altitude[i_flight/250]
+		i_flight++;
+	endfor
+
 	; Compress data by getting rid of "zero" frames.  If a detector's trigger time
 	; is 0, then the frame is empty for that detector.  However, to not lose any
 	; data (even if it's bad), here frames are only thrown away if all data is 0
@@ -235,14 +262,6 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	; If max value is zero, then the frame is empty for this detector.
 	max_frame = cmapply('max', frame[ 26+33*detector:57+33*detector, *], [1])
 	data_struct_compressed = data_struct[ where( max_frame gt 0 ) ]
-
-	; Identify which events occurred after launch (17:55:00), or "in flight"
-	; Do this only if the file is the flight data file.
-	; Post-launch events will have a '1' in the 'inflight' tag.
-	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
-		print, "  File is flight data.  Flagging post-launch events."
-		data_struct_compressed[ where( data_struct_compressed.wsmr_time gt 64500 ) ].inflight = 1
-	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
 	; Last step: check for obvious errors and flag these.
 	; Errors include:
