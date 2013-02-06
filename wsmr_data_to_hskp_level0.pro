@@ -40,7 +40,7 @@ FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME, STOP=STOP
 
   	; prepare a housekeeping data structure and make an array with one element for each frame.
   	print, '  Creating data structure.'
-  	data_struct = {foxsi_data, 	$
+  	data_struct = {housekeeping, 	$
 		frame_counter:ulong(0),	$	; formatter frame counter value, 32 bits
                	wsmr_time:double(0.),  	$	; WSMR ground station time, to milliseconds
 		frame_time:ulong64(0), 	$	; formatter frame time, 64 bits
