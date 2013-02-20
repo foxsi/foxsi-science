@@ -26,11 +26,13 @@
 ;		file = 'data_2012/foxsi_level0_data.sav'
 ;
 ; History:	Version 1, 2013-Jan-20, Lindsay Glesener
+;		2013-Feb-07, LG, Updated structure name and added altitude data
+;		2013-Feb-13, LG, Fixed altitude glitch and shifted "inflight" flag to 70 seconds later.
 ;-
 
 FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
-	add_path, 'util'
+	add_path, 'util/'
 	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
@@ -49,7 +51,7 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
   	; prepare the data structure and make an array with one element for each frame.
   	print, '  Creating data structure.'
-  	data_struct = {foxsi_data, 	$
+  	data_struct = {foxsi_level0, $
 		frame_counter:ulong(0),	$	; formatter frame counter value, 32 bits
                	wsmr_time:double(0.),  	$	; WSMR ground station time, to milliseconds
 		frame_time:ulong64(0), 	$	; formatter frame time, 64 bits
@@ -137,9 +139,10 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	max3 = cmapply('max', data_struct.adc[3,*], [2])
 	
 	; Identify which ASIC had the global max on each side.
-	ind_0 = where( max0 gt max1 )
+	; ASICs 0 and 2 automatically win any tie. (arbitrary)
+	ind_0 = where( max0 ge max1 and max0 gt 0 )
 	ind_1 = where( max1 gt max0 )
-	ind_2 = where( max2 gt max3 )
+	ind_2 = where( max2 ge max3 and max2 gt 0)
 	ind_3 = where( max3 gt max2 )
 	
 	; Identify the hit ASIC (if any!) for each frame.
@@ -225,18 +228,20 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	if detector eq 6 then data_struct.temperature = temp6
 	; If detector is 0, 2, or 5 then temperature values remain zero.
 
-	; Identify which events occurred after launch (17:55:00), or "in flight"
+	; Identify which events occurred after HV upramp and before HV downramp, or "in flight"
 	; Do this only if the file is the flight data file.
-	; Post-launch events will have a '1' in the 'inflight' tag.
+	; Post-ramp events will have a '1' in the 'inflight' tag.
 	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
 		print, "  File is flight data.  Flagging post-launch events."
-		data_struct[ where( data_struct.wsmr_time gt 64500 ) ].inflight = 1
+;		data_struct[ where( data_struct.wsmr_time gt 64570 ) ].inflight = 1
+	; update: instead of going by time, just check where the HV is close to 200V.
+		data_struct[ where( ishft(data_struct.hv,-4)/8 gt 190  ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
 	; Get altitude data from text file
 	data_alt=read_ascii('data_2012/36255.txt')
-	time_alt = data_alt.field01[1,*]
-	altitude = data_alt.field01[9,*] + 64500	; adjust altitude clock for time of launch.
+	time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
+	altitude = data_alt.field01[9,*]
 
 	; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
 	; So resize the altitude data by repeating values.
@@ -246,7 +251,7 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	
 	i_flight = long(0)
 	for i=long(0), nFrames-1 do begin
-		if not data_struct[i].inflight then continue
+		if data_struct[i].wsmr_time lt 64500 then continue
 		data_struct[i].altitude = altitude[i_flight/250]
 		i_flight++;
 	endfor
