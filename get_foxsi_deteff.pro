@@ -1,15 +1,21 @@
-FUNCTION get_foxsi_deteff, ENERGY_ARR = energy_arr, DET_THICK = det_thick, PLOT = plot, type = type, NO_LET = no_let
+FUNCTION get_foxsi_deteff, ENERGY_ARR = energy_arr, DET_THICK = det_thick, PLOT = plot, $
+	type = type, NO_LET = no_let, DATA_DIR = data_dir, LET_FILE = let_file
 
-;PURPOSE: Get the FOXSI Detector efficiency (Si)
+; PURPOSE: Get the FOXSI Detector efficiency (Si)
 ;
-;KEYWORD: DET_THICK - set the detector thickness in units of microns.
+; KEYWORD: DET_THICK - set the detector thickness in units of microns.
+; 		   LET_FILE:	file containing low-energy-threshold efficiency
 ;
-;WRITTEN: Steven Christe (23-Mar-09)
+; WRITTEN: Steven Christe (23-Mar-09)
 ; UPDATED L.G. Sept. 2012
 
-;data_dir = "~/idlsave/foxsi/"
-data_dir = "./"
+default, data_dir, './'
 default, type, 'si'
+
+if not keyword_set(no_let) and not keyword_set(let_file) then begin
+	print, 'No low-energy threshold file defined.'
+	return, -1
+endif else print, 'Using low-energy threshold file ', let_file
 
 IF NOT keyword_set(det_thick) THEN det_thick_um = 500 ELSE det_thick_um = det_thick
 
@@ -48,8 +54,7 @@ det_eff = 1 - exp(-det_thick_um/atten_len_um)
 
 if not keyword_set(no_let) then begin
 	
-	restore, 'LET_efficiency_flight_detectors_averaged.sav'
-	
+	restore, let_file	
 	let = interpol(efficiency.efficiency, efficiency.energy_keV, energy_arr)
 	
 	det_eff = det_eff*let
