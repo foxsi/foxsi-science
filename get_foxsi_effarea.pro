@@ -1,4 +1,6 @@
-FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, _EXTRA = _extra
+FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
+	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
+	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, _EXTRA = _extra
 
 ;PURPOSE: Get the FOXSI effective area 
 ;
@@ -15,6 +17,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, PL
 ;WRITTEN: Steven Christe (20-Mar-09)
 ;UPDATED: Steven Christe (3-Nov-09)
 ;UPDATED: Steven Christe (12-Jan-10)
+; Updated: LG, 2013-Mar-03
 
 default, type, 'si'
 
@@ -45,7 +48,8 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 IF NOT keyword_set(nodet) THEN BEGIN
-    det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _extra, det_thick = det_thick, type = type)
+    det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _extra, $
+    		  det_thick = det_thick, type = type, let_file = let_file)
     eff_area = eff_area*det_eff.det_eff
 ENDIF
 
