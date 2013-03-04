@@ -1,4 +1,4 @@
-FUNCTION get_foxsi_offaxis_resp, ENERGY_ARR = energy_arr, offaxis_angle = offaxis_angle, PLOT = plot, _EXTRA = _extra, SMOOTH_PARAM = smooth_param
+FUNCTION get_foxsi_offaxis_resp, ENERGY_ARR = energy_arr, offaxis_angle = offaxis_angle, PLOT = plot, _EXTRA = _extra, SMOOTH_PARAM = smooth_param, NOFIX = nofix
 
 ;PURPOSE: Get the FOXSI off axis response as a percent change from the on axis response
 ;
@@ -7,12 +7,13 @@ FUNCTION get_foxsi_offaxis_resp, ENERGY_ARR = energy_arr, offaxis_angle = offaxi
 ;                           response is based on data at 0, 2, 5, 10. Going beyond 10
 ;                           arcmin is therefore dangerous!)
 ;           PLOT - Create a plot on the screen
-;           ENERGY_ARR - choose the energies at which you want data at                            
+;           ENERGY_ARR - choose the energies at which you want data at
+;           NOFIX - if not set then do not make factor constant below 7 keV
 ;
 ;WRITTEN: Steven Christe (4-Mar-13)
 
-IF NOT keyword_set(offaxis_angle) THEN offaxis_angle = 7
-IF NOT keyword_set(smooth_param) THEN smooth_param = 10
+default, offaxis_angle, 7
+default, smooth_param, 10
 
 data_dir = "./calibration_data/"
 restore, data_dir + "optics_calibration_template.dat"
@@ -50,6 +51,18 @@ IF keyword_set(energy_arr) THEN BEGIN
 ENDIF ELSE BEGIN 
 	energy_arr = energy
 ENDELSE
+
+IF NOT keyword_set(NOFIX) THEN BEGIN
+    con1 = energy_arr LE 8
+    con2 = energy_arr GE 7
+    index = where(con1 and con2, count)
+    IF count GE 1 THEN BEGIN
+        avg = average(factor[index])
+        new_index = where(energy_arr LE 7, count)
+        IF count GE 1 THEN factor[new_index] = avg
+    ENDIF
+    stop
+ENDIF
 
 IF keyword_set(PLOT) THEN BEGIN
     plot, energy, factor, ytitle = '%', xtitle = 'Energy [keV]', /nodata
