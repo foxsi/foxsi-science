@@ -1,7 +1,7 @@
 FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
 	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, $
-	DATA_DIR = data_dir, _EXTRA = _extra
+	DATA_DIR = data_dir, OFFAXIS_ANGLE = offaxis_angle, _EXTRA = _extra
 
 ;PURPOSE: Get the FOXSI effective area 
 ;
@@ -14,6 +14,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 ;			BE_UM - set the thickness of a Be shutter
 ;			TYPE - element of the detector (e.g. cdte, DEFAULT is Si)
 ;			FOXSI2 - get the effective area for the updated FOXSI2 (3 extra inner shells)
+;			OFFAXIS_ANGLE:	off-axis angle.  If nonzero, off-axis response routine is called.
 ;
 ;WRITTEN: Steven Christe (20-Mar-09)
 ;UPDATED: Steven Christe (3-Nov-09)
@@ -22,6 +23,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 
 default, type, 'si'
 default, data_dir, './'
+default, offaxis_angle, 0.0
 
 ;my_linecolors
 
@@ -68,6 +70,13 @@ IF NOT keyword_set(PER_MODULES) THEN eff_area = num_modules * eff_area
 ;load the measured effective area
 ;restore, foxsi_effarea.dat
 ;effarea = replicate(1, 
+
+if offaxis_angle gt 0 then begin
+	offaxis_area = get_foxsi_offaxis_resp( energy_arr=energy_arr, offaxis_angle=offaxis_angle )
+	eff_area = eff_area*offaxis_area.factor
+endif
+
+help,eff_area
 
 IF keyword_set(PLOT) THEN BEGIN
 

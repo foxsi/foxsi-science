@@ -61,7 +61,7 @@ IF NOT keyword_set(NOFIX) THEN BEGIN
         new_index = where(energy_arr LE 7, count)
         IF count GE 1 THEN factor[new_index] = avg
     ENDIF
-    stop
+;    stop
 ENDIF
 
 IF keyword_set(PLOT) THEN BEGIN
