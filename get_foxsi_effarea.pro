@@ -1,6 +1,7 @@
 FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
-	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, _EXTRA = _extra
+	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, $
+	DATA_DIR = data_dir, _EXTRA = _extra
 
 ;PURPOSE: Get the FOXSI effective area 
 ;
@@ -20,11 +21,10 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 ; Updated: LG, 2013-Mar-03
 
 default, type, 'si'
+default, data_dir, './'
 
 ;my_linecolors
 
-data_dir = "./"
-;data_dir = "~/idlsave/foxsi/"
 ;restore, data_dir + "eff_area_permodules.dat"
 restore, data_dir + "eff_area_permodules2.dat"
 
@@ -48,19 +48,19 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 IF NOT keyword_set(nodet) THEN BEGIN
-    det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _extra, $
-    		  det_thick = det_thick, type = type, let_file = let_file)
+    det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _EXTRA, $
+    		  det_thick = det_thick, type = type, data_dir = data_dir, let_file = let_file)
     eff_area = eff_area*det_eff.det_eff
 ENDIF
 
 ;add in the various materials already in the optical path
 IF NOT keyword_set(nopath) THEN BEGIN
-	optical_path = get_foxsi_shutters(energy_arr = energy_arr, _EXTRA = _EXTRA)    
+	optical_path = get_foxsi_shutters(energy_arr = energy_arr, data_dir = data_dir, _EXTRA = _EXTRA)    
 	eff_area = eff_area*optical_path.shut_eff
 ENDIF
 
 IF NOT keyword_set(noshut) THEN BEGIN
-    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd)    
+    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd, data_dir = data_dir, _EXTRA = _EXTRA)    
     eff_area = eff_area*shut_eff.shut_eff
 ENDIF
 

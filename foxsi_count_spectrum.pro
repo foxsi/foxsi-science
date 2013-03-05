@@ -1,4 +1,5 @@
-FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP
+FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
+	DATA_DIR = data_dir, LET_FILE = let_file
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -26,11 +27,19 @@ flux = f_vth(e2, [EM, T, 1.], /cont)	; compute thermal X-ray flux
 
 ; note to self: there's a peak above 2.5 keV for T=7MK. Should there be a line there at this temperature?
 
-; get FOXSI response
-; get area, including optics, blanketing, and detector efficiency
-; make sure to use a version of the procedures that has the correction for the
-; low energy threshold efficiency.
-area = get_foxsi_effarea(energy = emid)
+;
+; Get FOXSI response
+;
+; First, get area for individual factors (optics area, detector efficiency (inc. LET), 
+; off-axis response, blanketing aborption) 
+; Then get area including all these effects.
+;
+area = get_foxsi_effarea(energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath) ; optics only
+area = get_foxsi_effarea(energy=emid, data_dir=data_dir, /nodet, /noshut) ; optics + blankets
+area = get_foxsi_effarea(energy=emid, data_dir=data_dir, /noshut, /nopath, let_file=let_file) ; optics + detectors
+area = get_foxsi_effarea(energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath)
+
+area = get_foxsi_effarea(energy = emid, data_dir = data_dir, let_file = let_file)
 
 ; fold flux with FOXSI response
 counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
