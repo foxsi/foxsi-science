@@ -1,4 +1,5 @@
-FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP
+FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
+	DATA_DIR = data_dir, LET_FILE = let_file
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -20,21 +21,36 @@ e1 = dindgen(1000)/100+2
 e2 = get_edges(e1,/edges_2)
 emid = get_edges(e1,/mean)
 
-T = T/11.6      ; switch temperature to units of keV
+TEMP = T/11.6      ; switch temperature to units of keV
 
-flux = f_vth(e2, [EM, T, 1.], /cont)	; compute thermal X-ray flux
+flux = f_vth(e2, [EM, TEMP, 1.], /cont)	; compute thermal X-ray flux
 
 ; note to self: there's a peak above 2.5 keV for T=7MK. Should there be a line there at this temperature?
 
-; get FOXSI response
-; get area, including optics, blanketing, and detector efficiency
-; make sure to use a version of the procedures that has the correction for the
-; low energy threshold efficiency.
-area = get_foxsi_effarea(energy = emid)
+;
+; Get FOXSI response
+;
+; First, get area for individual factors (optics area, detector efficiency (inc. LET), 
+; off-axis response, blanketing aborption) 
+; Then get area including all these effects.
+;
+area_bare =    get_foxsi_effarea( $ 	; optics only
+		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath)
+area_blankets =get_foxsi_effarea( $ 	; optics + blankets
+		energy=emid, data_dir=data_dir, /nodet, /noshut)
+area_det = 	   get_foxsi_effarea( $ 	; optics + detectors
+		energy=emid, data_dir=data_dir, /noshut, /nopath, let_file=let_file)
+area_offaxis = get_foxsi_effarea( $		; optics + off-axis response factor
+		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath, offaxis_angle=7.0)
+
+area = get_foxsi_effarea( $
+		energy=emid, data_dir=data_dir, let_file=let_file, offaxis_angle=7.0)
+
+if keyword_set(stop) then stop
 
 ; fold flux with FOXSI response
 counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
-counts = counts*binsize		 ; now the units are counts per second.
+;counts = counts*binsize		 ; now the units are counts per second.
 
 ; coarser energy bins.
 e2_coarse = findgen(10./binsize+1)*binsize+2
@@ -42,12 +58,12 @@ emid_coarse = get_edges(e2_coarse, /mean)
 counts_coarse = time*interpol(counts, emid, emid_coarse)
 y_err_raw = sqrt(counts_coarse)
 
-if keyword_set(stop) then stop
-
 ; if uncertainty is 100% or greater, kill it.
 i=where(y_err_raw gt counts_coarse)
-counts_coarse[i] = sqrt(-1)
-y_err_raw[i] = sqrt(-1)
+if i[0] gt -1 then begin
+	counts_coarse[i] = sqrt(-1)
+	y_err_raw[i] = sqrt(-1)
+endif
 
 result = create_struct("energy_keV", emid_coarse, "counts", counts_coarse, "count_error", y_err_raw)
 

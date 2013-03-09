@@ -1,6 +1,7 @@
 FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
-	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, _EXTRA = _extra
+	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, $
+	DATA_DIR = data_dir, OFFAXIS_ANGLE = offaxis_angle, _EXTRA = _extra
 
 ;PURPOSE: Get the FOXSI effective area 
 ;
@@ -13,6 +14,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 ;			BE_UM - set the thickness of a Be shutter
 ;			TYPE - element of the detector (e.g. cdte, DEFAULT is Si)
 ;			FOXSI2 - get the effective area for the updated FOXSI2 (3 extra inner shells)
+;			OFFAXIS_ANGLE:	off-axis angle.  If nonzero, off-axis response routine is called.
 ;
 ;WRITTEN: Steven Christe (20-Mar-09)
 ;UPDATED: Steven Christe (3-Nov-09)
@@ -20,11 +22,11 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 ; Updated: LG, 2013-Mar-03
 
 default, type, 'si'
+default, data_dir, './'
+default, offaxis_angle, 0.0
 
 ;my_linecolors
 
-data_dir = "./"
-;data_dir = "~/idlsave/foxsi/"
 ;restore, data_dir + "eff_area_permodules.dat"
 restore, data_dir + "eff_area_permodules2.dat"
 
@@ -48,19 +50,19 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 IF NOT keyword_set(nodet) THEN BEGIN
-    det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _extra, $
-    		  det_thick = det_thick, type = type, let_file = let_file)
+    det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _EXTRA, $
+    		  det_thick = det_thick, type = type, data_dir = data_dir, let_file = let_file)
     eff_area = eff_area*det_eff.det_eff
 ENDIF
 
 ;add in the various materials already in the optical path
 IF NOT keyword_set(nopath) THEN BEGIN
-	optical_path = get_foxsi_shutters(energy_arr = energy_arr, _EXTRA = _EXTRA)    
+	optical_path = get_foxsi_shutters(energy_arr = energy_arr, data_dir = data_dir, _EXTRA = _EXTRA)    
 	eff_area = eff_area*optical_path.shut_eff
 ENDIF
 
 IF NOT keyword_set(noshut) THEN BEGIN
-    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd)    
+    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd, data_dir = data_dir, _EXTRA = _EXTRA)    
     eff_area = eff_area*shut_eff.shut_eff
 ENDIF
 
@@ -68,6 +70,13 @@ IF NOT keyword_set(PER_MODULES) THEN eff_area = num_modules * eff_area
 ;load the measured effective area
 ;restore, foxsi_effarea.dat
 ;effarea = replicate(1, 
+
+if offaxis_angle gt 0 then begin
+	offaxis_area = get_foxsi_offaxis_resp( energy_arr=energy_arr, offaxis_angle=offaxis_angle )
+	eff_area = eff_area*offaxis_area.factor
+endif
+
+help,eff_area
 
 IF keyword_set(PLOT) THEN BEGIN
 
