@@ -54,9 +54,11 @@ det_eff = 1 - exp(-det_thick_um/atten_len_um)
 
 if not keyword_set(no_let) then begin
 	
-	restore, let_file	
-	let = interpol(efficiency.efficiency, efficiency.energy_keV, energy_arr)
-	
+	restore, data_dir + let_file
+	if is_struct(efficiency) then begin
+		let = interpol(efficiency.efficiency, efficiency.energy_keV, energy_arr)
+
+	endif else let = interpol(efficiency, findgen(100)/10., energy_arr)
 	det_eff = det_eff*let
 
 endif

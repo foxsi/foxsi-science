@@ -1,10 +1,13 @@
-FUNCTION get_foxsi_shutters, ENERGY_ARR = energy_arr, PLOT = plot, MYLAR_UM = mylar_um, BE_UM = be_um, AL_UM = al_um, KAPTON_UM = kapton_um, NONSTD = nonstd
+FUNCTION get_foxsi_shutters, ENERGY_ARR = energy_arr, PLOT = plot, $
+	MYLAR_UM = mylar_um, BE_UM = be_um, AL_UM = al_um, KAPTON_UM = kapton_um, $
+	DATA_DIR = data_dir, NONSTD = nonstd
 
 ;PURPOSE: Get the FOXSI shutter absorption as a function of energy. 
 ;			Defining material thicknesses are always added to the 
 ;			optical path.
 ;
-;	Note from Lindsay:  Running this with default parameters (no inputs for shutters) just gives you the FOXSI optical path, which is also useful.
+;	Note from Lindsay:  Running this with default parameters (no inputs for shutters) 
+;			just gives you the FOXSI optical path, which is also useful.
 ;
 ;KEYWORD: MYLAR_UM - set the thickness of mylar
 ;         BE_UM - set the thickness of Be
@@ -15,20 +18,29 @@ FUNCTION get_foxsi_shutters, ENERGY_ARR = energy_arr, PLOT = plot, MYLAR_UM = my
 ;		  NONSTD - set the optical path material to zero
 ;
 ;WRITTEN: Steven Christe (25-Mar-09)
+; Updated with nominal flight blanketing defaults, LG March 2013
 
-data_dir = "./"
-;data_dir = "~/idlsave/foxsi/"  ; Steve's original path
+default, data_dir, './'
 
-;default, th_um, [82.6, 0.0, 2.9, 178.0]        ;old defaults
-;default, th_um, [140, 0.0, 4.8, 203.0]		;updated numbers after
-                                                ;redoing the blankets
-;default, th_um, [95.5, 0.0, 3.2, 203.0]	;proposed redo
-;default, th_um, [140, 0.0, 4.8, 101.5]		;proposed redo
-default, th_um, [95.5, 0.0, 3.2, 101.5]		;proposed redo
-default, mylar_um, 0.0
+; These defaults are the nominal blanket material thicknesses in microns, according to Paul.
+; They should be rechecked once payload is entirely disassembled.
+default, mylar_um, 82.55
+default, al_um, 2.6
+default, kapton_um, 203.2
 default, be_um, 0.0
-default, al_um, 0.0
-default, kapton_um, 0.0
+default, th_um, [0.0, 0.0, 0.0, 0.0]
+
+; old defaults for previous blanketing scenarios
+; default, th_um, [82.6, 0.0, 2.9, 178.0]        
+
+; default, th_um, [140, 0.0, 4.8, 203.0]		
+; default, th_um, [95.5, 0.0, 3.2, 203.0]	
+; proposed redo
+;default, th_um, [140, 0.0, 4.8, 101.5]		
+; proposed redo
+default, th_um, [95.5, 0.0, 3.2, 101.5]		
+; proposed redo
+default, mylar_um, 0.0
 
 ;template = ascii_template(data_dir + "mylar_atten_len.dat")
 ;restore, data_dir + "atten_len_template.dat", /verbose
