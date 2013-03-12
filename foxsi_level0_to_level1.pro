@@ -15,14 +15,15 @@
 ; To process level 0 data into Level 1 IDL structures and save them:
 ;
 ;	filename = 'data_2012/foxsi_level0_data.sav'
-;	data_D0 = foxsi_level0_to_level1( filename, det=0 )
-;	data_D1 = foxsi_level0_to_level1( filename, det=1 )
-;	data_D2 = foxsi_level0_to_level1( filename, det=2 )
-;	data_D3 = foxsi_level0_to_level1( filename, det=3 )
-;	data_D4 = foxsi_level0_to_level1( filename, det=4 )
-;	data_D5 = foxsi_level0_to_level1( filename, det=5 )
-;	data_D6 = foxsi_level0_to_level1( filename, det=6 )
-;	save, data_D0, data_D1, data_D2, data_D3, data_D4, data_D5, data_d6, $
+;	data_lvl1_D0 = foxsi_level0_to_level1( filename, det=0 )
+;	data_lvl1_D1 = foxsi_level0_to_level1( filename, det=1 )
+;	data_lvl1_D2 = foxsi_level0_to_level1( filename, det=2 )
+;	data_lvl1_D3 = foxsi_level0_to_level1( filename, det=3 )
+;	data_lvl1_D4 = foxsi_level0_to_level1( filename, det=4 )
+;	data_lvl1_D5 = foxsi_level0_to_level1( filename, det=5 )
+;	data_lvl1_D6 = foxsi_level0_to_level1( filename, det=6 )
+;	save, data_lvl1_D0, data_lvl1_D1, data_lvl1_D2, data_lvl1_D3, $
+;		data_lvl1_D4, data_lvl1_D5, data_lvl1_d6, $
 ;		file = 'data_2012/foxsi_level1_data.sav'
 ;
 ; History:	Version 1, 2013-Feb-12, Lindsay Glesener
@@ -34,13 +35,13 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
 
 	restore, filename, /v
-	if detector eq 0 then data0 = data_D0
-	if detector eq 1 then data0 = data_D1
-	if detector eq 2 then data0 = data_D2
-	if detector eq 3 then data0 = data_D3
-	if detector eq 4 then data0 = data_D4
-	if detector eq 5 then data0 = data_D5
-	if detector eq 6 then data0 = data_D6
+	if detector eq 0 then data0 = data_lvl0_D0
+	if detector eq 1 then data0 = data_lvl0_D1
+	if detector eq 2 then data0 = data_lvl0_D2
+	if detector eq 3 then data0 = data_lvl0_D3
+	if detector eq 4 then data0 = data_lvl0_D4
+	if detector eq 5 then data0 = data_lvl0_D5
+	if detector eq 6 then data0 = data_lvl0_D6
 	if detector gt 6 then begin
 		print, 'Detector number out of range.'
 		return, -1
