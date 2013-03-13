@@ -190,6 +190,12 @@ pclose
 ; do both curves again with finer bins.
 sim_fine = foxsi_count_spectrum( em, t, time=60., binsize=0.1, data_dir='detector_data/', $
 	let_file='efficiency_det106_asic3.sav')
+spec_D0_fine = counts2energy_diagonal( data0, peaksfile='detector_data/peaks_det109.sav', binwidth=0.1 )
+spec_D1_fine = counts2energy_diagonal( data1, peaksfile='detector_data/peaks_det108.sav', binwidth=0.1 )
+spec_D2_fine = counts2energy_diagonal( data2, peaksfile='detector_data/peaks_det102.sav', binwidth=0.1 )
+spec_D3_fine = counts2energy_diagonal( data3, peaksfile='detector_data/peaks_det103.sav', binwidth=0.1 )
+spec_D4_fine = counts2energy_diagonal( data4, peaksfile='detector_data/peaks_det104.sav', binwidth=0.1 )
+spec_D5_fine = counts2energy_diagonal( data5, peaksfile='detector_data/peaks_det105.sav', binwidth=0.1 )
 spec_D6_fine = counts2energy_diagonal( data6, peaksfile='detector_data/peaks_det106.sav', binwidth=0.1 )
 
 FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
@@ -209,8 +215,22 @@ areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_
 			mylar=4.*mylar, al=4*al, kap=4*kapton)
 areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
 			mylar=6.*mylar, al=6*al, kap=6*kapton)
-plot, sim_fine.energy_kev, (spec_d6_fine[0:120,3,1]/0.1)/(sim_fine.counts/7.), xr=[4,10]
-oplot, area.energy_kev, areaX2.eff_area_cm2/area.eff_area_cm2
-oplot, area.energy_kev, areaX4.eff_area_cm2/area.eff_area_cm2
-oplot, area.energy_kev, areaX6.eff_area_cm2/area.eff_area_cm2
+plot, sim_fine.energy_kev, (spec_d6_fine[0:120,3,1]/0.1)/(sim_fine.counts/7.), xr=[2,10], $
+;	yr=[1.e-3,10.], /ylog, $
+	yr=[0.,1.], $
+	thick=4, charsize=1.2, xtitle='Energy [keV]', ytitle='ratio of measured to simulated counts', $
+	title='Comparison of sim and measured counts for detector 6 (1 minute)', psym=10, /nodata
+oplot, sim_fine.energy_kev, (2*spec_d0_fine[20:140,2,1]/0.1)/(sim_fine.counts/7.), psym=10, color=6
+oplot, sim_fine.energy_kev, (2*spec_d1_fine[20:140,2,1]/0.1)/(sim_fine.counts/7.), psym=10, color=7
+oplot, sim_fine.energy_kev, (2*spec_d2_fine[20:140,3,1]/0.1)/(sim_fine.counts/7.), psym=10, color=8
+oplot, sim_fine.energy_kev, (2*spec_d3_fine[20:140,3,1]/0.1)/(sim_fine.counts/7.), psym=10, color=9
+oplot, sim_fine.energy_kev, (2*spec_d4_fine[20:140,2,1]/0.1)/(sim_fine.counts/7.), psym=10, color=10
+oplot, sim_fine.energy_kev, (2*spec_d5_fine[20:140,2,1]/0.1)/(sim_fine.counts/7.), psym=10, color=12
+oplot, sim_fine.energy_kev, (2*spec_d6_fine[20:140,3,1]/0.1)/(sim_fine.counts/7.), psym=10, color=2
+oplot, area.energy_kev, areaX2.eff_area_cm2/area.eff_area_cm2, thick=4, line=2, color=6
+oplot, area.energy_kev, areaX4.eff_area_cm2/area.eff_area_cm2, thick=4, line=2, color=7
+oplot, area.energy_kev, areaX6.eff_area_cm2/area.eff_area_cm2, thick=4, line=2, color=8
+;legend, ['effect of 2X blanketing','4X blanketing','6X blanketing'], thick=4, line=2, color=[6,7,8]
+legend, ['Simulated flare counts','Det0','Det1','Det2','Det3','Det4','Det5','Det6'], $
+		 thick=4, line=[1,0,0,0,0,0,0,0], color=[0,6,7,8,9,10,12,2]
 
