@@ -20,13 +20,20 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 ;
 ;	file0 = 'data_2012/foxsi_level0_data.sav'
 ;	file1 = 'data_2012/foxsi_level1_data.sav'
-;	data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0 )
-;	data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1 )
-;	data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2 )
-;	data_lvl2_D3 = foxsi_level1_to_level2( file0, file1, det=3 )
-;	data_lvl2_D4 = foxsi_level1_to_level2( file0, file1, det=4 )
-;	data_lvl2_D5 = foxsi_level1_to_level2( file0, file1, det=5 )
-;	data_lvl2_D6 = foxsi_level1_to_level2( file0, file1, det=6 )
+;	cal0 = 'detector_data/peaks_det108.sav'
+;	cal1 = 'detector_data/peaks_det109.sav'
+;	cal2 = 'detector_data/peaks_det102.sav'
+;	cal3 = 'detector_data/peaks_det103.sav'
+;	cal4 = 'detector_data/peaks_det104.sav'
+;	cal5 = 'detector_data/peaks_det105.sav'
+;	cal6 = 'detector_data/peaks_det106.sav'
+;	data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0 )
+;	data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1 )
+;	data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2 )
+;	data_lvl2_D3 = foxsi_level1_to_level2( file0, file1, det=3, calib=cal3 )
+;	data_lvl2_D4 = foxsi_level1_to_level2( file0, file1, det=4, calib=cal4 )
+;	data_lvl2_D5 = foxsi_level1_to_level2( file0, file1, det=5, calib=cal5 )
+;	data_lvl2_D6 = foxsi_level1_to_level2( file0, file1, det=6, calib=cal6 )
 ;	save, data_lvl2_D0, data_lvl2_D1, data_lvl2_D2, data_lvl2_D3, $
 ;		data_lvl2_D4, data_lvl2_D5, data_lvl2_d6, $
 ;		file = 'data_2012/foxsi_level2_data.sav'
@@ -84,7 +91,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		hit_xy_pay:fltarr(2),		$	; Hit position in payload coordinates [arcsec]
 		hit_xy_solar:fltarr(2),		$	; Hit position in heliographic coordinates [arcsec]
 		assoc_energy:fltarr(3,3,2),$	; "associated" energies, including hit.
-		assoc_xy:fltarr(3,3,2), $	; "associated" locations, in payload coordinates [pixels]
+		assoc_xy_pay:fltarr(3,3,2), $	; "associated" locations, in payload coordinates [pixels]
+		assoc_xy_solar:fltarr(3,3,2), $	; "associated" locations, in solar coordinates [pixels]
 		HV:uint(0),				$	; detector bias voltage value [volts]
 		temperature:double(0),	$	; thermistor value [deg C] if temperature exists for this det.
 		inflight:uint(0),		$	; '1' if frame occurred post-launch (for flight data only!)
@@ -124,6 +132,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 
     for evt = long(0), nEvts-1 do begin
         
+        if data1[evt].inflight ne 1 then continue
+        
         if (evt mod 1000) eq 0 then print, 'Calibrating event  ', evt, ' / ', nEvts
 
 		; First, process the "single-pixel hit" separately:
@@ -159,8 +169,21 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 				endelse				
 			endfor
 		endfor
+		
+		;if data_struct[evt].error_flag eq 0 then stop
 
     endfor
+
+	; Transform all positions to payload coords.
+	; For some reason this was done only for the primary hit in Lvl1 data
+	; (not for the associated values)
+	data_struct.hit_xy_pay = data1.hit_xy_pay
+	for i=0, 2 do begin
+		for j=0, 2 do begin
+			temp = get_payload_coords( reform(data1.assoc_xy[i,j,*,*]), detector )
+			data_struct.assoc_xy_pay[i,j,*,*] = reform( temp, [1,1,2,n_elements(data1)] )
+		endfor
+	endfor
 
 	print, "  Done!"
 
