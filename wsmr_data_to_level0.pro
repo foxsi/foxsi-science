@@ -15,14 +15,15 @@
 ; To process flight data into Level 0 IDL structures and save them:
 ;
 ;	filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
-; 	data_D0 = wsmr_data_to_level0( filename, det=0 )
-; 	data_D1 = wsmr_data_to_level0( filename, det=1 )
-; 	data_D2 = wsmr_data_to_level0( filename, det=2 )
-; 	data_D3 = wsmr_data_to_level0( filename, det=3 )
-; 	data_D4 = wsmr_data_to_level0( filename, det=4 )
-; 	data_D5 = wsmr_data_to_level0( filename, det=5 )
-; 	data_D6 = wsmr_data_to_level0( filename, det=6 )
-;	save, data_D0, data_D1, data_D2, data_D3, data_D4, data_D5, data_d6, $
+; 	data_lvl0_D0 = wsmr_data_to_level0( filename, det=0 )
+; 	data_lvl0_D1 = wsmr_data_to_level0( filename, det=1 )
+; 	data_lvl0_D2 = wsmr_data_to_level0( filename, det=2 )
+; 	data_lvl0_D3 = wsmr_data_to_level0( filename, det=3 )
+; 	data_lvl0_D4 = wsmr_data_to_level0( filename, det=4 )
+; 	data_lvl0_D5 = wsmr_data_to_level0( filename, det=5 )
+; 	data_lvl0_D6 = wsmr_data_to_level0( filename, det=6 )
+;	save, data_lvl0_D0, data_lvl0_D1, data_lvl0_D2, data_lvl0_D3, $
+;		data_lvl0_D4, data_lvl0_D5, data_lvl0_d6, $
 ;		file = 'data_2012/foxsi_level0_data.sav'
 ;
 ; History:	Version 1, 2013-Jan-20, Lindsay Glesener
