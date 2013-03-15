@@ -240,9 +240,10 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	; interpolate the post-flight values.
 	data_struct.altitude = data0.altitude
 	i=where(data_struct.altitude gt 0)
-	alt_interp = interpol(altitude,time_alt,data_struct.wsmr_time)
-	data_struct[i].altitude = alt_interp[i]
-
+	if i[0] ne -1 then begin
+		alt_interp = interpol(altitude,time_alt,data_struct.wsmr_time)
+		data_struct[i].altitude = alt_interp[i]
+	endif
 
 	; Last step: check for obvious errors and flag these.
 	; Errors include:

@@ -209,18 +209,22 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	temp6 = [uintarr(i_nonzero[0]),temp6]
 	i_diff = n_elements(data_struct) - n_elements(temp6)
 	if i_diff gt 0 then temp6 = [temp6, uintarr(i_diff)]
+	if i_diff lt 0 then temp6 = temp6[0:n_elements(data_struct)-1]
 	temp7 = reform( transpose([ [therm7],[therm7],[therm7],[therm7] ]), 4*n_elements(therm7) )
 	temp7 = [uintarr(i_nonzero[0]),temp7]
 	i_diff = n_elements(data_struct) - n_elements(temp7)
 	if i_diff gt 0 then temp7 = [temp7, uintarr(i_diff)]
+	if i_diff lt 0 then temp7 = temp7[0:n_elements(data_struct)-1]
 	temp9 = reform( transpose([ [therm9],[therm9],[therm9],[therm9] ]), 4*n_elements(therm9) )
 	temp9 = [uintarr(i_nonzero[0]),temp9]
 	i_diff = n_elements(data_struct) - n_elements(temp9)
 	if i_diff gt 0 then temp9 = [temp9, uintarr(i_diff)]
+	if i_diff lt 0 then temp9 = temp9[0:n_elements(data_struct)-1]
 	temp11 = reform( transpose([ [therm11],[therm11],[therm11],[therm11] ]), 4*n_elements(therm11) )
 	temp11 = [uintarr(i_nonzero[0]),temp11]
 	i_diff = n_elements(data_struct) - n_elements(temp11)
 	if i_diff gt 0 then temp11 = [temp11, uintarr(i_diff)]
+	if i_diff lt 0 then temp11 = temp11[0:n_elements(data_struct)-1]
 
 	; Pick out correct temperature:
 	if detector eq 1 then data_struct.temperature = temp7
