@@ -40,13 +40,16 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 		ratio_good = 1.
 	end
 
+	energy = findgen(100/binwidth)*binwidth
+
 	if keyword_set(stop) then stop
 
-	energy = findgen(100/binwidth)*binwidth; + binwidth/2.
 	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy), $
 						min=min(energy), max=max(energy) ) / ratio_good / binwidth
 	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy), $
 						min=min(energy), max=max(energy) ) / ratio_good / binwidth
+						
+	energy = energy + binwidth/2.  ; make energy array the midpoints of the bins.
 
 	spex = create_struct( 'energy_kev', energy, 'spec_n', spec_n, 'spec_p', spec_p )
 
