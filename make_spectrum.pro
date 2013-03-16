@@ -1,5 +1,5 @@
 FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
-			CORRECT = CORRECT
+			CORRECT = CORRECT, THREE = THREE
 
 ;	This function takes a FOXSI level 2 data structure and returns an energy spectrum.
 ;	
@@ -8,6 +8,8 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		BINWIDTH:	width of energy bins for spectrum
 ;		PLOT:		Function will also generate a plot
 ;		CORRECT:	Only take known good events.  Adjust scale to account for those excluded.
+;		THREE:		If set, return the summed energy from all three strips, 
+;					not just the highest value
 ;
 ;	Return value:
 ;		Returns a structure with tags energy, n-side spectrum, and p-side spectrum.
@@ -42,11 +44,30 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 
 	if keyword_set(stop) then stop
 
-	energy = findgen(100/binwidth)*binwidth; + binwidth/2.
+	energy = findgen(100/binwidth)*binwidth
+
 	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy), $
 						min=min(energy), max=max(energy) ) / ratio_good / binwidth
 	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy), $
 						min=min(energy), max=max(energy) ) / ratio_good / binwidth
+
+	if keyword_set(three) then begin
+
+		spec_n = spec_n + histogram( data_good.assoc_energy[0,1,0], $
+									 nbins=n_elements(energy), min=min(energy), $
+									 max=max(energy) ) / ratio_good / binwidth
+		spec_n = spec_n + histogram( data_good.assoc_energy[2,1,0], $
+									 nbins=n_elements(energy), min=min(energy), $
+									 max=max(energy) ) / ratio_good / binwidth
+		spec_p = spec_p + histogram( data_good.assoc_energy[1,0,1], $
+									 nbins=n_elements(energy), min=min(energy), $
+									 max=max(energy) ) / ratio_good / binwidth
+		spec_p = spec_p + histogram( data_good.assoc_energy[1,2,1], $
+									 nbins=n_elements(energy), min=min(energy), $
+									 max=max(energy) ) / ratio_good / binwidth
+	endif
+
+	energy = energy + binwidth/2.  ; make energy array the midpoints of the bins.
 
 	spex = create_struct( 'energy_kev', energy, 'spec_n', spec_n, 'spec_p', spec_p )
 
