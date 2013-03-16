@@ -1,5 +1,5 @@
 FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
-	CALIB_FILE=CALIB_FILE, STOP=STOP
+	CALIB_FILE=CALIB_FILE, STOP=STOP, GROUND=GROUND
 
 ;+
 ; This function reads in Level 0 and Level 1 FOXSI data files (*.sav) and processes
@@ -10,7 +10,10 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 ;
 ; Inputs:	FILE_DATA0 = Level 0 data file.
 ;			FILE_DATA1 = Level 1 data file.
-;			   Defaults are the 2012 Nov 2 flight data files.
+;			CALIB_FILE:	Calibration file to use. Must be the correct detector!
+;			GROUND:		Data is not flight data.  (Needed or else the routine will
+;						look for an 'inflight' flag)
+;
 ;
 ; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
 ;			   must be processed individually.  Default D0
@@ -42,7 +45,6 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 ;-
 
 	add_path, 'util'
-	if not keyword_set(filename) then filename = 'data_2012/foxsi_level1_data.sav'
 	
 	if not keyword_set(calib_file) then begin
 		print, 'No calibration file given.'
@@ -97,6 +99,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		temperature:double(0),	$	; thermistor value [deg C] if temperature exists for this det.
 		inflight:uint(0),		$	; '1' if frame occurred post-launch (for flight data only!)
 		altitude:float(0),		$	; altitude data, interpolated betw 0.5 sec cadence
+		pitch:float(0),			$	; SPARCS pitch
+		yaw:float(0),			$	; SPARCS yaw
 		error_flag:uint(0)		$	; '1' if obvious error is noticed in that frame's data
     }
     	data_struct = replicate(data_struct, nEvts)
@@ -132,7 +136,11 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 
     for evt = long(0), nEvts-1 do begin
         
-        if data1[evt].inflight ne 1 then continue
+        if keyword_set(ground) then begin
+    		if data1[evt].hv ne 200 then continue
+    	endif else begin
+	        if data1[evt].inflight ne 1 then continue
+    	endelse
         
         if (evt mod 1000) eq 0 then print, 'Calibrating event  ', evt, ' / ', nEvts
 
@@ -174,6 +182,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 
     endfor
 
+	if keyword_set(stop) then stop
+
 	; Transform all positions to payload coords.
 	; For some reason this was done only for the primary hit in Lvl1 data
 	; (not for the associated values)
@@ -184,6 +194,35 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 			data_struct.assoc_xy_pay[i,j,*,*] = reform( temp, [1,1,2,n_elements(data1)] )
 		endfor
 	endfor
+	
+	; Get SPARCS pointing data and put in solar coords.
+	if not keyword_set(ground) then begin
+
+		pitch_struct = read_ascii( 'data_2012/LISS_pitch.txt' )
+		pitch_time = pitch_struct.field1[0,*]
+		pitch = pitch_struct.field1[1,*]
+
+		yaw_struct = read_ascii( 'data_2012/LISS_yaw.txt' )
+		yaw_time = yaw_struct.field1[0,*]
+		yaw = yaw_struct.field1[1,*]
+		
+		for i=long(0), nEvts-1 do begin
+			if data_struct[i].inflight eq 0 then continue
+			if i mod 100 eq 0 then print, 'i=', i
+			j = where(pitch_time gt 0)	; skip the NaN values
+			evt = closest( pitch_time[j] + 64500, data_struct[i].wsmr_time )
+			data_struct[i].pitch = pitch[j[evt]]
+			j = where(yaw_time gt 0)	; skip the NaN values
+			evt = closest( yaw_time[j] + 64500, data_struct[i].wsmr_time )
+			data_struct[i].yaw = yaw[j[evt]]
+		endfor
+		
+		; Combine pitch and yaw with hit position.
+		; Don't forget yaw has sign reversed.
+		data_struct.hit_xy_solar[0] = data_struct.hit_xy_pay[0] + data_struct.pitch
+		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1] - data_struct.yaw
+		
+	endif
 
 	print, "  Done!"
 

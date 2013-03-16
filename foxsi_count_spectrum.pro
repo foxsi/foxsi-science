@@ -16,14 +16,19 @@ FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 if not keyword_set(time) then time=1.
 if not keyword_set(binsize) then binsize=0.5
 
-; Set up energy bins 2-12 keV
-e1 = dindgen(1000)/100+2
+; Set up energy bins 0-12 keV
+e1 = dindgen(1200)/100
 e2 = get_edges(e1,/edges_2)
 emid = get_edges(e1,/mean)
 
 TEMP = T/11.6      ; switch temperature to units of keV
 
-flux = f_vth(e2, [EM, TEMP, 1.], /cont)	; compute thermal X-ray flux
+; f_vth won't work if you include energies below 1 keV.
+; Only simulate above 2 keV.
+i=where( emid gt 2 )
+flux = fltarr( n_elements(emid) )
+flux[i] = f_vth(e2[*,i], [EM, TEMP, 1.], /cont)		; compute thermal X-ray flux
+flux[ where( emid le 2 ) ] = sqrt(-1)
 
 ; note to self: there's a peak above 2.5 keV for T=7MK. Should there be a line there at this temperature?
 
@@ -53,7 +58,7 @@ counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
 ;counts = counts*binsize		 ; now the units are counts per second.
 
 ; coarser energy bins.
-e2_coarse = findgen(10./binsize+1)*binsize+2
+e2_coarse = findgen(10./binsize+1)*binsize
 emid_coarse = get_edges(e2_coarse, /mean)
 counts_coarse = time*interpol(counts, emid, emid_coarse)
 y_err_raw = sqrt(counts_coarse)
