@@ -11,6 +11,7 @@
 ; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
 ;			   must be processed individually.  Default D0
 ;		STOP = stop before returning, for debugging
+;		GROUND:	indicates this is not flight data.
 ;
 ; To process level 0 data into Level 1 IDL structures and save them:
 ;
@@ -29,7 +30,8 @@
 ; History:	Version 1, 2013-Feb-12, Lindsay Glesener
 ;-
 
-FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP
+FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
+			GROUND=GROUND
 
 	add_path, 'util'
 	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
@@ -269,8 +271,13 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	check = where(data_struct.hit_cm[1] eq 0)
 	data_struct[check].error_flag = data_struct[check].error_flag + 4
 	
-	check = where(data_struct.hv ne 200 or data_struct.wsmr_time lt 64610)
+	if keyword_set(ground) then begin
+		check = where(data_struct.hv ne 200)
+	endif else begin
+		check = where(data_struct.hv ne 200 or data_struct.wsmr_time lt 64610)
+	endelse
 	data_struct[check].error_flag = data_struct[check].error_flag + 8
+	
 	
 	check = where(data_struct.hit_cm[0] gt data_struct.hit_adc[0] or $
 				  data_struct.hit_cm[1] gt data_struct.hit_adc[1])

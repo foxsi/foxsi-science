@@ -1,27 +1,29 @@
 ; Create Level 0 data
 .compile wsmr_data_to_level0
 filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
-data_D0 = wsmr_data_to_level0( filename, det=0 )
-data_D1 = wsmr_data_to_level0( filename, det=1 )
-data_D2 = wsmr_data_to_level0( filename, det=2 )
-data_D3 = wsmr_data_to_level0( filename, det=3 )
-data_D4 = wsmr_data_to_level0( filename, det=4 )
-data_D5 = wsmr_data_to_level0( filename, det=5 )
-data_D6 = wsmr_data_to_level0( filename, det=6 )
-save, data_D0, data_D1, data_D2, data_D3, data_D4, data_D5, data_d6, $
+data_lvl0_D0 = wsmr_data_to_level0( filename, det=0 )
+data_lvl0_D1 = wsmr_data_to_level0( filename, det=1 )
+data_lvl0_D2 = wsmr_data_to_level0( filename, det=2 )
+data_lvl0_D3 = wsmr_data_to_level0( filename, det=3 )
+data_lvl0_D4 = wsmr_data_to_level0( filename, det=4 )
+data_lvl0_D5 = wsmr_data_to_level0( filename, det=5 )
+data_lvl0_D6 = wsmr_data_to_level0( filename, det=6 )
+save, data_lvl0_D0, data_lvl0_D1, data_lvl0_D2, data_lvl0_D3, data_lvl0_D4, $
+	data_lvl0_D5, data_lvl0_d6, $
 	file = 'data_2012/foxsi_level0_data.sav'
 
 ; Create Level 1 data
 .compile foxsi_level0_to_level1
 filename = 'data_2012/foxsi_level0_data.sav'
-data_D0 = foxsi_level0_to_level1( filename, det=0 )
-data_D1 = foxsi_level0_to_level1( filename, det=1 )
-data_D2 = foxsi_level0_to_level1( filename, det=2 )
-data_D3 = foxsi_level0_to_level1( filename, det=3 )
-data_D4 = foxsi_level0_to_level1( filename, det=4 )
-data_D5 = foxsi_level0_to_level1( filename, det=5 )
-data_D6 = foxsi_level0_to_level1( filename, det=6 )
-save, data_D0, data_D1, data_D2, data_D3, data_D4, data_D5, data_d6, $
+data_lvl1_D0 = foxsi_level0_to_level1( filename, det=0 )
+data_lvl1_D1 = foxsi_level0_to_level1( filename, det=1 )
+data_lvl1_D2 = foxsi_level0_to_level1( filename, det=2 )
+data_lvl1_D3 = foxsi_level0_to_level1( filename, det=3 )
+data_lvl1_D4 = foxsi_level0_to_level1( filename, det=4 )
+data_lvl1_D5 = foxsi_level0_to_level1( filename, det=5 )
+data_lvl1_D6 = foxsi_level0_to_level1( filename, det=6 )
+save, data_lvl1_D0, data_lvl1_D1, data_lvl1_D2, data_lvl1_D3, data_lvl1_D4, $
+	data_lvl1_D5, data_lvl1_d6, $
 	file = 'data_2012/foxsi_level1_data.sav'
 
 ; Plot positions
@@ -438,22 +440,34 @@ cal3 = 'detector_data/peaks_det103.sav'
 cal4 = 'detector_data/peaks_det104.sav'
 cal5 = 'detector_data/peaks_det105.sav'
 cal6 = 'detector_data/peaks_det106.sav'
-data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0 )
-data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1 )
-data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2 )
-data_lvl2_D3 = foxsi_level1_to_level2( file0, file1, det=3, calib=cal3 )
-data_lvl2_D4 = foxsi_level1_to_level2( file0, file1, det=4, calib=cal4 )
-data_lvl2_D5 = foxsi_level1_to_level2( file0, file1, det=5, calib=cal5 )
-data_lvl2_D6 = foxsi_level1_to_level2( file0, file1, det=6, calib=cal6 )
+data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0, /ground )
+data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1, /ground )
+data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2, /ground )
+data_lvl2_D3 = foxsi_level1_to_level2( file0, file1, det=3, calib=cal3, /ground )
+data_lvl2_D4 = foxsi_level1_to_level2( file0, file1, det=4, calib=cal4, /ground )
+data_lvl2_D5 = foxsi_level1_to_level2( file0, file1, det=5, calib=cal5, /ground )
+data_lvl2_D6 = foxsi_level1_to_level2( file0, file1, det=6, calib=cal6, /ground )
 save, data_lvl2_D0, data_lvl2_D1, data_lvl2_D2, data_lvl2_D3, $
 	data_lvl2_D4, data_lvl2_D5, data_lvl2_d6, $
 	file = 'data_2012/sequence_level2_data.sav'
 
-; Plot basic spectra (integrated over whole flight)
-spex0=make_spectrum( data_lvl2_d0, bin=0.1, /corr )
-spex1=make_spectrum( data_lvl2_d1, bin=0.1, /corr )
-spex2=make_spectrum( data_lvl2_d2, bin=0.1, /corr )
-spex3=make_spectrum( data_lvl2_d3, bin=0.1, /corr )
-spex4=make_spectrum( data_lvl2_d4, bin=0.1, /corr )
-spex5=make_spectrum( data_lvl2_d5, bin=0.1, /corr )
-spex6=make_spectrum( data_lvl2_d6, bin=0.1, /corr )
+i0=where(data_lvl2_d0.hv eq 200)
+i1=where(data_lvl2_d1.hv eq 200)
+i2=where(data_lvl2_d2.hv eq 200)
+i3=where(data_lvl2_d3.hv eq 200)
+i4=where(data_lvl2_d4.hv eq 200)
+i5=where(data_lvl2_d5.hv eq 200)
+i6=where(data_lvl2_d6.hv eq 200)
+
+; Plot basic spectra
+spex0=make_spectrum( data_lvl2_d0[i0], bin=0.5, /corr )
+spex1=make_spectrum( data_lvl2_d1[i1], bin=0.5, /corr  )
+spex2=make_spectrum( data_lvl2_d2[i2], bin=0.5, /corr  )
+spex3=make_spectrum( data_lvl2_d3[i3], bin=0.5, /corr  )
+spex4=make_spectrum( data_lvl2_d4[i4], bin=0.5, /corr  )
+spex5=make_spectrum( data_lvl2_d5[i5], bin=0.5, /corr  )
+spex6=make_spectrum( data_lvl2_d6[i6], bin=0.5, /corr  )
+sum = spex0.spec_p + spex1.spec_p + spex2.spec_p + spex3.spec_p $
+	 + spex4.spec_p + spex5.spec_p + spex6.spec_p
+
+plot, spex0.energy_kev, sum, psym=10
