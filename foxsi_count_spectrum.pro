@@ -1,5 +1,5 @@
 FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
-	DATA_DIR = data_dir, LET_FILE = let_file
+	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -12,6 +12,8 @@ FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 ;	T:  	 temperature in MK
 ;	TIME:  	 time interval for observation, in seconds
 ;	BINSIZE: width of energy bins
+;	LET_FILE:	detector efficiency file to use.
+;	SINGLE:	scale counts for a single module only (as opposed to all 7)
 
 if not keyword_set(time) then time=1.
 if not keyword_set(binsize) then binsize=0.5
@@ -27,8 +29,12 @@ TEMP = T/11.6      ; switch temperature to units of keV
 ; Only simulate above 2 keV.
 i=where( emid gt 2 )
 flux = fltarr( n_elements(emid) )
-flux[i] = f_vth(e2[*,i], [EM, TEMP, 1.], /cont)		; compute thermal X-ray flux
+flux[i] = f_vth(e2[*,i], [EM, TEMP, 1.])		; compute thermal X-ray flux
 flux[ where( emid le 2 ) ] = sqrt(-1)
+
+restore,'data_2012/rhsi_foxsi_flare1_photon_spectrum.sav'
+flux = f_vth( get_edges(findgen(37)/2+3,/edges_2), [em, temp, 1.] )
+emid = abins
 
 ; note to self: there's a peak above 2.5 keV for T=7MK. Should there be a line there at this temperature?
 
@@ -55,12 +61,12 @@ if keyword_set(stop) then stop
 
 ; fold flux with FOXSI response
 counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
-;counts = counts*binsize		 ; now the units are counts per second.
+;counts = counts*binsize		 ; now the units are counts per second. DONT USE!
 
 ; coarser energy bins.
 e2_coarse = findgen(10./binsize+1)*binsize
 emid_coarse = get_edges(e2_coarse, /mean)
-counts_coarse = time*interpol(counts, emid, emid_coarse)
+counts_coarse = interpol(counts, emid, emid_coarse)	; now units are cts/keV
 y_err_raw = sqrt(counts_coarse)
 
 ; if uncertainty is 100% or greater, kill it.
@@ -70,7 +76,11 @@ if i[0] gt -1 then begin
 	y_err_raw[i] = sqrt(-1)
 endif
 
-result = create_struct("energy_keV", emid_coarse, "counts", counts_coarse, "count_error", y_err_raw)
+if keyword_set(single) then n=1. else n=7.
+
+result = create_struct("energy_keV", emid_coarse, $
+			 		   "counts", counts_coarse*time/7.*N, $
+			 		   "count_error", y_err_raw*time)
 
 return, result
 

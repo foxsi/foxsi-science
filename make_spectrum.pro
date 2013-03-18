@@ -47,29 +47,37 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 	energy = findgen(100/binwidth)*binwidth
 
 	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy), $
-						min=min(energy), max=max(energy) ) / ratio_good / binwidth
+						min=min(energy), max=max(energy) )
 	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy), $
-						min=min(energy), max=max(energy) ) / ratio_good / binwidth
+						min=min(energy), max=max(energy) )
 
 	if keyword_set(three) then begin
 
 		spec_n = spec_n + histogram( data_good.assoc_energy[0,1,0], $
 									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) ) / ratio_good / binwidth
+									 max=max(energy) )
 		spec_n = spec_n + histogram( data_good.assoc_energy[2,1,0], $
 									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) ) / ratio_good / binwidth
+									 max=max(energy) )
 		spec_p = spec_p + histogram( data_good.assoc_energy[1,0,1], $
 									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) ) / ratio_good / binwidth
+									 max=max(energy) )
 		spec_p = spec_p + histogram( data_good.assoc_energy[1,2,1], $
 									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) ) / ratio_good / binwidth
+									 max=max(energy) )
 	endif
+
+	p_error = sqrt( spec_p )
+
+	; Correct for thrown-out events and bin width.
+	spec_n = spec_n / ratio_good / binwidth
+	spec_p = spec_p / ratio_good / binwidth
+	p_error = p_error / ratio_good / binwidth
 
 	energy = energy + binwidth/2.  ; make energy array the midpoints of the bins.
 
-	spex = create_struct( 'energy_kev', energy, 'spec_n', spec_n, 'spec_p', spec_p )
+	spex = create_struct( 'energy_kev', energy, 'spec_n', spec_n, 'spec_p', spec_p, $
+						  'spec_p_err', p_error )
 
 	if keyword_set(plot) then plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 	

@@ -76,8 +76,6 @@ if offaxis_angle gt 0 then begin
 	eff_area = eff_area*offaxis_area.factor
 endif
 
-help,eff_area
-
 IF keyword_set(PLOT) THEN BEGIN
 
 	plot, energy_arr, num_modules*eff_area_orig, psym = -4, $
