@@ -205,8 +205,8 @@ legend, ['Simulated flare counts','Actual D6 counts'], $
 ; Select only events w/o errors and in desired time range.
 ; Use /corr keyword to correct the spectrum for the thrown-out counts.
 restore, 'data_2012/foxsi_level2_data.sav', /v
-t1 = t2_start
-t2 = t2_end
+t1 = t4_start
+t2 = t4_end
 delta_t = t2 - t1
 i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2); and $
 i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2); and $
@@ -308,12 +308,45 @@ legend, ['Simulated flare counts','Det0','Det1','Det2','Det3','Det4','Det5','Det
 
 ;;; Try to characterize blanket absorption
 ; Simulate a FOXSI spectrum for the thermal plasma.
-sim_tot = foxsi_count_spectrum( em, t, time=60., binsize=0.5, data_dir='detector_data/', $
-						 		let_file='efficiency_det106_asic3.sav')
-; Divide by 7 to get the simulated rate for one detector only.
-sim_1det = sim_tot
-sim_1det.counts = sim_tot.counts / 7.
-sim_1det.count_error = sqrt(sim_1det.counts)
+T = 9.4  ; temperature in MK
+EM = 4.8e-3  ; emission measure in units of 10^49
+bin=0.5
+
+time_int = 60.
+
+sim_det0 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det108_asic2.sav', /single )
+sim_det1 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det109_asic2.sav', /single )
+sim_det2 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det102_asic3.sav', /single )
+sim_det3 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det103_asic3.sav', /single )
+sim_det4 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det104_asic2.sav', /single )
+sim_det5 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det105_asic2.sav', /single )
+sim_det6 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det106_asic3.sav', /single )
+
+; correct simulated spectra for livetime.
+sim_det0 = foxsi_live_correct( sim_det0, time_int )
+sim_det1 = foxsi_live_correct( sim_det1, time_int )
+sim_det2 = foxsi_live_correct( sim_det2, time_int )
+sim_det3 = foxsi_live_correct( sim_det3, time_int )
+sim_det4 = foxsi_live_correct( sim_det4, time_int )
+sim_det5 = foxsi_live_correct( sim_det5, time_int )
+sim_det6 = foxsi_live_correct( sim_det6, time_int )
+
+;plot, sim_det6.energy_kev, sim_det6.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
+plot, sim_det6.energy_kev, test.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
+;	yr=[0.,1.], $
+	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+;	ytitle='ratio of measured to simulated counts', $
+;	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+	psym=10
+oplot, spec_d6.energy_kev, spec_d6.spec_p, psym=10, color=2
+
 
 ; Calculate absorption due to various multiples of the blanketing.
 mylar=82.55
@@ -335,13 +368,27 @@ plot, sim_1det.energy_kev, spec_d6.spec_p / sim_1det.counts, xr=[2,10], $
 	ytitle='ratio of measured to simulated counts', $
 	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
 	psym=10, /nodata
-oplot, sim_1det.energy_kev, spec_d0.spec_p / sim_1det.counts, psym=-1, line=1, color=6
-oplot, sim_1det.energy_kev, spec_d1.spec_p / sim_1det.counts, psym=-1, line=1, color=7
-oplot, sim_1det.energy_kev, spec_d2.spec_p / sim_1det.counts, psym=-1, line=1, color=8
-oplot, sim_1det.energy_kev, spec_d3.spec_p / sim_1det.counts, psym=-1, line=1, color=9
-oplot, sim_1det.energy_kev, spec_d4.spec_p / sim_1det.counts, psym=-1, line=1, color=10
-oplot, sim_1det.energy_kev, spec_d5.spec_p / sim_1det.counts, psym=-1, line=1, color=12
-oplot, sim_1det.energy_kev, spec_d6.spec_p / sim_1det.counts, psym=-1, line=1, color=2
+oplot, sim_det0.energy_kev, spec_d0.spec_p / 0.9/sim_det0.counts, psym=-1, line=1, color=6
+oplot, sim_det1.energy_kev, spec_d1.spec_p / 0.9/sim_det1.counts, psym=-1, line=1, color=7
+oplot, sim_det2.energy_kev, spec_d2.spec_p / 0.9/sim_det2.counts, psym=-1, line=1, color=8
+oplot, sim_det3.energy_kev, spec_d3.spec_p / 0.9/sim_det3.counts, psym=-1, line=1, color=9
+oplot, sim_det4.energy_kev, spec_d4.spec_p / 0.9/sim_det4.counts, psym=-1, line=1, color=10
+oplot, sim_det5.energy_kev, spec_d5.spec_p / 0.9/sim_det5.counts, psym=-1, line=1, color=12
+oplot, spec_d6.energy_kev, spec_d6.spec_p / 0.9/sim_det6.counts, psym=-1, line=1, color=2
+
+;plot, sim_1det.energy_kev, sim_1det.counts, xr=[2,10], $
+;	yr=[0.,1.], $
+;	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+;	ytitle='ratio of measured to simulated counts', $
+;	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+;	psym=10, /nodata
+;oplot, sim_det0.energy_kev, 60*(s4_0.spec_p/delta_t4 - s2_0.spec_p/delta_t2) / 0.9/sim_det0.counts, psym=-1, line=1, color=6
+;oplot, sim_det1.energy_kev, 60*(s4_1.spec_p/delta_t4 - s2_1.spec_p/delta_t2) / 0.9/sim_det1.counts, psym=-1, line=1, color=7
+;oplot, sim_det2.energy_kev, 60*(s4_2.spec_p/delta_t4 - s2_2.spec_p/delta_t2) / 0.9/sim_det2.counts, psym=-1, line=1, color=8
+;oplot, sim_det3.energy_kev, 60*(s4_3.spec_p/delta_t4 - s2_3.spec_p/delta_t2) / 0.9/sim_det3.counts, psym=-1, line=1, color=9
+;oplot, sim_det4.energy_kev, 60*(s4_4.spec_p/delta_t4 - s2_4.spec_p/delta_t2) / 0.9/sim_det4.counts, psym=-1, line=1, color=10
+;oplot, sim_det5.energy_kev, 60*(s4_5.spec_p/delta_t4 - s2_5.spec_p/delta_t2) / 0.9/sim_det5.counts, psym=-1, line=1, color=12
+;oplot, sim_det6.energy_kev, 60*(s4_6.spec_p/delta_t4 - s2_6.spec_p/delta_t2) / 0.9/sim_det6.counts, psym=-1, line=1, color=2
 
 oplot_err, sim_1det.energy_kev, spec_d0.spec_p / sim_1det.counts, $
 	yerr = sqrt(spec_d0.spec_p)/sim_1det.counts, psym=-1, line=1, color=6
@@ -471,3 +518,28 @@ sum = spex0.spec_p + spex1.spec_p + spex2.spec_p + spex3.spec_p $
 	 + spex4.spec_p + spex5.spec_p + spex6.spec_p
 
 plot, spex0.energy_kev, sum, psym=10
+
+
+
+
+i0 = where( data_lvl2_d0.error_flag eq 0 and 
+	data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2 and 
+	data_lvl2_d0.hit_energy[1] gt 4 and $
+	data_lvl2_d0.hit_energy[1] lt 15 )
+i1 = where( data_lvl2_d1.error_flag eq 0 and data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2)
+i2 = where( data_lvl2_d2.error_flag eq 0 and data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2)
+i3 = where( data_lvl2_d3.error_flag eq 0 and data_lvl2_d3.wsmr_time gt t1 and data_lvl2_d3.wsmr_time lt t2)
+i4 = where( data_lvl2_d4.error_flag eq 0 and data_lvl2_d4.wsmr_time gt t1 and data_lvl2_d4.wsmr_time lt t2)
+i5 = where( data_lvl2_d5.error_flag eq 0 and data_lvl2_d5.wsmr_time gt t1 and data_lvl2_d5.wsmr_time lt t2)
+i6 = where( data_lvl2_d6.error_flag eq 0 and data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2)
+
+
+
+r = [-1200,1200]
+plot, data_lvl2_d0[i0].hit_xy_solar[0], data_lvl2_d0[i0].hit_xy_solar[1], psym=3, xr=r,yr=r
+;oplot, data_lvl2_d1[i1].hit_xy_solar[0], data_lvl2_d1[i1].hit_xy_solar[1], psym=3, color=7
+;oplot, data_lvl2_d2[i2].hit_xy_solar[0], data_lvl2_d2[i2].hit_xy_solar[1], psym=3, color=8
+;oplot, data_lvl2_d3[i3].hit_xy_solar[0], data_lvl2_d3[i3].hit_xy_solar[1], psym=3, color=9
+oplot, data_lvl2_d4[i4].hit_xy_solar[0], data_lvl2_d4[i4].hit_xy_solar[1], psym=3, color=10
+oplot, data_lvl2_d5[i5].hit_xy_solar[0], data_lvl2_d5[i5].hit_xy_solar[1], psym=3, color=12
+oplot, data_lvl2_d6[i6].hit_xy_solar[0], data_lvl2_d6[i6].hit_xy_solar[1], psym=3, color=2
