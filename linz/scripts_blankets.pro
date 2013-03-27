@@ -20,7 +20,7 @@ t1 = t4_start
 t2 = t4_start+60
 delta_t = t2 - t1
 
-bin = 0.5
+bin = 0.3
 
 i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2); and $
 i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2); and $
@@ -189,3 +189,48 @@ blankets, 4, 0.08, /det4
 blankets, 4, 0.1, /det5
 blankets, 4, 0.08, /det6
 pclose
+
+; second version of blankets routine
+blankets, [0.,0.,0.], /det0
+
+; Try to fit it.
+
+counter = 0.
+chi = dblarr(125000.)
+i_arr = dblarr(125000.)
+j_arr = dblarr(125000.)
+k_arr = dblarr(125000.)
+.r
+for i=0., 1.0, 0.1 do begin
+  for j=0., 1.-i, 0.1 do begin
+    for k=0., 1.-i-j, 0.1 do begin
+		print,i,j,k
+		chi[ counter ] = blankets2( [i,j,k], /det6, bin=0.5 )
+		i_arr[ counter ] = i
+		j_arr[ counter ] = j
+		k_arr[ counter ] = k
+		counter++
+	endfor
+  endfor
+endfor
+end
+
+ind = where( chi gt 0 )
+print, min( chi[ind], min_ind )
+print, i_arr[ind[min_ind]], j_arr[ind[min_ind]], k_arr[ind[min_ind]]
+
+print, blankets2( [0.,0.,0.], bin=0.5, /det6 )
+print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.0, ni_th=0.000, det=6) 
+oplot, area.energy_kev, areaX4.eff_area_cm2/area.eff_area_cm2, thick=4, line=2
+
+;print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.0, ni_th=0.000, det=0) 
+;print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.0, ni_th=0.000, det=1, /over) 
+;print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.0, ni_th=0.000, det=2, /over) 
+;print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.0, ni_th=0.000, det=3, /over) 
+print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.02, ni_th=0.000, det=4) 
+print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.05, ni_th=0.000, det=5, /over) 
+print, blankets2( [0.,0.,0.], bin=0.3, fe_th=0.000, off=-0.04, ni_th=0.000, det=6, /over) 
+oplot, area.energy_kev, areaX4.eff_area_cm2/area.eff_area_cm2, thick=4, line=2
+legend, ['4X blanketing', $
+		 'Det4','Det5','Det6'], $
+		 thick=4, line=[2,0,0,0], color=[1,10,12,2]

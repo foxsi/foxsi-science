@@ -181,7 +181,7 @@ t6_start = t_launch + 438.5		; Target 6 (flare)
 t6_end = t_launch + 498.3
 t1 = t1_start
 t2 = t1_end
-binwidth=0.5
+binwidth=0.3
 
 ;; Method 1: This is the old way to do it, using a hacked routine I wrote
 ; (needed before we had Level 2 data)
@@ -205,8 +205,8 @@ legend, ['Simulated flare counts','Actual D6 counts'], $
 ; Select only events w/o errors and in desired time range.
 ; Use /corr keyword to correct the spectrum for the thrown-out counts.
 restore, 'data_2012/foxsi_level2_data.sav', /v
-t1 = t4_start
-t2 = t4_end
+t1 = t2_start
+t2 = t2_end
 delta_t = t2 - t1
 i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2); and $
 i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2); and $
@@ -243,6 +243,16 @@ legend, ['Summed, except D1','Det0','Det1','Det2','Det3','Det4','Det5','Det6'], 
 		 thick=4, line=[1,0,0,0,0,0,0,0], color=[0,6,7,8,9,10,12,2], /right, box=0
 
 pclose
+
+spec_flare = spec_sum
+dt_flare = delta_t
+
+plot,  spec_d6.energy_kev, spec_sum/delta_t, xr=[2,20], thick=4, psym=10, /xlog, $
+  xtitle='Energy [keV]', ytitle='FOXSI counts s!U-1!N keV!U-1!N', xstyle=1,$
+  title = 'FOXSI count spectrum, Target 1', charsize=1.2, /ylog, yr=[1.e-1,1.e1]
+plot,  spec_d6.energy_kev, spec_flare/dt_flare, xr=[2,20], thick=4, psym=10, /xlog, $
+  xtitle='Energy [keV]', ytitle='FOXSI counts s!U-1!N keV!U-1!N', xstyle=1,$
+  title = 'FOXSI count spectrum, B-class flare', charsize=1.2, /ylog, yr=[1.e-1,1.e2]
 
 ;; or use this if you want to select the positions.
 ; rough flare centroid for each detector
@@ -310,7 +320,7 @@ legend, ['Simulated flare counts','Det0','Det1','Det2','Det3','Det4','Det5','Det
 ; Simulate a FOXSI spectrum for the thermal plasma.
 T = 9.4  ; temperature in MK
 EM = 4.8e-3  ; emission measure in units of 10^49
-bin=0.5
+bin=0.3
 
 time_int = 60.
 
@@ -362,7 +372,7 @@ areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_
 areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
 			mylar=6.*mylar, al=6*al, kap=6*kapton)
 
-plot, sim_1det.energy_kev, spec_d6.spec_p / sim_1det.counts, xr=[2,10], $
+plot, sim_det0.energy_kev, spec_d6.spec_p / sim_det0.counts, xr=[2,10], $
 	yr=[0.,1.], $
 	thick=4, charsize=1.2, xtitle='Energy [keV]', $
 	ytitle='ratio of measured to simulated counts', $
@@ -520,26 +530,233 @@ sum = spex0.spec_p + spex1.spec_p + spex2.spec_p + spex3.spec_p $
 plot, spex0.energy_kev, sum, psym=10
 
 
+t1=t1_start
+t2=t6_end
+e1=3
+e2=15
 
-
-i0 = where( data_lvl2_d0.error_flag eq 0 and 
-	data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2 and 
-	data_lvl2_d0.hit_energy[1] gt 4 and $
-	data_lvl2_d0.hit_energy[1] lt 15 )
-i1 = where( data_lvl2_d1.error_flag eq 0 and data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2)
-i2 = where( data_lvl2_d2.error_flag eq 0 and data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2)
-i3 = where( data_lvl2_d3.error_flag eq 0 and data_lvl2_d3.wsmr_time gt t1 and data_lvl2_d3.wsmr_time lt t2)
-i4 = where( data_lvl2_d4.error_flag eq 0 and data_lvl2_d4.wsmr_time gt t1 and data_lvl2_d4.wsmr_time lt t2)
-i5 = where( data_lvl2_d5.error_flag eq 0 and data_lvl2_d5.wsmr_time gt t1 and data_lvl2_d5.wsmr_time lt t2)
-i6 = where( data_lvl2_d6.error_flag eq 0 and data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2)
-
+i0 = where( data_lvl2_d0.error_flag eq 0 and $
+	data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2 and  $
+	data_lvl2_d0.hit_energy[1] gt e1 and $
+	data_lvl2_d0.hit_energy[1] lt e2 )
+i1 = where( data_lvl2_d1.error_flag eq 0 and  $
+	data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2 and  $
+	data_lvl2_d1.hit_energy[1] gt e1 and $
+	data_lvl2_d1.hit_energy[1] lt e2 )
+i2 = where( data_lvl2_d2.error_flag eq 0 and  $
+	data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2 and  $
+	data_lvl2_d2.hit_energy[1] gt e1 and $
+	data_lvl2_d2.hit_energy[1] lt e2 )
+i3 = where( data_lvl2_d3.error_flag eq 0 and  $
+	data_lvl2_d3.wsmr_time gt t1 and data_lvl2_d3.wsmr_time lt t2 and $ 
+	data_lvl2_d3.hit_energy[1] gt e1 and $
+	data_lvl2_d3.hit_energy[1] lt e2 )
+i4 = where( data_lvl2_d4.error_flag eq 0 and  $
+	data_lvl2_d4.wsmr_time gt t1 and data_lvl2_d4.wsmr_time lt t2 and  $
+	data_lvl2_d4.hit_energy[1] gt e1 and $
+	data_lvl2_d4.hit_energy[1] lt e2 )
+i5 = where( data_lvl2_d5.error_flag eq 0 and  $
+	data_lvl2_d5.wsmr_time gt t1 and data_lvl2_d5.wsmr_time lt t2 and  $
+	data_lvl2_d5.hit_energy[1] gt e1 and $
+	data_lvl2_d5.hit_energy[1] lt e2 )
+i6 = where( data_lvl2_d6.error_flag eq 0 and  $
+	data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2 and  $
+	data_lvl2_d6.hit_energy[1] gt e1 and $
+	data_lvl2_d6.hit_energy[1] lt e2 )
 
 
 r = [-1200,1200]
-plot, data_lvl2_d0[i0].hit_xy_solar[0], data_lvl2_d0[i0].hit_xy_solar[1], psym=3, xr=r,yr=r
-;oplot, data_lvl2_d1[i1].hit_xy_solar[0], data_lvl2_d1[i1].hit_xy_solar[1], psym=3, color=7
-;oplot, data_lvl2_d2[i2].hit_xy_solar[0], data_lvl2_d2[i2].hit_xy_solar[1], psym=3, color=8
-;oplot, data_lvl2_d3[i3].hit_xy_solar[0], data_lvl2_d3[i3].hit_xy_solar[1], psym=3, color=9
-oplot, data_lvl2_d4[i4].hit_xy_solar[0], data_lvl2_d4[i4].hit_xy_solar[1], psym=3, color=10
-oplot, data_lvl2_d5[i5].hit_xy_solar[0], data_lvl2_d5[i5].hit_xy_solar[1], psym=3, color=12
-oplot, data_lvl2_d6[i6].hit_xy_solar[0], data_lvl2_d6[i6].hit_xy_solar[1], psym=3, color=2
+shftX = 0
+shftY = 0
+plot_map,m[0],/limb,center=[0,0],fov=50      
+oplot, data_lvl2_d0[i0].hit_xy_solar[0]+shftX, data_lvl2_d0[i0].hit_xy_solar[1]+shftY, psym=3;, xr=r,yr=r
+;oplot, data_lvl2_d1[i1].hit_xy_solar[0]+shftX, data_lvl2_d1[i1].hit_xy_solar[1]+shftY, psym=3, color=7
+oplot, data_lvl2_d2[i2].hit_xy_solar[0]+shftX, data_lvl2_d2[i2].hit_xy_solar[1]+shftY, psym=3, color=8
+;oplot, data_lvl2_d3[i3].hit_xy_solar[0]+shftX, data_lvl2_d3[i3].hit_xy_solar[1]+shftY, psym=3, color=9
+oplot, data_lvl2_d4[i4].hit_xy_solar[0]+shftX, data_lvl2_d4[i4].hit_xy_solar[1]+shftY, psym=3, color=10
+oplot, data_lvl2_d5[i5].hit_xy_solar[0]+shftX, data_lvl2_d5[i5].hit_xy_solar[1]+shftY, psym=3, color=12
+oplot, data_lvl2_d6[i6].hit_xy_solar[0]+shftX, data_lvl2_d6[i6].hit_xy_solar[1]+shftY, psym=3, color=2
+xyouts, -1100, 1100, strtrim(e1,2)+'-'+strtrim(e2,2)+'keV'
+
+
+;
+; more imaging, this time using Ishikawa's scripts
+;
+
+restore, 'data_2012/foxsi_level2_data.sav', /v
+i0 = where( data_lvl2_d0.error_flag eq 0 )
+i1 = where( data_lvl2_d1.error_flag eq 0 )
+i2 = where( data_lvl2_d2.error_flag eq 0 )
+i3 = where( data_lvl2_d3.error_flag eq 0 )
+i4 = where( data_lvl2_d4.error_flag eq 0 )
+i5 = where( data_lvl2_d5.error_flag eq 0 )
+i6 = where( data_lvl2_d6.error_flag eq 0 )
+
+t0 = '2-Nov-2012 17:55:00.000'
+t1_start = 108.3		; Target 1 (AR)
+t1_end = 151.8
+t2_start = 154.8		; Target 2 (AR)
+t2_end = 244.7
+t3_start = 247			; Target 3 (quiet Sun)
+t3_end = 337.3
+t4_start = 340			; Target 4 (flare)
+t4_end = 421.2
+t5_start = 423.5		; Target 5 (off-pointing)
+t5_end = 435.9
+t6_start = 438.5		; Target 6 (flare)
+t6_end = 498.3
+
+pix=20.
+xr=[-1300,1300]
+yr=[-1300,1300]
+img=foxsi_image_solar(data_lvl2_d6, 6,psize=pix)
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix )
+plot_map, map, /limb, dmax=5, xr=xr, yr=yr
+
+loadct,4
+TVLCT, r, g, b, /Get
+TVLCT, Reverse(r), Reverse(g), Reverse(b)
+
+
+pix=7.5
+erange=[4,15]
+tr = [t6_start, t6_end]
+ind = [1,0,1,0,1,1,1]
+img=foxsi_image_solar_int( data_lvl2_d0[i0], data_lvl2_d1[i1], data_lvl2_d2[i2], $
+		data_lvl2_d3[i3], data_lvl2_d4[i4], data_lvl2_d5[i5], data_lvl2_d6[i6], $
+		psize=pix, erange=erange, trange=tr, index=ind, /xycor, thr_n=4., /nowin )
+;img=foxsi_image_solar( data_lvl2_d6[i6], 6, $
+;		psize=pix, erange=erange, trange=tr, /xycor, thr_n=4. )
+;img(where(img eq 0))=1500.
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix, id='', $
+	time=anytim( anytim(t0)+tr[0], /yo) )
+plot_map, map, /limb, /cbar, center=[960,-210], fov=2
+plot_map, map, /over, levels=[50,95], /per;, color=1
+plot_map, map, /limb, /cbar, center=[0,0], fov=50, /log, lcolor=0
+
+
+cgdisplay, 800,800  
+plot_map, map, /limb, dmax=5, xr=xr, yr=yr, charsize=2, charthick=2, /cbar, $
+	lcolor=176, lthick=3, color=1
+xyouts, 400, 1300, 'FOXSI Target 1', color=1, charthick=3, size=2
+xyouts, 400, 1100, '90 seconds', color=1, charthick=3, size=2
+xyouts, -1300, 1300, 'D0, D2, D4, D5, D6', color=1, charthick=3, size=2
+xyouts, -1300, 1100, '15-90 keV', color=1, charthick=3, size=2
+
+
+; plot effective area, including what we think ours was.
+
+e1 = dindgen(1200)/100+3
+e2 = get_edges(e1,/edges_2)
+emid = get_edges(e1,/mean)
+
+rhessi = rhessi_eff_area(e1, 0.25, 0)
+area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/')
+
+plot, area.energy_kev, area.eff_area_cm2, line=2, thick=4, yr=[1.,1000], charsize=1.2, $
+	xtitle='Energy[keV]', ytitle='Effective area [cm!U2!N]', /ylog
+oplot, emid, rhessi, line=1, thick=4
+area1 = interpol( area.eff_area_cm2, area.energy_kev, sim_det6.energy_kev )
+avg  = spec_d0.spec_p/sim_det0.counts
+avg += spec_d1.spec_p/sim_det1.counts
+avg += spec_d2.spec_p/sim_det2.counts
+avg += spec_d3.spec_p/sim_det3.counts
+avg += spec_d4.spec_p/sim_det4.counts
+avg += spec_d5.spec_p/sim_det5.counts
+avg += spec_d6.spec_p/sim_det6.counts
+avg = avg/7.
+avg[ where(avg gt 1.) ] = 1.
+oplot, sim_det6.energy_kev, avg*area1, thick=4
+oplot, sim_det6.energy_kev, area1[where(sim_det6.energy_kev gt 8)], thick=4
+legend, ['Nominal FOXSI','FOXSI in-flight','RHESSI'], line=[2,0,1], thick=4
+
+;
+; Plot flare centroid positions with and without Ishikawa's correction.
+;
+
+pix=10.
+erange=[4,15]
+tr = [t6_start, t6_end]
+
+img0=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img1=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img2=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img3=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img4=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img5=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img6=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+
+map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix, id='D0 target3 no alignment')
+map1 = make_map( img1, xcen=0., ycen=0., dx=pix, dy=pix, id='D1 target3 no alignment')
+map2 = make_map( img2, xcen=0., ycen=0., dx=pix, dy=pix, id='D2 target3 no alignment')
+map3 = make_map( img3, xcen=0., ycen=0., dx=pix, dy=pix, id='D3 target3 no alignment')
+map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix, id='D4 target3 no alignment')
+map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix, id='D5 target3 no alignment')
+map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix, id='D6 target3 no alignment')
+
+plot_map, map0, cen=[960,-210], fov=5
+
+img0corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img1corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img2corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img3corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img4corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img5corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img6corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+
+map0corr = make_map( img0corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D0 target3 w/alignment')
+map1corr = make_map( img1corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D1 target3 w/alignment')
+map2corr = make_map( img2corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D2 target3 w/alignment')
+map3corr = make_map( img3corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D3 target3 w/alignment')
+map4corr = make_map( img4corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D4 target3 w/alignment')
+map5corr = make_map( img5corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D5 target3 w/alignment')
+map6corr = make_map( img6corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D6 target3 w/alignment')
+
+plot_map, map0, cen=[960,-210], fov=5
+
+npix = n_elements(img0[0,*])
+axis = (findgen( npix ) - npix/2)*pix
+
+img0[ where(img0 lt 3) ] = 0
+img1[ where(img1 lt 3) ] = 0
+img2[ where(img2 lt 3) ] = 0
+img3[ where(img3 lt 3) ] = 0
+img4[ where(img4 lt 3) ] = 0
+img5[ where(img5 lt 3) ] = 0
+img6[ where(img6 lt 3) ] = 0
+
+map_xymoments, img0, axis, axis, centr0, stddev0
+map_xymoments, img1, axis, axis, centr1, stddev1
+map_xymoments, img2, axis, axis, centr2, stddev2
+map_xymoments, img3, axis, axis, centr3, stddev3
+map_xymoments, img4, axis, axis, centr4, stddev4
+map_xymoments, img5, axis, axis, centr5, stddev5
+map_xymoments, img6, axis, axis, centr6, stddev6
+
+map_xymoments, img0corr, axis, axis, centr0corr, stddev0corr
+map_xymoments, img1corr, axis, axis, centr1corr, stddev1corr
+map_xymoments, img2corr, axis, axis, centr2corr, stddev2corr
+map_xymoments, img3corr, axis, axis, centr3corr, stddev3corr
+map_xymoments, img4corr, axis, axis, centr4corr, stddev4corr
+map_xymoments, img5corr, axis, axis, centr5corr, stddev5corr
+map_xymoments, img6corr, axis, axis, centr6corr, stddev6corr
+
+plot_map, map0, cen=[960,-210], fov=6
+oplot, [centr0[0]], [centr0[1]], color, /psym, symsize=2, thick=2
+
+restore,'data_2012/rhessi_imaging_foxsi_flare_march2013.sav',/ver
+
+loadct2,3
+center=[960,-205]
+fov=1.5
+!p.multi=[0,4,1]
+;RHESSI
+loadct2,5
+plot_map,c3n,/limb,center=center,fov=fov,bot=8,lcolor=255,gcolor=255,grid=2
+plot_map,vff,/over,/per,levels=[50],color=255,thick=2
+plot_map,njmap,/limb,center=center,fov=fov,bot=8,lcolor=255,gcolor=255,grid=2
+plot_map,vff,/over,/per,levels=[50],color=255,thick=2
+plot_map,vff,/limb,center=center,fov=fov,bot=8,lcolor=255,gcolor=255,grid=2
+plot_map,vff,/over,/per,levels=[50],color=255,thick=2
+plot_map,pmap,/limb,center=center,fov=fov,bot=8,lcolor=255,gcolor=255,grid=2
+plot_map,vff,/over,/per,levels=[50],color=255,thick=2

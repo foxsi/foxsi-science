@@ -33,8 +33,8 @@ flux[i] = f_vth(e2[*,i], [EM, TEMP, 1.])		; compute thermal X-ray flux
 flux[ where( emid le 2 ) ] = sqrt(-1)
 
 restore,'data_2012/rhsi_foxsi_flare1_photon_spectrum.sav'
-flux = f_vth( get_edges(findgen(37)/2+3,/edges_2), [em, temp, 1.] )
-emid = abins
+flux1 = f_vth( get_edges(findgen(37)/2+3,/edges_2), [em, temp, 1.] )
+emid1 = abins
 
 ; note to self: there's a peak above 2.5 keV for T=7MK. Should there be a line there at this temperature?
 
@@ -78,8 +78,24 @@ endif
 
 if keyword_set(single) then n=1. else n=7.
 
+counts_coarse = counts_coarse*time/7.*N
+
+; smear with a Gaussian for imperfect energy resolution.
+i = where( counts_coarse gt 0 )
+print, total(counts_coarse[i])
+print,i
+i = i[1:n_elements(i)-2]
+print,i
+n = n_elements(counts_coarse)
+adjust = fltarr(n)
+adjust[i] = adjust[i] + 0.15*counts_coarse[i+1]
+adjust[i] = adjust[i] + 0.15*counts_coarse[i-1]
+adjust[i] = adjust[i] - 0.3*counts_coarse[i]
+counts_coarse = counts_coarse + adjust
+print, total(counts_coarse[i])
+
 result = create_struct("energy_keV", emid_coarse, $
-			 		   "counts", counts_coarse*time/7.*N, $
+			 		   "counts", counts_coarse, $
 			 		   "count_error", y_err_raw*time)
 
 return, result
