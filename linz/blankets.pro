@@ -1,5 +1,9 @@
-PRO BLANKETS, EXTRA_SETS, CONST, STOP=STOP, ALL=ALL, $
+PRO BLANKETS, PARAM, STOP=STOP, ALL=ALL, $
 	DET0=DET0, DET1=DET1, DET2=DET2, DET3=DET3, DET4=DET4, DET5=DET5, DET6=DET6
+
+; PARAM is parameter array with % effarea blocked by 2, 4, or 6 sets of blankets.
+; Total of these percents should be < 1.  The difference from 1 will be
+; modeled as effarea with no absorbtion.
 
 if keyword_set(det0) then title = 'Detector 0'
 if keyword_set(det1) then title = 'Detector 1'
@@ -19,6 +23,8 @@ if keyword_set(all) then begin
 	det6 = 1
 	title = 'All detectors'
 endif
+
+if total(param) gt 1 then error, 'Total area % > 100'
 
 ;title = title + ': ' + strtrim(extra_sets,2) + ' extra Kapton layers, ' + $
 ;	strtrim(fix(100*const),2) + ' percent unobstructed'
@@ -44,16 +50,25 @@ sim_det5 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detecto
 sim_det6 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
 						 		let_file='efficiency_det106_asic3.sav', /single )
 
+;
 ; correct by an attenuation factor
+;
+
+; nominal blanketing thicknesses (total in path)
 mylar=82.55
 al=2.6
 kapton=203.2
-;extra_sets = 2
-;const = 0.0
-factor = (1+extra_sets)
+;factor = (1+extra_sets)
+
+; attenuation factors due to excess blankets
 area_control = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/')
-area_test = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
-			mylar=factor*mylar, al=factor*al, kap=factor*kapton)
+area_2X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+			mylar=2*mylar, al=2*al, kap=2*kapton)
+area_4X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+			mylar=3*mylar, al=3*al, kap=3*kapton)
+area_6X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+			mylar=4*mylar, al=4*al, kap=4*kapton)
+
 ratio = area_test.eff_area_cm2 / area_control.eff_area_cm2
 sim_det0.counts = sim_det0.counts * (ratio + const)
 sim_det1.counts = sim_det1.counts * (ratio + const)
