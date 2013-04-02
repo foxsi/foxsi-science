@@ -29,7 +29,7 @@ d6 = data_lvl2_d6[ where( data_lvl2_d6.error_flag eq 0 ) ]
 pix=7.8
 erange=[4,15]
 tr = [t4_start, t4_end]
-ind = [1,0,1,0,1,1,1]
+ind = [1,0,1,0,1,1,1]	; all detectors except 1 and 3
 
 ; make image and store in a map.
 img = foxsi_image_solar_int( d0,d1,d2,d3,d4,d5,d6, psize=pix, erange=erange, trange=tr, $

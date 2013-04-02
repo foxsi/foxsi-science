@@ -618,18 +618,20 @@ TVLCT, r, g, b, /Get
 TVLCT, Reverse(r), Reverse(g), Reverse(b)
 
 
-pix=7.5
-erange=[4,15]
-tr = [t6_start, t6_end]
+pix=10.
+erange=[4,10]
+tr = [t4_start, t4_end]
+;ind = [1,0,1,0,1,1,1]
 ind = [1,0,1,0,1,1,1]
 img=foxsi_image_solar_int( data_lvl2_d0[i0], data_lvl2_d1[i1], data_lvl2_d2[i2], $
 		data_lvl2_d3[i3], data_lvl2_d4[i4], data_lvl2_d5[i5], data_lvl2_d6[i6], $
 		psize=pix, erange=erange, trange=tr, index=ind, /xycor, thr_n=4., /nowin )
-;img=foxsi_image_solar( data_lvl2_d6[i6], 6, $
-;		psize=pix, erange=erange, trange=tr, /xycor, thr_n=4. )
-;img(where(img eq 0))=1500.
 map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix, id='', $
 	time=anytim( anytim(t0)+tr[0], /yo) )
+plot_map, map, /limb, /cbar, lthick=2,cen=[-750,100],fov=20
+plot_map, map, /limb, /cbar, lthick=2,cen=[960,-200],fov=2
+plot_map, map, /limb, /cbar, fov=50, lthick=2
+
 plot_map, map, /limb, /cbar, center=[960,-210], fov=2
 plot_map, map, /over, levels=[50,95], /per;, color=1
 plot_map, map, /limb, /cbar, center=[0,0], fov=50, /log, lcolor=0
@@ -637,7 +639,7 @@ plot_map, map, /limb, /cbar, center=[0,0], fov=50, /log, lcolor=0
 
 cgdisplay, 800,800  
 plot_map, map, /limb, dmax=5, xr=xr, yr=yr, charsize=2, charthick=2, /cbar, $
-	lcolor=176, lthick=3, color=1
+	lcolor=176, lthick=3, color=1, fov=50
 xyouts, 400, 1300, 'FOXSI Target 1', color=1, charthick=3, size=2
 xyouts, 400, 1100, '90 seconds', color=1, charthick=3, size=2
 xyouts, -1300, 1300, 'D0, D2, D4, D5, D6', color=1, charthick=3, size=2
@@ -679,12 +681,12 @@ erange=[4,15]
 tr = [t6_start, t6_end]
 
 img0=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
-img1=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
-img2=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
-img3=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
-img4=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
-img5=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
-img6=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img1=foxsi_image_solar(data_lvl2_d1[i1],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img2=foxsi_image_solar(data_lvl2_d2[i2],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img3=foxsi_image_solar(data_lvl2_d3[i3],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img4=foxsi_image_solar(data_lvl2_d4[i4],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img5=foxsi_image_solar(data_lvl2_d5[i5],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
+img6=foxsi_image_solar(data_lvl2_d6[i6],0,psize=pix,erange=erange,trange=tr,thr_n=4.)
 
 map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix, id='D0 target3 no alignment')
 map1 = make_map( img1, xcen=0., ycen=0., dx=pix, dy=pix, id='D1 target3 no alignment')
@@ -694,15 +696,16 @@ map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix, id='D4 target3 no align
 map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix, id='D5 target3 no alignment')
 map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix, id='D6 target3 no alignment')
 
+plot_map, map0, cen=[1000,-300], fov=5
 plot_map, map0, cen=[960,-210], fov=5
 
 img0corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
-img1corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
-img2corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
-img3corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
-img4corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
-img5corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
-img6corr=foxsi_image_solar(data_lvl2_d0[i0],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img1corr=foxsi_image_solar(data_lvl2_d1[i1],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img2corr=foxsi_image_solar(data_lvl2_d2[i2],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img3corr=foxsi_image_solar(data_lvl2_d3[i3],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img4corr=foxsi_image_solar(data_lvl2_d4[i4],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img5corr=foxsi_image_solar(data_lvl2_d5[i5],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
+img6corr=foxsi_image_solar(data_lvl2_d6[i6],0,psize=pix,erange=erange,trange=tr,/xycor,thr_n=4.)
 
 map0corr = make_map( img0corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D0 target3 w/alignment')
 map1corr = make_map( img1corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D1 target3 w/alignment')
@@ -712,7 +715,7 @@ map4corr = make_map( img4corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D4 target3 
 map5corr = make_map( img5corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D5 target3 w/alignment')
 map6corr = make_map( img6corr, xcen=0., ycen=0., dx=pix, dy=pix, id='D6 target3 w/alignment')
 
-plot_map, map0, cen=[960,-210], fov=5
+plot_map, map0corr, cen=[960,-210], fov=5
 
 npix = n_elements(img0[0,*])
 axis = (findgen( npix ) - npix/2)*pix
@@ -741,8 +744,23 @@ map_xymoments, img4corr, axis, axis, centr4corr, stddev4corr
 map_xymoments, img5corr, axis, axis, centr5corr, stddev5corr
 map_xymoments, img6corr, axis, axis, centr6corr, stddev6corr
 
-plot_map, map0, cen=[960,-210], fov=6
-oplot, [centr0[0]], [centr0[1]], color, /psym, symsize=2, thick=2
+window, 0, xsize=1200, ysize=600
+!p.multi=[0,4,2]
+plot_map, map0, cen=[1030,-300], fov=6
+oplot, [centr0[0]], [centr0[1]], color=0, /psym, symsize=2, thick=2
+plot_map, map1, cen=[1030,-300], fov=6
+oplot, [centr1[0]], [centr1[1]], color=0, /psym, symsize=2, thick=2
+plot_map, map2, cen=[1030,-300], fov=6
+oplot, [centr2[0]], [centr2[1]], color=0, /psym, symsize=2, thick=2
+plot_map, map3, cen=[1030,-300], fov=6
+oplot, [centr3[0]], [centr3[1]], color=0, /psym, symsize=2, thick=2
+plot_map, map4, cen=[1030,-300], fov=6
+oplot, [centr4[0]], [centr4[1]], color=0, /psym, symsize=2, thick=2
+plot_map, map5, cen=[1030,-300], fov=6
+oplot, [centr5[0]], [centr5[1]], color=0, /psym, symsize=2, thick=2
+plot_map, map6, cen=[1030,-300], fov=6, /limb
+oplot, [centr6[0]], [centr6[1]], color=0, /psym, symsize=2, thick=2
+
 
 restore,'data_2012/rhessi_imaging_foxsi_flare_march2013.sav',/ver
 
