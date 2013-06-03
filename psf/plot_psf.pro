@@ -1,7 +1,7 @@
-PRO plot_psf
+PRO plot_psf, STOP=STOP
 
-restore, filename='psf.dat'
-restore, filename='axis.dat'
+restore, filename='psf/psf.dat'
+restore, filename='psf/axis.dat'
 
 dim_dz = n_elements(psf[0,0,*,0])
 dim_offax = n_elements(psf[0,0,0,*])
@@ -75,6 +75,7 @@ FOR i = 0, dim_dz-1 DO BEGIN
         ssw_legend, ['X', 'Y'], linestyle = [0,1]
 ENDFOR
 psclose
-stop
+
+if keyword_set(stop) then stop
 
 END

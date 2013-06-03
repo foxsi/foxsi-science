@@ -1,4 +1,4 @@
-restore,'rhessi_imaging_foxsi_flare_march2013.sav',/ver
+restore,'data_2012/rhessi_imaging_foxsi_flare_march2013.sav',/ver
 
 
 loadct2,3
