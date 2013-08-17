@@ -211,10 +211,11 @@ legend, ['Simulated flare counts','Actual D6 counts'], $
 ; Use function "make spectrum"
 ; Select only events w/o errors and in desired time range.
 ; Use /corr keyword to correct the spectrum for the thrown-out counts.
-restore, 'data_2012/foxsi_level2_data.sav', /v
+restore, '~/Documents/foxsi/flight-analysis/foxsi-science/data_2012/foxsi_level2_data.sav', /v
 t1 = t2_start
 t2 = t2_end
 delta_t = t2 - t1
+binwidth=1.0
 i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2); and $
 i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2); and $
 i2 = where(data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2); and $
@@ -236,20 +237,32 @@ spec_sum = spec_d0.spec_p + spec_d2.spec_p + spec_d3.spec_p + $
 ;plot,  spec_d6.energy_kev, spec_sum/delta_t, xr=[2,20],yr=[1.e-2,1.e3], thick=4, psym=10, $
 ;  xtitle='Energy [keV]', ytitle='FOXSI counts s!U-1!N keV!U-1!N', /ylog, /xlog, xstyle=1, line=1, $
 ;  title = 'FOXSI count spectra, corrected, Target 6 (flare)', charsize=1.2
-plot,  spec_d6.energy_kev, spec_sum/delta_t, xr=[2,100], thick=4, psym=10, /xlog, $
+plot,  spec_d4.energy_kev, spec_sum/delta_t, xr=[2,100], thick=4, psym=10, /xlog, $
   xtitle='Energy [keV]', ytitle='FOXSI counts s!U-1!N keV!U-1!N', xstyle=1, line=1, $
   title = 'FOXSI count spectra, corrected, Target 2', charsize=1.2
-oplot, spec_d0.energy_kev, spec_d0.spec_p/delta_t, psym=10, thick=4, color=6
-oplot, spec_d1.energy_kev, spec_d1.spec_p/delta_t, psym=10, thick=4, color=7
-oplot, spec_d2.energy_kev, spec_d2.spec_p/delta_t, psym=10, thick=4, color=8
-oplot, spec_d3.energy_kev, spec_d3.spec_p/delta_t, psym=10, thick=4, color=9
+;oplot, spec_d0.energy_kev, spec_d0.spec_p/delta_t, psym=10, thick=4, color=6
+;oplot, spec_d1.energy_kev, spec_d1.spec_p/delta_t, psym=10, thick=4, color=7
+;oplot, spec_d2.energy_kev, spec_d2.spec_p/delta_t, psym=10, thick=4, color=8
+;oplot, spec_d3.energy_kev, spec_d3.spec_p/delta_t, psym=10, thick=4, color=9
 oplot, spec_d4.energy_kev, spec_d4.spec_p/delta_t, psym=10, thick=4, color=10
-oplot, spec_d5.energy_kev, spec_d5.spec_p/delta_t, psym=10, thick=4, color=12
-oplot, spec_d6.energy_kev, spec_d6.spec_p/delta_t, psym=10, thick=4, color=2
+;oplot, spec_d5.energy_kev, spec_d5.spec_p/delta_t, psym=10, thick=4, color=12
+;oplot, spec_d6.energy_kev, spec_d6.spec_p/delta_t, psym=10, thick=4, color=2
 legend, ['Summed, except D1','Det0','Det1','Det2','Det3','Det4','Det5','Det6'], $
 		 thick=4, line=[1,0,0,0,0,0,0,0], color=[0,6,7,8,9,10,12,2], /right, box=0
 
 pclose
+
+spec_sum = spec_d0.spec_p + spec_d2.spec_p + $
+	spec_d4.spec_p + spec_d5.spec_p + spec_d6.spec_p
+
+;popen, xsize=7, ysize=5
+window,0
+plot,  spec_d4.energy_kev, spec_sum/delta_t, xr=[3,20], thick=4, psym=10, /xlog, /ylog, $
+  xtitle='Energy [keV]', ytitle='FOXSI counts s!U-1!N keV!U-1!N', /xsty, line=0, $
+  title = 'FOXSI count spectrum, Target 2', charsize=1.2, /ysty, yr=[1.e-2,1.e1]
+;oplot, spec_d4.energy_kev, spec_sum/delta_t, psym=10, thick=6, line=1
+;legend, ['Simulated','Observed'], line=[1,0], thick=4, /right, box=0
+;pclose
 
 sim = foxsi_live_correct( sim_1det, 60 )
 spec_sum = spec_d0.spec_p + spec_d2.spec_p + spec_d3.spec_p + $
@@ -649,12 +662,15 @@ cen4 = [ 700,-600]
 cen5 = [1000,-900]
 cen6 = [ 700,-600]
 
-pix=20.
-xr=[-1300,1300]
-yr=[-1300,1300]
+pix=7.7.
+;xr=[-1300,1300]
+;yr=[-1300,1300]
 img=foxsi_image_solar(data_lvl2_d6, 6,psize=pix)
 map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix )
-plot_map, map, /limb, dmax=5, xr=xr, yr=yr
+plot_map, map, /limb, dmax=5, cen=cen4, fov=16
+
+flarecen = [1030,-310]
+plot_map, map, /limb, cen=flarecen, fov=2
 
 loadct, 4
 TVLCT, r, g, b, /Get
@@ -662,12 +678,12 @@ r[0]=255
 g[0]=255
 b[0]=255
 
-pix=100.
+pix=7.7
 erange=[4,15]
-cen=[600,600]
-cen=[-200,-200]
-cen=[960,-200]
-tr = [t1_start, t1_end]
+cen=cen4
+;cen=[-200,-200]
+;cen=[960,-200]
+tr = [t4_start, t4_end]
 ind = [1,0,1,0,1,1,1]
 img=foxsi_image_solar_int( data_lvl2_d0[i0], data_lvl2_d1[i1], data_lvl2_d2[i2], $
 		data_lvl2_d3[i3], data_lvl2_d4[i4], data_lvl2_d5[i5], data_lvl2_d6[i6], $
@@ -796,14 +812,14 @@ map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix, id='D5',time=anytim( an
 map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix, id='D6',time=anytim( anytim(t0)+tr[0], /yo))
 map  = make_map( img,  xcen=0., ycen=0., dx=pix, dy=pix, id='5dets',time=anytim( anytim(t0)+tr[0], /yo))
 
-!p.multi=[0,2,4]
-loadct,5
+;!p.multi=[0,2,4]
+loadct, 1	; before it was 5
 TVLCT, r, g, b, /get
 TVLCT, reverse(r), reverse(g), reverse(b)
 mx=5
 cen=cen2
 targ=2
-popen, xsi=5, ysi=10
+;popen, xsi=5, ysi=10
 plot_map, map0, /limb, /cbar, cen=cen, fov=22, color=255, dmax=mx, $
 	lcolor=255, lthick=4, charsize=1.2, charthick=8, thick=3
 draw_fov, det=0, target=targ, col=255
@@ -825,9 +841,12 @@ draw_fov, det=5, target=targ, col=255
 plot_map, map6, /limb, /cbar, cen=cen, fov=22, color=255, dmax=mx, $
 	lcolor=255, lthick=4, charsize=1.2, charthick=8, thick=3
 draw_fov, det=6, target=targ, col=255
-plot_map, map, /limb, /cbar, cen=cen, fov=22, color=255, dmax=mx, $
-	lcolor=255, lthick=4, charsize=1.2, charthick=8, thick=3
-draw_fov, /all, target=targ, col=255
+popen, xsi=5, ysi=5
+plot_map, map, /limb, /cbar, cen=cen, fov=30, color=255, dmax=10, $
+	lcolor=255, lthick=4, charsize=1.2, charthick=8, thick=3, $
+	title = '2-Nov-2012 17:57:35 -- 17:59:04'
+xyouts, -1600, -600, '4-15 keV', size=1.2, color=255
+draw_fov, /all, target=targ, col=255, /xycor
 pclose
 
 plot_map, aia_maps[0], /log, fov=50, /limb, charthick=2, thick=2
@@ -1280,3 +1299,414 @@ popen, xsize=6, ysize=6
 plot_map, temperature_map, /cbar, cen=[950,-200], fov=5, dmax=10.e6, tit='log(T[MK])' 
 plot_map, temperature_map, /cbar, cen=[950,-200], fov=5, dmin=5.e6, dmax=10.e6, tit='log(T[MK])' 
 pclose
+
+
+
+;
+; Look at some profiles of the blob
+;
+
+add_path,'img'
+restore, 'data_2012/foxsi_level2_data.sav', /v
+i0 = where( data_lvl2_d0.error_flag eq 0 )
+i1 = where( data_lvl2_d1.error_flag eq 0 )
+i2 = where( data_lvl2_d2.error_flag eq 0 )
+i3 = where( data_lvl2_d3.error_flag eq 0 )
+i4 = where( data_lvl2_d4.error_flag eq 0 )
+i5 = where( data_lvl2_d5.error_flag eq 0 )
+i6 = where( data_lvl2_d6.error_flag eq 0 )
+
+t0 = '2-Nov-2012 17:55:00.000'
+t1_start = 108.3		; Target 1 (AR)
+t1_end = 151.8
+t2_start = 154.8		; Target 2 (AR)
+t2_end = 244.7
+t3_start = 247			; Target 3 (quiet Sun)
+t3_end = 337.3
+t4_start = 340			; Target 4 (flare)
+t4_end = 421.2
+t5_start = 423.5		; Target 5 (off-pointing)
+t5_end = 435.9
+t6_start = 438.5		; Target 6 (flare)
+t6_end = 498.3
+
+cen1 = [-480,-350]
+cen2 = [-850, 150]
+cen3 = [ 600, 400]
+cen4 = [ 700,-600]
+cen5 = [1000,-900]
+cen6 = [ 700,-600]
+flarecen = [1030,-310]
+
+popen, xsi=8, ysi=4
+!p.multi=[0,4,2]
+pix=4.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3
+xyouts, 950, -235, 'pix = 4 arcsec', col=255
+pix=5.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3
+xyouts, 950, -235, 'pix = 5 arcsec', col=255
+pix=6.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3
+xyouts, 950, -235, 'pix = 6 arcsec', col=255
+pix=7.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3
+xyouts, 950, -235, 'pix = 7 arcsec', col=255
+pix=8.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3
+xyouts, 950, -235, 'pix = 8 arcsec', col=255
+pix=9.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3
+xyouts, 950, -235, 'pix = 9 arcsec', col=255
+pix=10.
+img=foxsi_image_solar(data_lvl2_d6, 6, psize=pix, size=[3000,3000])
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix  )
+plot_map, map, /limb, cen=flarecen, fov=3, col=255
+xyouts, 950, -235, 'pix = 10 arcsec', col=255
+pclose
+
+sub_map, map, sub, xr=[950,1100], yr=[-400,-200]
+x = sub.data[*,0]
+plot, findgen(21)*7.7, x, psym=10
+
+; correct map for D6 offset.
+sub.xc += -63.45
+sub.yc += +106.36
+
+;  	xerr=[55.4700,    81.490,   96.360,  87.8900,  48.2700,   49.550,   63.450]
+;  	yerr=[-135.977, -131.124, -130.241, -92.7310, -95.3080, -120.276, -106.360]
+
+plot_map, aia[0], center=[960,-225], fov=2                       
+plot_map, sub, /over
+
+sub.id='FOXSI D6 whole flight'
+sub.time=['2012-Nov-2']
+
+ch=1.
+th=3
+col=255
+
+popen, 'D6-131-overlay', xsi=8, ysi=8
+!p.multi=[0,2,2]
+plot_map, aia[0], fov=2, /limb, /nodate, charsi=ch, lcol=col, lth=th
+plot_map, sub, cen=aia[0], fov=2, /limb, title='FOXSI D6 whole flight 4-15keV', charsi=ch, lcol=255, lth=th
+plot_map, aia[0], fov=2, /limb, /nodate, charsi=ch, lcol=255, lth=th
+plot_map, sub, /over, thick=th, col=col
+xyouts, 905, -155, 'D6 autolevels', col=col
+plot_map, aia[0], fov=2, /limb, /nodate, charsi=ch, lcol=255, lth=th
+plot_map, sub, /over, levels=[50],/per, thick=th, col=col
+xyouts, 905, -155, 'D6 50%', col=col
+pclose
+
+
+;
+; Redoing time profile
+;
+
+add_path,'img'
+restore, 'data_2012/foxsi_level2_data.sav', /v
+
+e1=5.
+e2=10.
+
+i0 = where( data_lvl2_d0.error_flag eq 0 and data_lvl2_d0.hit_energy[1] gt e1 and data_lvl2_d0.hit_energy[1] lt e2 )
+i1 = where( data_lvl2_d1.error_flag eq 0 and data_lvl2_d1.hit_energy[1] gt e1 and data_lvl2_d1.hit_energy[1] lt e2 )
+i2 = where( data_lvl2_d2.error_flag eq 0 and data_lvl2_d2.hit_energy[1] gt e1 and data_lvl2_d2.hit_energy[1] lt e2 )
+i3 = where( data_lvl2_d3.error_flag eq 0 and data_lvl2_d3.hit_energy[1] gt e1 and data_lvl2_d3.hit_energy[1] lt e2 )
+i4 = where( data_lvl2_d4.error_flag eq 0 and data_lvl2_d4.hit_energy[1] gt e1 and data_lvl2_d4.hit_energy[1] lt e2 )
+i5 = where( data_lvl2_d5.error_flag eq 0 and data_lvl2_d5.hit_energy[1] gt e1 and data_lvl2_d5.hit_energy[1] lt e2 )
+i6 = where( data_lvl2_d6.error_flag eq 0 and data_lvl2_d6.hit_energy[1] gt e1 and data_lvl2_d6.hit_energy[1] lt e2 )
+j0 = where( data_lvl2_d0.inflight eq 1 and data_lvl2_d0.hit_energy[1] gt e1 and data_lvl2_d0.hit_energy[1] lt e2 )
+j1 = where( data_lvl2_d1.inflight eq 1 and data_lvl2_d1.hit_energy[1] gt e1 and data_lvl2_d1.hit_energy[1] lt e2 )
+j2 = where( data_lvl2_d2.inflight eq 1 and data_lvl2_d2.hit_energy[1] gt e1 and data_lvl2_d2.hit_energy[1] lt e2 )
+j3 = where( data_lvl2_d3.inflight eq 1 and data_lvl2_d3.hit_energy[1] gt e1 and data_lvl2_d3.hit_energy[1] lt e2 )
+j4 = where( data_lvl2_d4.inflight eq 1 and data_lvl2_d4.hit_energy[1] gt e1 and data_lvl2_d4.hit_energy[1] lt e2 )
+j5 = where( data_lvl2_d5.inflight eq 1 and data_lvl2_d5.hit_energy[1] gt e1 and data_lvl2_d5.hit_energy[1] lt e2 )
+j6 = where( data_lvl2_d6.inflight eq 1 and data_lvl2_d6.hit_energy[1] gt e1 and data_lvl2_d6.hit_energy[1] lt e2 )
+
+t_launch = 64500
+t1_start = t_launch + 108.3		; Target 1 (AR)
+t1_end = t_launch + 151.8
+t2_start = t_launch + 154.8		; Target 2 (AR)
+t2_end = t_launch + 244.7
+t3_start = t_launch + 247		; Target 3 (quiet Sun)
+t3_end = t_launch + 337.3
+t4_start = t_launch + 340		; Target 4 (flare)
+t4_end = t_launch + 421.2
+t5_start = t_launch + 423.5		; Target 5 (off-pointing)
+t5_end = t_launch + 435.9
+t6_start = t_launch + 438.5		; Target 6 (flare)
+t6_end = t_launch + 498.3
+t1 = t1_start
+t2 = t6_end
+
+tbin = 3.
+nbins = (t2-t1)/tbin
+
+lc0 = histogram( data_lvl2_d0[i0].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc1 = histogram( data_lvl2_d1[i1].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc2 = histogram( data_lvl2_d2[i2].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc3 = histogram( data_lvl2_d3[i3].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc4 = histogram( data_lvl2_d4[i4].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc5 = histogram( data_lvl2_d5[i5].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc6 = histogram( data_lvl2_d6[i6].wsmr_time, min=t1, max=t2, nbins=nbins )
+lctot = lc0+lc1+lc2+lc3+lc4+lc5+lc6
+
+lc0a = histogram( data_lvl2_d0[j0].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc1a = histogram( data_lvl2_d1[j1].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc2a = histogram( data_lvl2_d2[j2].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc3a = histogram( data_lvl2_d3[j3].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc4a = histogram( data_lvl2_d4[j4].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc5a = histogram( data_lvl2_d5[j5].wsmr_time, min=t1, max=t2, nbins=nbins )
+lc6a = histogram( data_lvl2_d6[j6].wsmr_time, min=t1, max=t2, nbins=nbins )
+
+lc0err = sqrt(lc0)/tbin
+lc1err = sqrt(lc0)/tbin
+lc2err = sqrt(lc0)/tbin
+lc3err = sqrt(lc0)/tbin
+lc4err = sqrt(lc0)/tbin
+lc5err = sqrt(lc0)/tbin
+lc6err = sqrt(lc0)/tbin
+lctoterr = sqrt(lctot)/tbin
+lc0aerr = sqrt(lc0a)/tbin
+lc1aerr = sqrt(lc0a)/tbin
+lc2aerr = sqrt(lc0a)/tbin
+lc3aerr = sqrt(lc0a)/tbin
+lc4aerr = sqrt(lc0a)/tbin
+lc5aerr = sqrt(lc0a)/tbin
+lc6aerr = sqrt(lc0a)/tbin
+
+lc0 = lc0/tbin
+lc1 = lc1/tbin
+lc2 = lc2/tbin
+lc3 = lc3/tbin
+lc4 = lc4/tbin
+lc5 = lc5/tbin
+lc6 = lc6/tbin
+lctot = lctot/tbin
+lc0a = lc0a/tbin
+lc1a = lc1a/tbin
+lc2a = lc2a/tbin
+lc3a = lc3a/tbin
+lc4a = lc4a/tbin
+lc5a = lc5a/tbin
+lc6a = lc6a/tbin
+
+loadct,0
+hsi_linecolors
+th=3
+ymin=0.1
+ymax=1.e2
+times = (findgen(nbins)+1)*tbin
+
+window, 0
+plot, times, lc0, psym=10, yr=[ymin,ymax], /ylog
+oplot, times, lc0, psym=10, color=6, thick=th
+oplot, times, lc1, psym=10, color=7, thick=th
+oplot, times, lc2, psym=10, color=8, thick=th
+oplot, times, lc3, psym=10, color=9, thick=th
+oplot, times, lc4, psym=10, color=10, thick=th
+oplot, times, lc5, psym=10, color=12, thick=th
+oplot, times, lc6, psym=10, color=2, thick=th
+oplot, [t1_start-t1_start,t1_start-t1_start], [ymin,ymax], thick=5
+oplot, [t2_start-t1_start,t2_start-t1_start], [ymin,ymax], thick=5
+oplot, [t3_start-t1_start,t3_start-t1_start], [ymin,ymax], thick=5
+oplot, [t4_start-t1_start,t4_start-t1_start], [ymin,ymax], thick=5
+oplot, [t5_start-t1_start,t5_start-t1_start], [ymin,ymax], thick=5
+oplot, [t6_start-t1_start,t6_start-t1_start], [ymin,ymax], thick=5
+
+window, 0
+ymin=0.1
+ymax=1.e3
+plot, times, lctot, psym=10, yr=[ymin,ymax], /ylog, thick=3, charsi=1.2, $
+;plot, times, lctot, psym=10, yr=[0,20], thick=3, charsi=1.2, $
+;plot, times, lctot, psym=10, yr=[50,150], thick=3, charsi=1.2, $
+	xtit='time since Target 1 acquired [s]', ytit='cts/sec', tit='Lightcurve, all detectors summmed, 5-10keV'
+oplot, [t1_start-t1_start,t1_start-t1_start], [ymin,ymax], thick=5
+oplot, [t2_start-t1_start,t2_start-t1_start], [ymin,ymax], thick=5
+oplot, [t3_start-t1_start,t3_start-t1_start], [ymin,ymax], thick=5
+oplot, [t4_start-t1_start,t4_start-t1_start], [ymin,ymax], thick=5
+oplot, [t5_start-t1_start,t5_start-t1_start], [ymin,ymax], thick=5
+oplot, [t6_start-t1_start,t6_start-t1_start], [ymin,ymax], thick=5
+
+window, 0
+plot, times, lc0, psym=10, yr=[ymin,ymax], /ylog, charsize=1.2
+oplot_err, times, lc0, yerr=lc0err, psym=10, color=6, thick=th
+oplot_err, times, lc1, yerr=lc1err, psym=10, color=7, thick=th
+oplot_err, times, lc2, yerr=lc2err, psym=10, color=8, thick=th
+oplot_err, times, lc3, yerr=lc3err, psym=10, color=9, thick=th
+oplot_err, times, lc4, yerr=lc4err, psym=10, color=10, thick=th
+oplot_err, times, lc5, yerr=lc5err, psym=10, color=12, thick=th
+oplot_err, times, lc6, yerr=lc6err, psym=10, color=2, thick=th
+oplot, [t1_start-t1_start,t1_start-t1_start], [ymin,ymax], thick=5
+oplot, [t2_start-t1_start,t2_start-t1_start], [ymin,ymax], thick=5
+oplot, [t3_start-t1_start,t3_start-t1_start], [ymin,ymax], thick=5
+oplot, [t4_start-t1_start,t4_start-t1_start], [ymin,ymax], thick=5
+oplot, [t5_start-t1_start,t5_start-t1_start], [ymin,ymax], thick=5
+oplot, [t6_start-t1_start,t6_start-t1_start], [ymin,ymax], thick=5
+legend, ['D0','D1','D2','D3','D4','D5','D6'], textcolor=[6,7,8,9,10,12,2], charsize=1.5
+
+window, 1
+plot, lc0a, psym=10, yr=[0.1, 1.e2], /ylog
+oplot, lc0a, psym=10, color=6, thick=th
+oplot, lc1a, psym=10, color=7, thick=th
+oplot, lc2a, psym=10, color=8, thick=th
+oplot, lc3a, psym=10, color=9, thick=th
+oplot, lc4a, psym=10, color=10, thick=th
+oplot, lc5a, psym=10, color=12, thick=th
+oplot, lc6a, psym=10, color=2, thick=th
+
+; Result: "error free" and "all inflight" data curves look the same except for scaling, 
+; so from here on out only look at error-free data.
+
+;
+; Simulate FOXSI count spectrum for Hinode AR.
+;
+
+add_path,'spec'
+add_path,'resp'
+
+; From Ishikawa: DEM vs T for 1x1pix (4x4 arcsec) sample:
+
+; # log(temperature)           DEM
+;       5.5000000       9.9999997
+;       5.5999999   5.7615336e+09
+;       5.6999998   3.6089325e+16
+;       5.8000002   9.6696061e+20
+;       5.9000001   3.5377804e+22
+;       6.0000000   8.7783289e+21
+;       6.0999999   4.0188885e+20
+;       6.1999998   7.9382189e+19
+;       6.3000002   2.3459946e+20
+;       6.4000001   1.9350063e+21
+;       6.5000000   6.9564576e+21
+;       6.5999999   2.8403134e+21
+;       6.6999998   2.9826793e+20
+;       6.8000002   2.9016692e+19
+;       6.9000001   8.4066512e+18
+;       7.0000000   7.3720743e+18
+;       7.0999999   9.8257205e+18
+;       7.1999998   1.0305182e+19
+;       7.3000002   6.1854576e+18
+;       7.4000001   2.5750783e+18
+;       7.5000000   9.1455790e+17
+
+;; larger area (100x100):       
+;	   5.5000000   9.2702526e+20
+;       5.5999999   7.7229808e+17
+;       5.6999998   6.7899155e+15
+;       5.8000002   1.1811620e+15
+;       5.9000001   8.3469140e+15
+;       6.0000000   8.3893852e+17
+;       6.0999999   1.3764897e+20
+;       6.1999998   4.4214144e+21
+;       6.3000002   1.0777911e+22
+;       6.4000001   4.7550073e+21
+;       6.5000000   9.2400217e+20
+;       6.5999999   1.6420199e+20
+;       6.6999998   3.9138261e+19
+;       6.8000002   1.7319996e+19
+;       6.9000001   1.9518247e+19
+;       7.0000000   3.8958065e+19
+;       7.0999999   6.1678387e+19
+;       7.1999998   3.3981301e+19
+;       7.3000002   4.3694079e+18
+;       7.4000001   1.7278429e+17
+;       7.5000000   2.6657822e+15
+
+; FOXSI software paths for simulated count spec and instrument response
+add_path,'spec'
+add_path,'resp'
+
+; set up the temperature array, from log(T) = {5.5, 7.5}
+logT = findgen(21)/10. + 5.5
+
+; Choose values from one of the two examples below.
+
+; Case 1: 1x1 pixel (4"x4")
+area = 4.^2 * (0.725d8)^2
+; dem values from Ishikawa
+dem = [ 10., 5.7615336e+09, 3.6089325e+16, 9.6696061e+20, 3.5377804e+22, 8.7783289e+21, $
+		4.0188885e+20, 7.9382189e+19, 2.3459946e+20, 1.9350063e+21, 6.9564576e+21, $
+		2.8403134e+21, 2.9826793e+20, 2.9016692e+19, 8.4066512e+18, 7.3720743e+18, $
+		9.8257205e+18, 1.0305182e+19, 6.1854576e+18, 2.5750783e+18, 9.1455790e+17 ]
+title = '4"x4" Hinode AR'
+file  = 'hinode-ar-1pix'
+
+; Case 2: 25x25 pixels (100"x100")
+area = 100.^2 * (0.725d8)^2
+dem = [ 9.2702526e+20, 7.7229808e+17, 6.7899155e+15, 1.1811620e+15, 8.3469140e+15, $
+		8.3893852e+17, 1.3764897e+20, 4.4214144e+21, 1.0777911e+22, 4.7550073e+21, $
+		9.2400217e+20, 1.6420199e+20, 3.9138261e+19, 1.7319996e+19, 1.9518247e+19, $
+		3.8958065e+19, 6.1678387e+19, 3.3981301e+19, 4.3694079e+18, 1.7278429e+17, $
+		2.6657822e+15 ]
+title = '100"x100" Hinode AR'
+file  = 'hinode-ar-25pix'
+		
+; Calculate EM in cm^-3 for each bin.
+T = 10.^logt
+dT = get_edges(T, /edges_2)
+em = dem*dt*area
+
+; energy arrays for simulated thermal fluxes
+en1 = findgen(500)/20 + 1.
+en2 = get_edges(en1, /edges_2)
+en  = get_edges(en1, /mean)
+n = n_elements(t)
+
+; calculate thermal X-ray fluxes for each temperature/EM pair.
+flux = dblarr( n_elements(en), n )
+for i=0, 20 do flux[*,i] = f_vth( en2, [em[i]/1.d49, t[i]/11.8/1.d6, 1.] )
+
+; The next routine calculates the expected FOXSI count spectrum for given thermal params.
+; This includes contributions from the optics, detectors, and nominal blanketing.
+; The extra blanketing isn't included.
+; Off-axis angle is assumed 0.
+; For simplicity, I only use D8's efficiency file. (The others are very similar.)
+
+; Sample sim to set up arrays.
+simA = foxsi_count_spectrum(em[10]/1.d49, t[10]/1.d6, $
+	data_dir='detector_data/', let_file='efficiency_det108_asic2.sav' )
+; Now do it for all temperature bins.
+sim = dblarr( n_elements(simA.energy_keV), n_elements(logt) )
+.run
+for i=0, 20 do begin sim2 = foxsi_count_spectrum(em[i]/1.d49, t[i]/1.d6, $
+	data_dir='detector_data/', let_file='efficiency_det108_asic2.sav' )
+	sim[*,i] = sim2.counts
+endfor
+end
+
+
+
+; display results
+
+loadct, 5
+colors = 220-findgen(n)*10+20
+;popen, file, xsi=7, ysi=5
+plot, en, flux[*,15], psym=10, /xlo, /ylo, xr=[1.,30.], yr=[1.e-2, 1.e5], /xsty, /ysty, $
+	xtit='Energy [keV]', ytit='Phot s!U-1!N cm!U-2!N keV!U-1!N', charsi=1.1, $
+	tit='Photon flux, '+title
+for i=0, n_elements(logt)-1 do $
+	oplot, en, flux[*,i], psym=10, thick=3, col=colors[i]
+legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th, $
+	/right, charth=2, charsi=1.1
+
+plot, simA.energy_kev, sim[*,15], psym=10, /xlo, /ylo, xr=[1.,30], /xsty, $
+	yr=[1.e-3, 1.e3], /ysty, xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N', $
+	tit='Simulated FOXSI flux, '+title
+for i=0, n_elements(logt)-1 do oplot, simA.energy_kev, sim[*,i], psym=10, thick=3, col=colors[i]
+legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th
+;pclose
+
