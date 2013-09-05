@@ -1,5 +1,5 @@
 FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
-	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE
+	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -7,18 +7,28 @@ FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 ; If source area is smaller than FOV then no correction needed.  
 ; No energy resolution is considered in this simulation.
 ; Livetime is not considered.
+; 
+; Return value: Structure containing the energy vector, count vector, and count uncertainty vector.
 ;
 ;	EM: 	 emission measure in units of 10.^49 cm^-3
-;	T:  	 temperature in MK
-;	TIME:  	 time interval for observation, in seconds
-;	BINSIZE: width of energy bins
-;	LET_FILE:	detector efficiency file to use.
+;	T:  	 temperature in MK (Yes, it's MK!  Sorry but can't be changed now.)
+;	TIME:  	 time interval for observation, in seconds (Default 1 sec)
+;	BINSIZE: width of energy bins (Default 0.5 keV)
+;	LET_FILE:	detector efficiency file to use. (Default "average" LET.)
 ;	SINGLE:	scale counts for a single module only (as opposed to all 7)
+;	OFFAXIS:	off-axis angle in arcmin.  (Default 0.0)
+;
+; History: 	Updated 9/5/2013 Linz
+; 			Created summer 2012 Linz
+;
 
-if not keyword_set(time) then time=1.
-if not keyword_set(binsize) then binsize=0.5
+default, time, 1.
+default, binsize, 0.5
+default, let_file, 'efficiency_averaged.sav'
+default, data_dir, 'detector_data/'
+default, offaxis, 0.
 
-; Set up energy bins 0-12 keV
+; Set up energy bins 0-12 keV. These bins are finer than those desired!!
 e1 = dindgen(1200)/100
 e2 = get_edges(e1,/edges_2)
 emid = get_edges(e1,/mean)
@@ -27,24 +37,21 @@ TEMP = T/11.6      ; switch temperature to units of keV
 
 ; f_vth won't work if you include energies below 1 keV.
 ; Only simulate above 2 keV.
-i=where( emid gt 2 )
-flux = fltarr( n_elements(emid) )
+i=where( emid gt 2. )
+flux = dblarr( n_elements(emid) )
 flux[i] = f_vth(e2[*,i], [EM, TEMP, 1.])		; compute thermal X-ray flux
 flux[ where( emid le 2 ) ] = sqrt(-1)
-
-restore,'data_2012/rhsi_foxsi_flare1_photon_spectrum.sav'
-flux1 = f_vth( get_edges(findgen(37)/2+3,/edges_2), [em, temp, 1.] )
-emid1 = abins
 
 ; note to self: there's a peak above 2.5 keV for T=7MK. Should there be a line there at this temperature?
 
 ;
 ; Get FOXSI response
 ;
+
 ; First, get area for individual factors (optics area, detector efficiency (inc. LET), 
-; off-axis response, blanketing aborption) 
-; Then get area including all these effects.
-;
+; off-axis response, blanketing absorption).  These results are not used but these
+; lines are easy to borrow for analyzing payload elements individually.
+
 area_bare =    get_foxsi_effarea( $ 	; optics only
 		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath)
 area_blankets =get_foxsi_effarea( $ 	; optics + blankets
@@ -54,8 +61,9 @@ area_det = 	   get_foxsi_effarea( $ 	; optics + detectors
 area_offaxis = get_foxsi_effarea( $		; optics + off-axis response factor
 		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath, offaxis_angle=7.0)
 
+; Now, the full response.  This is the one we'll use.
 area = get_foxsi_effarea( $
-		energy=emid, data_dir=data_dir, let_file=let_file); , offaxis_angle=7.0)
+		energy=emid, data_dir=data_dir, let_file=let_file , offaxis_angle=offaxis )
 
 if keyword_set(stop) then stop
 
@@ -63,11 +71,17 @@ if keyword_set(stop) then stop
 counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
 ;counts = counts*binsize		 ; now the units are counts per second. DONT USE!
 
-; coarser energy bins.
-e2_coarse = findgen(10./binsize+1)*binsize
-emid_coarse = get_edges(e2_coarse, /mean)
-counts_coarse = interpol(counts, emid, emid_coarse)	; now units are cts/keV
-y_err_raw = sqrt(counts_coarse)
+; use coarser, user-specified energy bins
+e1_coarse = findgen(10./binsize+1)*binsize
+emid_coarse = get_edges(e1_coarse, /mean)
+counts_coarse = interpol(counts, emid, emid_coarse)	; units still in counts / sec / keV
+
+if keyword_set(single) then n=1. else n=7.
+counts_coarse = counts_coarse*time/7.*N		; Now units are counts / keV
+y_err_raw = sqrt(counts_coarse)				; units also in counts / keV
+
+
+; Leftover code.  This is up to the user to do herself.
 
 ;; if uncertainty is 100% or greater, kill it.
 ;i=where(y_err_raw gt counts_coarse)
@@ -76,9 +90,8 @@ y_err_raw = sqrt(counts_coarse)
 ;	y_err_raw[i] = sqrt(-1)
 ;endif
 
-if keyword_set(single) then n=1. else n=7.
-
-counts_coarse = counts_coarse*time/7.*N
+; Leftover code used for smearing to simulate imperfect energy resolution.
+; Not used here.
 
 ;; smear with a Gaussian for imperfect energy resolution.
 ;i = where( counts_coarse gt 0 )
@@ -98,7 +111,7 @@ counts_coarse = counts_coarse*time/7.*N
 
 result = create_struct("energy_keV", emid_coarse, $
 			 		   "counts", counts_coarse, $
-			 		   "count_error", y_err_raw*time)
+			 		   "count_error", y_err_raw)
 
 return, result
 

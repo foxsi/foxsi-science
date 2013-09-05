@@ -9,7 +9,7 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		PLOT:		Function will also generate a plot
 ;		CORRECT:	Only take known good events.  Adjust scale to account for those excluded.
 ;		THREE:		If set, return the summed energy from all three strips, 
-;					not just the highest value
+;					not just the highest value (default 0)
 ;
 ;	Return value:
 ;		Returns a structure with tags energy, n-side spectrum, and p-side spectrum.
