@@ -1572,141 +1572,39 @@ oplot, lc6a, psym=10, color=2, thick=th
 ; so from here on out only look at error-free data.
 
 ;
-; Simulate FOXSI count spectrum for Hinode AR.
+; Simple plots of FOXSI's effective area (FOXSI-1 and FOXSI-2), compared with RHESSI's
 ;
 
-add_path,'spec'
-add_path,'resp'
+add_path, 'resp'
+restore, 'data_2012/foxsi_level2_data.sav', /v
 
-; From Ishikawa: DEM vs T for 1x1pix (4x4 arcsec) sample:
-
-; # log(temperature)           DEM
-;       5.5000000       9.9999997
-;       5.5999999   5.7615336e+09
-;       5.6999998   3.6089325e+16
-;       5.8000002   9.6696061e+20
-;       5.9000001   3.5377804e+22
-;       6.0000000   8.7783289e+21
-;       6.0999999   4.0188885e+20
-;       6.1999998   7.9382189e+19
-;       6.3000002   2.3459946e+20
-;       6.4000001   1.9350063e+21
-;       6.5000000   6.9564576e+21
-;       6.5999999   2.8403134e+21
-;       6.6999998   2.9826793e+20
-;       6.8000002   2.9016692e+19
-;       6.9000001   8.4066512e+18
-;       7.0000000   7.3720743e+18
-;       7.0999999   9.8257205e+18
-;       7.1999998   1.0305182e+19
-;       7.3000002   6.1854576e+18
-;       7.4000001   2.5750783e+18
-;       7.5000000   9.1455790e+17
-
-;; larger area (100x100):       
-;	   5.5000000   9.2702526e+20
-;       5.5999999   7.7229808e+17
-;       5.6999998   6.7899155e+15
-;       5.8000002   1.1811620e+15
-;       5.9000001   8.3469140e+15
-;       6.0000000   8.3893852e+17
-;       6.0999999   1.3764897e+20
-;       6.1999998   4.4214144e+21
-;       6.3000002   1.0777911e+22
-;       6.4000001   4.7550073e+21
-;       6.5000000   9.2400217e+20
-;       6.5999999   1.6420199e+20
-;       6.6999998   3.9138261e+19
-;       6.8000002   1.7319996e+19
-;       6.9000001   1.9518247e+19
-;       7.0000000   3.8958065e+19
-;       7.0999999   6.1678387e+19
-;       7.1999998   3.3981301e+19
-;       7.3000002   4.3694079e+18
-;       7.4000001   1.7278429e+17
-;       7.5000000   2.6657822e+15
-
-; FOXSI software paths for simulated count spec and instrument response
-add_path,'spec'
-add_path,'resp'
-
-; set up the temperature array, from log(T) = {5.5, 7.5}
-logT = findgen(21)/10. + 5.5
-
-; Choose values from one of the two examples below.
-
-; Case 1: 1x1 pixel (4"x4")
-area = 4.^2 * (0.725d8)^2
-; dem values from Ishikawa
-dem = [ 10., 5.7615336e+09, 3.6089325e+16, 9.6696061e+20, 3.5377804e+22, 8.7783289e+21, $
-		4.0188885e+20, 7.9382189e+19, 2.3459946e+20, 1.9350063e+21, 6.9564576e+21, $
-		2.8403134e+21, 2.9826793e+20, 2.9016692e+19, 8.4066512e+18, 7.3720743e+18, $
-		9.8257205e+18, 1.0305182e+19, 6.1854576e+18, 2.5750783e+18, 9.1455790e+17 ]
-title = '4"x4" Hinode AR'
-file  = 'hinode-ar-1pix'
-
-; Case 2: 25x25 pixels (100"x100")
-area = 100.^2 * (0.725d8)^2
-dem = [ 9.2702526e+20, 7.7229808e+17, 6.7899155e+15, 1.1811620e+15, 8.3469140e+15, $
-		8.3893852e+17, 1.3764897e+20, 4.4214144e+21, 1.0777911e+22, 4.7550073e+21, $
-		9.2400217e+20, 1.6420199e+20, 3.9138261e+19, 1.7319996e+19, 1.9518247e+19, $
-		3.8958065e+19, 6.1678387e+19, 3.3981301e+19, 4.3694079e+18, 1.7278429e+17, $
-		2.6657822e+15 ]
-title = '100"x100" Hinode AR'
-file  = 'hinode-ar-25pix'
-		
-; Calculate EM in cm^-3 for each bin.
-T = 10.^logt
-dT = get_edges(T, /edges_2)
-em = dem*dt*area
-
-; energy arrays for simulated thermal fluxes
-en1 = findgen(500)/20 + 1.
+en1 = findgen(2000)/100.
+en_mid = get_edges(en1, /mean)
 en2 = get_edges(en1, /edges_2)
-en  = get_edges(en1, /mean)
-n = n_elements(t)
+dir = 'detector_data/'
+let_file = 'efficiency_averaged.sav'
+i=where(en1 ge 3.)
 
-; calculate thermal X-ray fluxes for each temperature/EM pair.
-flux = dblarr( n_elements(en), n )
-for i=0, 20 do flux[*,i] = f_vth( en2, [em[i]/1.d49, t[i]/11.8/1.d6, 1.] )
+area1 = get_foxsi_effarea( energy=en_mid, data_dir=dir, let_file=let_file)
+area2 = get_foxsi_effarea( energy=en_mid, data_dir=dir, let_file=let_file, /foxsi2)
+area1_opt = get_foxsi_effarea( energy=en_mid, data_dir=dir, /noshut, /nopath, /nodet)
+area2_opt = get_foxsi_effarea( energy=en_mid, data_dir=dir, /noshut, /nopath, /nodet, /foxsi2)
+rhessi = rhessi_eff_area(en1[i], 0.25, 0)
 
-; The next routine calculates the expected FOXSI count spectrum for given thermal params.
-; This includes contributions from the optics, detectors, and nominal blanketing.
-; The extra blanketing isn't included.
-; Off-axis angle is assumed 0.
-; For simplicity, I only use D8's efficiency file. (The others are very similar.)
+loadct,0
+hsi_linecolors
 
-; Sample sim to set up arrays.
-simA = foxsi_count_spectrum(em[10]/1.d49, t[10]/1.d6, $
-	data_dir='detector_data/', let_file='efficiency_det108_asic2.sav' )
-; Now do it for all temperature bins.
-sim = dblarr( n_elements(simA.energy_keV), n_elements(logt) )
-.run
-for i=0, 20 do begin sim2 = foxsi_count_spectrum(em[i]/1.d49, t[i]/1.d6, $
-	data_dir='detector_data/', let_file='efficiency_det108_asic2.sav' )
-	sim[*,i] = sim2.counts
-endfor
-end
-
+popen, 'effarea', xsize=7, ysize=4.5
+plot, area2_opt.energy_kev, area2_opt.eff_area_cm2, xr=[0,20], yr=[0,205], /ysty, $
+  xtitle = 'Energy [keV]', ytitle = 'Area [cm!U2!N]',$
+  charsize=1.4, /nodata
+oplot, area1_opt.energy_kev, area1_opt.eff_area_cm2, thick=6, color=7, line=2
+oplot, area2_opt.energy_kev, area2_opt.eff_area_cm2, thick=6, color=6, line=2
+oplot, area1.energy_kev, area1.eff_area_cm2, thick=6, color=7
+oplot, area2.energy_kev, area2.eff_area_cm2, thick=6, color=6
+oplot, get_edges(en1[i],/mean), rhessi, thick=6
+legend, ['FOXSI-1','FOXSI-2','RHESSI'], textcolor=[7,6,0], charsize=1.4, /right, box=0
+pclose
 
 
-; display results
-
-loadct, 5
-colors = 220-findgen(n)*10+20
-;popen, file, xsi=7, ysi=5
-plot, en, flux[*,15], psym=10, /xlo, /ylo, xr=[1.,30.], yr=[1.e-2, 1.e5], /xsty, /ysty, $
-	xtit='Energy [keV]', ytit='Phot s!U-1!N cm!U-2!N keV!U-1!N', charsi=1.1, $
-	tit='Photon flux, '+title
-for i=0, n_elements(logt)-1 do $
-	oplot, en, flux[*,i], psym=10, thick=3, col=colors[i]
-legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th, $
-	/right, charth=2, charsi=1.1
-
-plot, simA.energy_kev, sim[*,15], psym=10, /xlo, /ylo, xr=[1.,30], /xsty, $
-	yr=[1.e-3, 1.e3], /ysty, xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N', $
-	tit='Simulated FOXSI flux, '+title
-for i=0, n_elements(logt)-1 do oplot, simA.energy_kev, sim[*,i], psym=10, thick=3, col=colors[i]
-legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th
-;pclose
 
