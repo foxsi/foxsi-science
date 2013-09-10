@@ -204,5 +204,5 @@ oplot, 	logt[11:20], $
 oplot, 	logt[11:20], $
 	   	[dem11[9],dem12[9],dem13[9],dem14[9],dem15[9],dem16[9],dem17[9],dem18[9],dem19[9],dem20[9]], $
 	   	color = colors[6], thick=4
-legend, strtrim(spec_sum.energy_kev[3:9],2), color=colors, line=0, box=0, thick=th, charsize=1.0
+legend, strtrim(spec_sum.energy_kev[3:9],2)+' keV', color=colors, line=0, box=0, thick=th, charsize=1.0
 pclose
