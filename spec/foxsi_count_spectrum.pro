@@ -28,8 +28,8 @@ default, let_file, 'efficiency_averaged.sav'
 default, data_dir, 'detector_data/'
 default, offaxis, 0.
 
-; Set up energy bins 0-12 keV. These bins are finer than those desired!!
-e1 = dindgen(1200)/100
+; Set up energy bins 0-20 keV. These bins are finer than those desired!!
+e1 = dindgen(2000)/100
 e2 = get_edges(e1,/edges_2)
 emid = get_edges(e1,/mean)
 
@@ -72,7 +72,7 @@ counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
 ;counts = counts*binsize		 ; now the units are counts per second. DONT USE!
 
 ; use coarser, user-specified energy bins
-e1_coarse = findgen(10./binsize+1)*binsize
+e1_coarse = findgen(20./binsize+1)*binsize
 emid_coarse = get_edges(e1_coarse, /mean)
 counts_coarse = interpol(counts, emid, emid_coarse)	; units still in counts / sec / keV
 
