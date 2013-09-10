@@ -1,5 +1,5 @@
 FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
-			CORRECT = CORRECT, THREE = THREE
+			CORRECT = CORRECT, THREE = THREE, SPLIT_LIMIT = SPLIT_LIMIT
 
 ;	This function takes a FOXSI level 2 data structure and returns an energy spectrum.
 ;	
@@ -10,6 +10,7 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		CORRECT:	Only take known good events.  Adjust scale to account for those excluded.
 ;		THREE:		If set, return the summed energy from all three strips, 
 ;					not just the highest value (default 0)
+;		SPLIT_LIMIT:	threshold on each strip for the three-strip case.
 ;
 ;	Return value:
 ;		Returns a structure with tags energy, n-side spectrum, and p-side spectrum.
@@ -32,6 +33,7 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 
 
 	default, binwidth, 0.1
+	default, split_limit, 3.
 	
 	if keyword_set(correct) then begin
 		i = where(data.error_flag eq 0)
@@ -53,16 +55,20 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 
 	if keyword_set(three) then begin
 
-		spec_n = spec_n + histogram( data_good.assoc_energy[0,1,0], $
+		i=where( data_good.assoc_energy[0,1,0] gt split_limit )
+		spec_n = spec_n + histogram( data_good[i].assoc_energy[0,1,0], $
 									 nbins=n_elements(energy), min=min(energy), $
 									 max=max(energy) )
-		spec_n = spec_n + histogram( data_good.assoc_energy[2,1,0], $
+		i=where( data_good.assoc_energy[2,1,0] gt split_limit )
+		spec_n = spec_n + histogram( data_good[i].assoc_energy[2,1,0], $
 									 nbins=n_elements(energy), min=min(energy), $
 									 max=max(energy) )
-		spec_p = spec_p + histogram( data_good.assoc_energy[1,0,1], $
+		i=where( data_good.assoc_energy[1,0,1] gt split_limit )
+		spec_p = spec_p + histogram( data_good[i].assoc_energy[1,0,1], $
 									 nbins=n_elements(energy), min=min(energy), $
 									 max=max(energy) )
-		spec_p = spec_p + histogram( data_good.assoc_energy[1,2,1], $
+		i=where( data_good.assoc_energy[1,2,1] gt split_limit )
+		spec_p = spec_p + histogram( data_good[i].assoc_energy[1,2,1], $
 									 nbins=n_elements(energy), min=min(energy), $
 									 max=max(energy) )
 	endif

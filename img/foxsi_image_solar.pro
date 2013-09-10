@@ -85,7 +85,8 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
     ypix = (long(position))[1]
           
     if xpix ge 0 and xpix lt size_nat[0] and ypix ge 0 and ypix lt size_nat[1] and $
-    	data[i].error_flag eq 0 and data[i].hit_energy[1] ge erange[0] and $
+    	; data[i].error_flag eq 0 and $
+    	data[i].hit_energy[1] ge erange[0] and $
         data[i].hit_energy[1] le erange[1] and data[i].hit_energy[0] gt thr_n then begin
         img_nat(xpix, ypix)+=1.
     endif

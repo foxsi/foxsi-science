@@ -1,4 +1,136 @@
 ;;; Try to characterize blanket absorption
+; Simulate a FOXSI spectrum for the thermal plasma.
+T = 9.4  ; temperature in MK
+EM = 4.8e-3  ; emission measure in units of 10^49
+bin=0.3
+
+time_int = 60.
+
+sim_det0 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det108_asic2.sav', /single )
+sim_det1 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det109_asic2.sav', /single )
+sim_det2 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det102_asic3.sav', /single )
+sim_det3 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det103_asic3.sav', /single )
+sim_det4 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det104_asic2.sav', /single )
+sim_det5 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det105_asic2.sav', /single )
+sim_det6 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
+						 		let_file='efficiency_det106_asic3.sav', /single )
+
+; correct simulated spectra for livetime.
+sim_det0 = foxsi_live_correct( sim_det0, time_int )
+sim_det1 = foxsi_live_correct( sim_det1, time_int )
+sim_det2 = foxsi_live_correct( sim_det2, time_int )
+sim_det3 = foxsi_live_correct( sim_det3, time_int )
+sim_det4 = foxsi_live_correct( sim_det4, time_int )
+sim_det5 = foxsi_live_correct( sim_det5, time_int )
+sim_det6 = foxsi_live_correct( sim_det6, time_int )
+
+;plot, sim_det6.energy_kev, sim_det6.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
+plot, sim_det6.energy_kev, test.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
+;	yr=[0.,1.], $
+	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+;	ytitle='ratio of measured to simulated counts', $
+;	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+	psym=10
+oplot, spec_d6.energy_kev, spec_d6.spec_p, psym=10, color=2
+
+
+; Calculate absorption due to various multiples of the blanketing.
+mylar=82.55
+al=2.6
+kapton=203.2
+
+; plot ratio of two and compare to blanketing schemes.
+area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/')
+areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+			mylar=2.*mylar, al=2*al, kap=2*kapton)
+areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+			mylar=4.*mylar, al=4*al, kap=4*kapton)
+areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+			mylar=6.*mylar, al=6*al, kap=6*kapton)
+
+bkgd = get_target_spectra( 2, /correct )
+
+
+plot, sim_det0.energy_kev, spec_d6.spec_p / sim_det0.counts, xr=[2,15], $
+	yr=[0.,1.], $
+	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+	ytitle='ratio of measured to simulated counts', $
+	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+	psym=10, /nodata
+oplot, sim_det0.energy_kev, (spec_d0.spec_p / delta_t - bkgd[0].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=6
+oplot, sim_det0.energy_kev, (spec_d1.spec_p / delta_t - bkgd[1].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=7
+oplot, sim_det0.energy_kev, (spec_d2.spec_p / delta_t - bkgd[2].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=8
+oplot, sim_det0.energy_kev, (spec_d3.spec_p / delta_t - bkgd[3].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=9
+oplot, sim_det0.energy_kev, (spec_d4.spec_p / delta_t - bkgd[4].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=10
+oplot, sim_det0.energy_kev, (spec_d5.spec_p / delta_t - bkgd[5].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=12
+oplot, sim_det0.energy_kev, (spec_d6.spec_p / delta_t - bkgd[6].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=2
+
+
+;plot, sim_1det.energy_kev, sim_1det.counts, xr=[2,10], $
+;	yr=[0.,1.], $
+;	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+;	ytitle='ratio of measured to simulated counts', $
+;	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+;	psym=10, /nodata
+;oplot, sim_det0.energy_kev, 60*(s4_0.spec_p/delta_t4 - s2_0.spec_p/delta_t2) / 0.9/sim_det0.counts, psym=-1, line=1, color=6
+;oplot, sim_det1.energy_kev, 60*(s4_1.spec_p/delta_t4 - s2_1.spec_p/delta_t2) / 0.9/sim_det1.counts, psym=-1, line=1, color=7
+;oplot, sim_det2.energy_kev, 60*(s4_2.spec_p/delta_t4 - s2_2.spec_p/delta_t2) / 0.9/sim_det2.counts, psym=-1, line=1, color=8
+;oplot, sim_det3.energy_kev, 60*(s4_3.spec_p/delta_t4 - s2_3.spec_p/delta_t2) / 0.9/sim_det3.counts, psym=-1, line=1, color=9
+;oplot, sim_det4.energy_kev, 60*(s4_4.spec_p/delta_t4 - s2_4.spec_p/delta_t2) / 0.9/sim_det4.counts, psym=-1, line=1, color=10
+;oplot, sim_det5.energy_kev, 60*(s4_5.spec_p/delta_t4 - s2_5.spec_p/delta_t2) / 0.9/sim_det5.counts, psym=-1, line=1, color=12
+;oplot, sim_det6.energy_kev, 60*(s4_6.spec_p/delta_t4 - s2_6.spec_p/delta_t2) / 0.9/sim_det6.counts, psym=-1, line=1, color=2
+
+oplot_err, sim_1det.energy_kev, spec_d0.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d0.spec_p)/sim_1det.counts, psym=-1, line=1, color=6
+oplot_err, sim_1det.energy_kev, spec_d1.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d1.spec_p)/sim_1det.counts, psym=-1, line=1, color=7
+oplot_err, sim_1det.energy_kev, spec_d2.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d2.spec_p)/sim_1det.counts, psym=-1, line=1, color=8
+oplot_err, sim_1det.energy_kev, spec_d3.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d3.spec_p)/sim_1det.counts, psym=-1, line=1, color=9
+oplot_err, sim_1det.energy_kev, spec_d4.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d4.spec_p)/sim_1det.counts, psym=-1, line=1, color=10
+oplot_err, sim_1det.energy_kev, spec_d5.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d5.spec_p)/sim_1det.counts, psym=-1, line=1, color=12
+oplot_err, sim_1det.energy_kev, spec_d6.spec_p / sim_1det.counts, $
+	yerr = sqrt(spec_d6.spec_p)/sim_1det.counts, psym=-1, line=1, color=2
+
+oplot, area.energy_kev, areaX2.eff_area_cm2/area.eff_area_cm2, thick=4, line=1
+oplot, area.energy_kev, areaX4.eff_area_cm2/area.eff_area_cm2, thick=4, line=2
+oplot, area.energy_kev, areaX6.eff_area_cm2/area.eff_area_cm2, thick=4, line=3
+legend, ['effect of 2X blanketing', '4X blanketing', '6X blanketing', $
+		 'Det0','Det1','Det2','Det3','Det4','Det5','Det6'], $
+		 thick=4, line=[1,2,3,0,0,0,0,0,0,0], color=[1,1,1,6,7,8,9,10,12,2]
+		 
+
+plot, sim_1det.energy_kev, spec_d6.spec_p / sim_1det.counts, xr=[2,10], $
+	yr=[0.,1.], $
+	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+	ytitle='ratio of measured to simulated counts', $
+	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+	psym=10, /nodata
+oplot, sim_1det.energy_kev, spec_d0.spec_n / sim_1det.counts, psym=-1, line=1, color=6
+oplot, sim_1det.energy_kev, spec_d1.spec_n / sim_1det.counts, psym=-1, line=1, color=7
+oplot, sim_1det.energy_kev, spec_d2.spec_n / sim_1det.counts, psym=-1, line=1, color=8
+oplot, sim_1det.energy_kev, spec_d3.spec_n / sim_1det.counts, psym=-1, line=1, color=9
+oplot, sim_1det.energy_kev, spec_d4.spec_n / sim_1det.counts, psym=-1, line=1, color=10
+oplot, sim_1det.energy_kev, spec_d5.spec_n / sim_1det.counts, psym=-1, line=1, color=12
+oplot, sim_1det.energy_kev, spec_d6.spec_n / sim_1det.counts, psym=-1, line=1, color=2
+
+oplot, area.energy_kev, areaX2.eff_area_cm2/area.eff_area_cm2, thick=4, line=1
+oplot, area.energy_kev, areaX4.eff_area_cm2/area.eff_area_cm2, thick=4, line=2
+oplot, area.energy_kev, areaX6.eff_area_cm2/area.eff_area_cm2, thick=4, line=3
+legend, ['effect of 2X blanketing', '4X blanketing', '6X blanketing', $
+		 'Det0','Det1','Det2','Det3','Det4','Det5','Det6'], $
+		 thick=4, line=[1,2,3,0,0,0,0,0,0,0], color=[1,1,1,6,7,8,9,10,12,2]
+
+;;; Try to characterize blanket absorption
 
 t_launch = 64500
 t1_start = t_launch + 108.3		; Target 1 (AR)
