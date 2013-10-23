@@ -1,3 +1,225 @@
+;
+; First, some utility functions.
+; Main procedure is below and is 'formatter_data_to_level0'
+;
+
+;; Utility function, adapted from CMPRODUCT
+function cmapply_product, x
+  sz = size(x)
+  n = sz(1)
+
+  while n GT 1 do begin
+      if (n mod 2) EQ 1 then x(0,*) = x(0,*) * x(n-1,*)
+      n2 = floor(n/2)
+      x = x(0:n2-1,*) * x(n2:n2*2-1,*)
+      n = n2
+  endwhile
+  return, reform(x(0,*), /overwrite)
+end
+
+;; Utility function, used to collect collaped dimensions
+pro cmapply_redim, newarr, dimapply, dimkeep, nkeep, totcol, totkeep
+  sz = size(newarr)
+  ;; First task: rearrange dimensions so that the dimensions
+  ;; that are "kept" (ie, uncollapsed) are at the back
+  dimkeep = where(histogram(dimapply,min=1,max=sz(0)) ne 1, nkeep)
+  if nkeep EQ 0 then return
+
+  newarr = transpose(temporary(newarr), [dimapply-1, dimkeep])
+  ;; totcol is the total number of collapsed elements
+  totcol = sz(dimapply(0))
+  for i = 1, n_elements(dimapply)-1 do totcol = totcol * sz(dimapply(i))
+  totkeep = sz(dimkeep(0)+1)
+  for i = 1, n_elements(dimkeep)-1 do totkeep = totkeep * sz(dimkeep(i)+1)
+
+  ;; this new array has two dimensions:
+  ;;   * the first, all elements that will be collapsed
+  ;;   * the second, all dimensions that will be preserved
+  ;; (the ordering is so that all elements to be collapsed are
+  ;;  adjacent in memory)
+  newarr = reform(newarr, [totcol, totkeep], /overwrite)
+end
+
+;; Main function
+function cmapply, op, array, dimapply, double=dbl, type=type, $
+                  functargs=functargs, nocatch=nocatch
+
+  if n_params() LT 2 then begin
+      message, "USAGE: XX = CMAPPLY('OP',ARRAY,2)", /info
+      message, '       where OP is +, *, AND, OR, MIN, MAX', /info
+      return, -1L
+  endif
+  if NOT keyword_set(nocatch) then $
+    on_error, 2 $
+  else $
+    on_error, 0
+
+  version = double(!version.release)
+;  version = 0
+;  print, 'version = ',version
+
+  ;; Parameter checking
+  ;; 1) the dimensions of the array
+  sz = size(array)
+  if sz(0) EQ 0 then $
+    message, 'ERROR: ARRAY must be an array!'
+
+  ;; 2) The type of the array
+  if sz(sz(0)+1) EQ 0 OR sz(sz(0)+1) EQ 7 OR sz(sz(0)+1) EQ 8 then $
+    message, 'ERROR: Cannot apply to UNDEFINED, STRING, or STRUCTURE'
+  if n_elements(type) EQ 0 then type = sz(sz(0)+1)
+
+  ;; 3) The type of the operation
+  szop = size(op)
+  if szop(szop(0)+1) NE 7 then $
+    message, 'ERROR: operation OP was not a string'
+
+  ;; 4) The dimensions to apply (default is to apply to first dim)
+  if n_params() EQ 2 then dimapply = 1
+  dimapply = [ dimapply ]
+  dimapply = dimapply(sort(dimapply))   ; Sort in ascending order
+  napply = n_elements(dimapply)
+
+  ;; 5) Use double precision if requested or if needed
+  if n_elements(dbl) EQ 0 then begin
+      dbl=0
+      if type EQ 5 OR type EQ 9 then dbl=1
+  endif
+
+  newop = strupcase(op)
+  newarr = array
+  newarr = reform(newarr, sz(1:sz(0)), /overwrite)
+  case 1 of
+
+      ;; *** Addition
+      (newop EQ '+'): begin
+          for i = 0L, napply-1 do begin
+              newarr = total(temporary(newarr), dimapply(i)-i, double=dbl)
+          endfor
+      end
+
+      ;; *** Multiplication
+      (newop EQ '*'): begin ;; Multiplication (by summation of logarithms)
+          forward_function product
+
+          cmapply_redim, newarr, dimapply, dimkeep, nkeep, totcol, totkeep
+          if nkeep EQ 0 then begin
+              newarr = reform(newarr, n_elements(newarr), 1, /overwrite)
+              if version GT 5.55 then return, product(newarr)
+              return, (cmapply_product(newarr))(0)
+          endif
+
+          if version GT 5.55 then begin
+              result = product(newarr,1)
+          endif else begin
+              result = cmapply_product(newarr)
+          endelse
+          result = reform(result, sz(dimkeep+1), /overwrite)
+          return, result
+      end
+
+      ;; *** LOGICAL AND or OR
+      ((newop EQ 'AND') OR (newop EQ 'OR')): begin
+          newarr = temporary(newarr) NE 0
+          totelt = 1L
+          for i = 0L, napply-1 do begin
+              newarr = total(temporary(newarr), dimapply(i)-i)
+              totelt = totelt * sz(dimapply(i))
+          endfor
+          if newop EQ 'AND' then return, (round(newarr) EQ totelt)
+          if newop EQ 'OR'  then return, (round(newarr) NE 0)
+      end
+
+      ;; Operations requiring a little more attention over how to
+      ;; iterate
+      ((newop EQ 'MAX') OR (newop EQ 'MIN') OR (newop EQ 'MEDIAN')): begin
+          cmapply_redim, newarr, dimapply, dimkeep, nkeep, totcol, totkeep
+          if nkeep EQ 0 then begin
+              if newop EQ 'MAX' then return, max(newarr)
+              if newop EQ 'MIN' then return, min(newarr)
+              if newop EQ 'MEDIAN' then return, median(newarr)
+          endif
+
+          ;; IDL 5.5 introduced the DIMENSION keyword to MAX() and MIN()
+          if version GT 5.45 then begin
+              extra = {dimension:1}
+              if newop EQ 'MAX' then result = max(newarr, _EXTRA=extra)
+              if newop EQ 'MIN' then result = min(newarr, _EXTRA=extra)
+              if newop EQ 'MEDIAN' then result = median(newarr, _EXTRA=extra)
+          endif else begin
+              
+              ;; Next task: create result array
+              result = make_array(totkeep, type=type)
+              
+              ;; Now either iterate over the number of output elements, or
+              ;; the number of collapsed elements, whichever is smaller.
+              if (totcol LT totkeep) AND newop NE 'MEDIAN' then begin
+                  ;; Iterate over the number of collapsed elements
+                  result(0) = reform(newarr(0,*),totkeep,/overwrite)
+                  case newop of 
+                      'MAX': for i = 1L, totcol-1 do $
+                        result(0) = result > newarr(i,*)
+                      'MIN': for i = 1L, totcol-1 do $
+                        result(0) = result < newarr(i,*)
+                  endcase
+              endif else begin
+                  ;; Iterate over the number of output elements
+                  case newop of 
+                      'MAX': for i = 0L, totkeep-1 do result(i) = max(newarr(*,i))
+                      'MIN': for i = 0L, totkeep-1 do result(i) = min(newarr(*,i))
+                      'MEDIAN': for i = 0L, totkeep-1 do result(i) = median(newarr(*,i))
+                  endcase
+              endelse
+          endelse
+
+          result = reform(result, sz(dimkeep+1), /overwrite)
+          return, result
+      end
+
+      ;; User function
+      (strmid(newop,0,4) EQ 'USER'): begin
+          functname = strmid(newop,5)
+          if functname EQ '' then $
+            message, 'ERROR: '+newop+' is not a valid operation'
+
+          cmapply_redim, newarr, dimapply, dimkeep, nkeep, totcol, totkeep
+          if nkeep EQ 0 then begin
+              if n_elements(functargs) GT 0 then $
+                return, call_function(functname, newarr, _EXTRA=functargs)
+              return, call_function(functname, newarr)
+          endif
+          
+          ;; Next task: create result array
+          result = make_array(totkeep, type=type)
+          
+          ;; Iterate over the number of output elements
+          if n_elements(functargs) GT 0 then begin
+              for i = 0L, totkeep-1 do $
+                result(i) = call_function(functname, newarr(*,i), _EXTRA=functargs)
+          endif else begin
+              for i = 0L, totkeep-1 do $
+                result(i) = call_function(functname, newarr(*,i))
+          endelse
+
+          result = reform(result, sz(dimkeep+1), /overwrite)
+          return, result
+      end
+
+              
+  endcase
+
+  newsz = size(newarr)
+  if type EQ newsz(newsz(0)+1) then return, newarr
+
+  ;; Cast the result into the desired type, if necessary
+  castfns = ['UNDEF', 'BYTE', 'FIX', 'LONG', 'FLOAT', $
+             'DOUBLE', 'COMPLEX', 'UNDEF', 'UNDEF', 'DCOMPLEX' ]
+  if type GE 1 AND type LE 3 then $
+    return, call_function(castfns(type), round(newarr)) $
+  else $
+    return, call_function(castfns(type), newarr)
+end
+  
 ;+
 ; This function reads in a FORMATTER CALIBRATION-style data file (*.dat) and processes 
 ; it into Level 0 FOXSI data.  The Level 0 FOXSI data structure is meant for use with
@@ -50,6 +272,7 @@ FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
   	print, '  Creating data structure.'
   	data_struct = {foxsi_level0, $
 		frame_counter:ulong(0),	$	; formatter frame counter value, 32 bits
+		wsmr_time:double(0),	$	;
 		frame_time:ulong64(0), 	$	; formatter frame time, 64 bits
 		det_num:uint(0),		$	; same for all frames; from input keyword
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
@@ -63,23 +286,21 @@ FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 		HV:uint(0),		$	; detector bias voltage value, with status bits
 		temperature:uint(0),	$	; raw A/D thermistor value if exists
 		inflight:uint(0),	$	; '1' if frame occurred post-launch (for flight data only!)
+		altitude:float(0),	$	;
 		error_flag:uint(0)	$	; '1' if obvious error is noticed in that frame's data
                 }
-    	data_struct = replicate(data_struct, nFrames)
+    	
+    data_struct = replicate(data_struct, nFrames)
 
-    	print, '  Filling in header info.'
-    	data_struct.frame_counter = reform( ishft( ulong(frame[7,*]),16 ) + frame[8,*] )
-    	data_struct.frame_time = reform( ishft( ulong64(frame[4,*]),32 ) + ishft( ulong64(frame[5,*]),16 ) + frame[6,*] )
-    	data_struct.det_num = detector
-    	data_struct.trigger_time = reform( frame[26 + 33*detector, *] )
+    print, '  Filling in header info.'
+    data_struct.frame_counter = reform( ishft( ulong(frame[4,*]),16 ) + frame[5,*] )
+    data_struct.frame_time = reform( ishft( ulong64(frame[1,*]),32 ) + ishft( ulong64(frame[2,*]),16 ) + frame[3,*] )
+    data_struct.det_num = detector
+    data_struct.trigger_time = reform( frame[23 + 33*detector, *] )
+    
+    ; HV data
+    data_struct.HV = reform( frame[13,*] )
 
-    	; Decode WSMR time (seconds of day).
-	; Note that including the MSB of the time (from the frame word 2) is not strictly necessary
-	; since this value is zero for our entire flight.  However, it's done anyway for 
-	; completeness.
-	seconds = uint( reform( frame[1,*] + ishft(ishft(frame[2,*],-15),16) ) )
-	mil = ishft(ishft(frame[2,*],6),-6)/double(1000.)
-	data_struct.wsmr_time = double(seconds)+mil
 
 	; temporary arrays to grab data during loops
 	adc_array = uintarr(4,3,nFrames)
@@ -88,7 +309,7 @@ FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	print, '  Filling in ADC values.'
     	for i=0, 3 do begin
        		print, '    ASIC ', i
-          	index = 31 + 33*detector + 8*i + [0,1,2]
+          	index = 28 + 33*detector + 8*i + [0,1,2]
           	strip = ishft(frame[index,*],-10)
 		adc_array[i,*,*] = frame[index,*] - ishft(strip,10)
 		strip_array[i,*,*] = strip
@@ -99,26 +320,14 @@ FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
 	asic = indgen(4)
 
-    	; Grab the common mode
-    	data_struct.common_mode = frame[34 + 33*detector + 8*asic,*]
+    ; Grab the common mode
+    data_struct.common_mode = frame[31 + 33*detector + 8*asic,*]
 
 	; Grab the channel mask
-    	data_struct.channel_mask = frame[30 + 33*detector + 8*asic,*]
-    	data_struct.channel_mask = ishft( data_struct.channel_mask, 16) + frame[29 + 33*detector + 8*asic,*]
-    	data_struct.channel_mask = ishft( data_struct.channel_mask, 16) + frame[28 + 33*detector + 8*asic,*]
-    	data_struct.channel_mask = ishft( data_struct.channel_mask, 16) + frame[27 + 33*detector + 8*asic,*]
-
-
-;;;	This section is not used since the common mode will not be used in this level analysis. 
-;;;	Reserve it for later use.
-;	; find "hit" asics and strips.  First subtract the common mode (only for calculation; CM is
-;	; NOT subtracted in the stored data.
-;	; construct a CM cube that can be subtracted from the ADC cube.
-;	cm = transpose( [[[data_struct.common_mode]],[[data_struct.common_mode]],[[data_struct.common_mode]]], [0,2,1] )
-;	sub = fix(data_struct.adc) - fix(cm)
-;	;;;; THIS STEP REQUIRES CMAPPLY.PRO ;;;;
-;	n_max = cmapply('max', sub[0:1,*,*], [1,2])
-;	p_max = cmapply('max', sub[2:3,*,*], [1,2])
+    	data_struct.channel_mask = frame[27 + 33*detector + 8*asic,*]
+    	data_struct.channel_mask = ishft( data_struct.channel_mask, 16) + frame[26 + 33*detector + 8*asic,*]
+    	data_struct.channel_mask = ishft( data_struct.channel_mask, 16) + frame[25 + 33*detector + 8*asic,*]
+    	data_struct.channel_mask = ishft( data_struct.channel_mask, 16) + frame[24 + 33*detector + 8*asic,*]
 
 	;;;;;;
 	; Identify the "hit" (i.e. max ADC value) on p-side and n-side.  
@@ -177,84 +386,6 @@ FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	
 	endfor
 	
-	; extract housekeeping data
-	print, "  Getting housekeeping data."
-	data_struct.HV = reform( frame[16,*] )
-	hskp0 = reform( frame[9,*] )
-	hskp1 = reform( frame[13,*] )
-	hskp2 = reform( frame[17,*] )
-	hskp3 = reform( frame[21,*] )
-
-	; See McBride's formatter packet description for an explanation of the decoding.
-	therm6 = hskp2[where(data_struct.frame_counter mod 4 eq 2)]
-	therm7 = hskp3[where(data_struct.frame_counter mod 4 eq 2)]
-	;  therm8 = hskp0[where(data_struct.frame_counter mod 4 eq 3)]		; disfunctional! Not used.
-	therm9 = hskp1[where(data_struct.frame_counter mod 4 eq 3)]
-	;  therm10 = hskp2[where(data_struct.frame_counter mod 4 eq 3)]  	; on focal plane, not used here.
-	therm11 = hskp3[where(data_struct.frame_counter mod 4 eq 3)]
-
-	; Each temperature value only shows up once every fourth frame.  Allow values to leak
-	; into neighboring frames so that we have one value per frame.
-	; Series of frames at beginning where frame_counter is zero are also added in.
-	; THIS MAY CAUSE PROBLEMS IF THERE ARE DROPOUTS MIDFRAME! (These are not well
-	; accounted for in this code.
-	i_nonzero = where(data_struct.frame_counter gt 0)
-	temp6 = reform( transpose([ [therm6],[therm6],[therm6],[therm6] ]), 4*n_elements(therm6) )
-	temp6 = [uintarr(i_nonzero[0]),temp6]
-	i_diff = n_elements(data_struct) - n_elements(temp6)
-	if i_diff gt 0 then temp6 = [temp6, uintarr(i_diff)]
-	if i_diff lt 0 then temp6 = temp6[0:n_elements(data_struct)-1]
-	temp7 = reform( transpose([ [therm7],[therm7],[therm7],[therm7] ]), 4*n_elements(therm7) )
-	temp7 = [uintarr(i_nonzero[0]),temp7]
-	i_diff = n_elements(data_struct) - n_elements(temp7)
-	if i_diff gt 0 then temp7 = [temp7, uintarr(i_diff)]
-	if i_diff lt 0 then temp7 = temp7[0:n_elements(data_struct)-1]
-	temp9 = reform( transpose([ [therm9],[therm9],[therm9],[therm9] ]), 4*n_elements(therm9) )
-	temp9 = [uintarr(i_nonzero[0]),temp9]
-	i_diff = n_elements(data_struct) - n_elements(temp9)
-	if i_diff gt 0 then temp9 = [temp9, uintarr(i_diff)]
-	if i_diff lt 0 then temp9 = temp9[0:n_elements(data_struct)-1]
-	temp11 = reform( transpose([ [therm11],[therm11],[therm11],[therm11] ]), 4*n_elements(therm11) )
-	temp11 = [uintarr(i_nonzero[0]),temp11]
-	i_diff = n_elements(data_struct) - n_elements(temp11)
-	if i_diff gt 0 then temp11 = [temp11, uintarr(i_diff)]
-	if i_diff lt 0 then temp11 = temp11[0:n_elements(data_struct)-1]
-
-	; Pick out correct temperature:
-	if detector eq 1 then data_struct.temperature = temp7
-	if detector eq 3 then data_struct.temperature = temp9
-	if detector eq 4 then data_struct.temperature = temp11
-	if detector eq 6 then data_struct.temperature = temp6
-	; If detector is 0, 2, or 5 then temperature values remain zero.
-
-	; Identify which events occurred after HV upramp and before HV downramp, or "in flight"
-	; Do this only if the file is the flight data file.
-	; Post-ramp events will have a '1' in the 'inflight' tag.
-	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
-		print, "  File is flight data.  Flagging post-launch events."
-;		data_struct[ where( data_struct.wsmr_time gt 64570 ) ].inflight = 1
-	; update: instead of going by time, just check where the HV is close to 200V.
-		data_struct[ where( ishft(data_struct.hv,-4)/8 gt 190  ) ].inflight = 1
-	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
-
-	; Get altitude data from text file
-	data_alt=read_ascii('data_2012/36255.txt')
-	time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
-	altitude = data_alt.field01[9,*]
-
-	; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
-	; So resize the altitude data by repeating values.
-	; I don't like the way "interpol" interpolates this, and I think the 
-	; "discrete" step nature is good so that you can see the real
-	; resolution of the altitude data.
-	
-	i_flight = long(0)
-	for i=long(0), nFrames-1 do begin
-		if data_struct[i].wsmr_time lt 64500 then continue
-		data_struct[i].altitude = altitude[i_flight/250]
-		i_flight++;
-	endfor
-
 	; Compress data by getting rid of "zero" frames.  If a detector's trigger time
 	; is 0, then the frame is empty for that detector.  However, to not lose any
 	; data (even if it's bad), here frames are only thrown away if all data is 0
@@ -264,12 +395,10 @@ FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
 	; Find the max value of all 33 words per detector in the frame.
 	; If max value is zero, then the frame is empty for this detector.
-	max_frame = cmapply('max', frame[ 26+33*detector:57+33*detector, *], [1])
+	max_frame = cmapply('max', frame[ 23+33*detector:54+33*detector, *], [1])
 	data_struct_compressed = data_struct[ where( max_frame gt 0 ) ]
 
 	; Last step: check for obvious errors and flag these.
-	; Errors include:
-	;    -- Common mode value greater than 1023
 
 	print, "  Checking data and flagging abnormalities."
 	; Check for events where *any* common mode > 1023

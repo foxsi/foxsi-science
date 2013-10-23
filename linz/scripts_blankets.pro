@@ -6,20 +6,13 @@ bin=0.3
 
 time_int = 60.
 
-sim_det0 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det108_asic2.sav', /single )
-sim_det1 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det109_asic2.sav', /single )
-sim_det2 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det102_asic3.sav', /single )
-sim_det3 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det103_asic3.sav', /single )
-sim_det4 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det104_asic2.sav', /single )
-sim_det5 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det105_asic2.sav', /single )
-sim_det6 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, data_dir='detector_data/', $
-						 		let_file='efficiency_det106_asic3.sav', /single )
+sim_det0 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det108_asic2.sav' )
+sim_det1 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det109_asic2.sav' )
+sim_det2 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det102_asic3.sav' )
+sim_det3 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det103_asic3.sav' )
+sim_det4 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det104_asic2.sav' )
+sim_det5 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det105_asic2.sav' )
+sim_det6 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det106_asic3.sav' )
 
 ; correct simulated spectra for livetime.
 sim_det0 = foxsi_live_correct( sim_det0, time_int )
@@ -30,8 +23,8 @@ sim_det4 = foxsi_live_correct( sim_det4, time_int )
 sim_det5 = foxsi_live_correct( sim_det5, time_int )
 sim_det6 = foxsi_live_correct( sim_det6, time_int )
 
-;plot, sim_det6.energy_kev, sim_det6.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
-plot, sim_det6.energy_kev, test.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
+plot, sim_det6.energy_kev, sim_det6.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
+;plot, sim_det6.energy_kev, test.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty, $
 ;	yr=[0.,1.], $
 	thick=4, charsize=1.2, xtitle='Energy [keV]', $
 ;	ytitle='ratio of measured to simulated counts', $
@@ -63,6 +56,20 @@ plot, sim_det0.energy_kev, spec_d6.spec_p / sim_det0.counts, xr=[2,15], $
 	ytitle='ratio of measured to simulated counts', $
 	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
 	psym=10, /nodata
+oplot, sim_det0.energy_kev, (spec_d0.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=6
+oplot, sim_det0.energy_kev, (spec_d1.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=7
+oplot, sim_det0.energy_kev, (spec_d2.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=8
+oplot, sim_det0.energy_kev, (spec_d3.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=9
+oplot, sim_det0.energy_kev, (spec_d4.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=10
+oplot, sim_det0.energy_kev, (spec_d5.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=12
+oplot, sim_det0.energy_kev, (spec_d6.spec_p / delta_t ) /sim_det0.counts*time_int, psym=-1, line=1, color=2
+
+plot, sim_det0.energy_kev, spec_d6.spec_p / sim_det0.counts, xr=[2,15], $
+	yr=[0.,1.], $
+	thick=4, charsize=1.2, xtitle='Energy [keV]', $
+	ytitle='ratio of measured to simulated counts', $
+	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
+	psym=10, /nodata
 oplot, sim_det0.energy_kev, (spec_d0.spec_p / delta_t - bkgd[0].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=6
 oplot, sim_det0.energy_kev, (spec_d1.spec_p / delta_t - bkgd[1].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=7
 oplot, sim_det0.energy_kev, (spec_d2.spec_p / delta_t - bkgd[2].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=8
@@ -70,7 +77,6 @@ oplot, sim_det0.energy_kev, (spec_d3.spec_p / delta_t - bkgd[3].spec_p) / 0.9/si
 oplot, sim_det0.energy_kev, (spec_d4.spec_p / delta_t - bkgd[4].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=10
 oplot, sim_det0.energy_kev, (spec_d5.spec_p / delta_t - bkgd[5].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=12
 oplot, sim_det0.energy_kev, (spec_d6.spec_p / delta_t - bkgd[6].spec_p) / 0.9/sim_det0.counts, psym=-1, line=1, color=2
-
 
 ;plot, sim_1det.energy_kev, sim_1det.counts, xr=[2,10], $
 ;	yr=[0.,1.], $

@@ -222,7 +222,10 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		data_struct.hit_xy_solar[0] = data_struct.hit_xy_pay[0] + data_struct.pitch
 		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1] - data_struct.yaw
 		
-	endif
+	endif else begin
+		data_struct.hit_xy_solar[0] = data_struct.hit_xy_pay[0]
+		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1]
+	endelse	
 
 	print, "  Done!"
 

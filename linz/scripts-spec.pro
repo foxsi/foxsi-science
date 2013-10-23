@@ -419,5 +419,17 @@ oplot, get_edges(en1[i],/mean), rhessi, thick=6
 legend, ['FOXSI-1','FOXSI-2','RHESSI'], textcolor=[7,6,0], charsize=1.4, /right, box=0
 pclose
 
+;
+; working on a better counts-to-photon conversion for the flare.
+;
+
+flare_xy = [1020.,-320.]
+rad = 120.
+
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, rad=rad, center=flare_xy
+
+spec = make_spectrum( [d0,d2,d4,d5,d6], /three, /corr, bin=0.3 )
+
+plot, spec.energy_kev, spec.spec_p, /xlo, /ylo, xr=[2.,15.], /xsty, yr=[1.e1,1.e4], psym=10
 
 

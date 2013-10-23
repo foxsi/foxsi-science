@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
                           	CENTER = CENTER, PSIZE = PSIZE, SIZE = SIZE, $
-                          	XYCOR = XYCOR, THR_N = THR_N
+                          	XYCOR = XYCOR, THR_N = THR_N, STOP = STOP
 ;
 ; written March 2013 by Ishikawa, modified by Lindsay
 ;        
@@ -27,7 +27,7 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
   	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
   	if not keyword_set(center) then center=[0.0, 0.0]    ; img center position in arcsec
  	if not keyword_set(psize) then psize=7.735   ; img pixel size (arcseconds/imagepixel)
-  	if not keyword_set(size) then size=[500,500] ; size in image pixel numbers
+  	if not keyword_set(size) then size=[1000,1000] ; size in image pixel numbers
   	if not keyword_set(thr_n) then thr_n =3.0    ; desired n-side energy threshold
 
   	tlaunch=long(64500.)	; time of launch in seconds-of-day
@@ -35,6 +35,9 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
   	; Here are Ishikawa's offsets used if XYCOR is set:
   	xerr=[55.4700,    81.490,   96.360,  87.8900,  48.2700,   49.550,   63.450]
   	yerr=[-135.977, -131.124, -130.241, -92.7310, -95.3080, -120.276, -106.360]
+
+	; throw out any potentially bad events
+	data = data[ where( data.error_flag eq 0 ) ]
 
 	; get rotation angle for this detector.
 	case detector of
@@ -64,8 +67,15 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
 	print, '  ', '  Native pixels in image: ', size_nat
 
   	istart=long(0)
-  	istart=(where(data.wsmr_time ge trange[0]+tlaunch))[0]
-  	iend=(where(data.wsmr_time gt trange[1]+tlaunch))[0]
+  	i_times = where( data.wsmr_time ge (trange[0]+tlaunch) and data.wsmr_time le (trange[1]+tlaunch) )
+;  	istart=(where(data.wsmr_time ge trange[0]+tlaunch))[0]
+;  	iend=(where(data.wsmr_time gt trange[1]+tlaunch))[0]
+	if i_times[0] eq -1 then begin
+		print, 'No events in time range.'
+		return, -1
+	endif
+	istart = i_times[0]
+	iend = i_times[n_elements(i_times)-1]
   	img_nat = fltarr( size_nat[0], size_nat[1] )  ; image in native pixels
   	img = fltarr( size[0], size[1] )	; image in user-desired pixels
 
@@ -104,6 +114,7 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
   ;print, 'max count rate = ', max(img)/(trange[1]-trange[0])
   ;return, img/(trange[1]-trange[0])
 
+if keyword_set(stop) then stop
 
 return, img
 
