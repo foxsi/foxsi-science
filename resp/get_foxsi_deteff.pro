@@ -15,7 +15,7 @@ default, type, 'si'
 if not keyword_set(no_let) and not keyword_set(let_file) then begin
 	print, 'No low-energy threshold file defined.'
 	return, -1
-endif else print, 'Using low-energy threshold file ', let_file
+endif ;else print, 'Using low-energy threshold file ', let_file
 
 IF NOT keyword_set(det_thick) THEN det_thick_um = 500 ELSE det_thick_um = det_thick
 

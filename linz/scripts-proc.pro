@@ -131,6 +131,92 @@ sum = spex0.spec_p + spex1.spec_p + spex2.spec_p + spex3.spec_p $
 
 plot, spex0.energy_kev, sum, psym=10
 
+;
+; Look at alignment images to check orientation.
+; (Data taken postflight, Nov. 3 2012)
+;
+
+@linz/foxsi-setup-script
+.compile cal_data_to_level0
+
+f0 = '~/foxsi/detector/IDL/20121103/data_121103_2028.dat'
+f1 = '~/foxsi/detector/IDL/20121103/data_121103_2048.dat'
+f2 = '~/foxsi/detector/IDL/20121103/data_121103_2041.dat'
+f4 = '~/foxsi/detector/IDL/20121103/data_121103_2037.dat'
+f5 = '~/foxsi/detector/IDL/20121103/data_121103_2033.dat'
+f6 = '~/foxsi/detector/IDL/20121103/data_121103_1939.dat'
+
+data_lvl0_d0 = formatter_data_to_level0( f0, det=0)
+data_lvl0_d1 = formatter_data_to_level0( f1, det=1)
+data_lvl0_d2 = formatter_data_to_level0( f2, det=2)
+data_lvl0_d4 = formatter_data_to_level0( f4, det=4)
+data_lvl0_d5 = formatter_data_to_level0( f5, det=5)
+data_lvl0_d6 = formatter_data_to_level0( f6, det=6)
+save, data_lvl0_d0, data_lvl0_d1, data_lvl0_d2, data_lvl0_d4, data_lvl0_d5, data_lvl0_d6, $
+	file = 'data_2012/post-check-lvl0.sav'
+
+data_lvl1_d0 = foxsi_level0_to_level1( 'data_2012/post-check-lvl1.sav', det=0 )
+data_lvl1_d1 = foxsi_level0_to_level1( 'data_2012/post-check-lvl1.sav', det=1 )
+data_lvl1_d2 = foxsi_level0_to_level1( 'data_2012/post-check-lvl1.sav', det=2 )
+data_lvl1_d4 = foxsi_level0_to_level1( 'data_2012/post-check-lvl1.sav', det=4 )
+data_lvl1_d5 = foxsi_level0_to_level1( 'data_2012/post-check-lvl1.sav', det=5 )
+data_lvl1_d6 = foxsi_level0_to_level1( 'data_2012/post-check-lvl1.sav', det=6 )
+save, data_lvl1_d0, data_lvl1_d1, data_lvl1_d2, data_lvl1_d4, data_lvl1_d5, data_lvl1_d6, $
+	file = 'data_2012/post-check-lvl1.sav'
+
+cal0 = 'detector_data/peaks_det108.sav'
+cal1 = 'detector_data/peaks_det109.sav'
+cal2 = 'detector_data/peaks_det102.sav'
+cal3 = 'detector_data/peaks_det103.sav'
+cal4 = 'detector_data/peaks_det104.sav'
+cal5 = 'detector_data/peaks_det105.sav'
+cal6 = 'detector_data/peaks_det106.sav'
+
+d0 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=0, calib=cal0, /ground )
+d1 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=1, calib=cal1, /ground )
+d2 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=2, calib=cal2, /ground )
+d4 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=4, calib=cal4, /ground )
+d5 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=5, calib=cal5, /ground )
+d6 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=6, calib=cal6, /ground )
+
+save, d0,d1,d2,d4,d5,d6, file='data_2012/post-check-lvl2.sav'
+
+pix=10.
+img0 = foxsi_image_solar(d0, 0, psize=pix, tr=[-100000.,100000.])
+img1 = foxsi_image_solar(d1, 1, psize=pix, tr=[-100000.,100000.])
+img2 = foxsi_image_solar(d2, 2, psize=pix, tr=[-100000.,100000.])
+img4 = foxsi_image_solar(d4, 4, psize=pix, tr=[-100000.,100000.])
+img5 = foxsi_image_solar(d5, 5, psize=pix, tr=[-100000.,100000.])
+img6 = foxsi_image_solar(d6, 6, psize=pix, tr=[-100000.,100000.])
+map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix )
+map1 = make_map( img1, xcen=0., ycen=0., dx=pix, dy=pix )
+map2 = make_map( img2, xcen=0., ycen=0., dx=pix, dy=pix )
+map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix )
+map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix )
+map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix )
+
+!p.multi=[0,2,3]
+ch=1.2
+popen, 'post-flight-alignment', xsi=6, ysi=9
+plot_map, map0, fov=16, charsi=ch, dmax=50
+plot_map, map1, fov=16, charsi=ch
+plot_map, map2, fov=16, charsi=ch
+plot_map, map4, fov=16, charsi=ch
+plot_map, map5, fov=16, charsi=ch
+plot_map, map6, fov=16, charsi=ch
+pclose
+
+
+i0=where(data_lvl2_d0.hv eq 200)
+i1=where(data_lvl2_d1.hv eq 200)
+i2=where(data_lvl2_d2.hv eq 200)
+i3=where(data_lvl2_d3.hv eq 200)
+i4=where(data_lvl2_d4.hv eq 200)
+i5=where(data_lvl2_d5.hv eq 200)
+i6=where(data_lvl2_d6.hv eq 200)
+
+
+;-----
 
 t1=t1_start
 t2=t3_end

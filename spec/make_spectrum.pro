@@ -44,8 +44,6 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 		ratio_good = 1.
 	end
 
-	if keyword_set(stop) then stop
-
 	energy = findgen(100/binwidth)*binwidth
 
 	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy), $
@@ -53,6 +51,8 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy), $
 						min=min(energy), max=max(energy) )
 
+	if keyword_set(stop) then stop
+	
 	if keyword_set(three) then begin
 
 		i=where( data_good.assoc_energy[0,1,0] gt split_limit )
@@ -86,7 +86,7 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 						  'spec_p_err', p_error )
 
 	if keyword_set(plot) then plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
-	
+
 	return, spex
 	
 END

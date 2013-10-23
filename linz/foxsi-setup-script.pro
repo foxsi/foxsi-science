@@ -1,13 +1,13 @@
 ; setup script to analyze FOXSI data.
 
 ; add directory paths
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/fermi'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/img'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/resp'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/psf'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/proc'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/spec'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/util'
+add_path, '~/foxsi/flight-analysis/foxsi-science/fermi'
+add_path, '~/foxsi/flight-analysis/foxsi-science/img'
+add_path, '~/foxsi/flight-analysis/foxsi-science/resp'
+add_path, '~/foxsi/flight-analysis/foxsi-science/psf'
+add_path, '~/foxsi/flight-analysis/foxsi-science/proc'
+add_path, '~/foxsi/flight-analysis/foxsi-science/spec'
+add_path, '~/foxsi/flight-analysis/foxsi-science/util'
 
 ; load the Level 2 data.
 restore, 'data_2012/foxsi_level2_data.sav', /v
@@ -27,4 +27,16 @@ t5_start = t_launch + 423.5		; Target 5 (off-pointing)
 t5_end = t_launch + 435.9
 t6_start = t_launch + 438.5		; Target 6 (flare)
 t6_end = t_launch + 498.3
+
+date=anytim('2012-nov-03')
+t0 = '2-Nov-2012 17:55:00.000'
+
+cen1 = [-480,-350]
+cen2 = [-850, 150]
+cen3 = [ 600, 400]
+cen4 = [ 700,-600]
+cen5 = [1000,-900]
+cen6 = [ 700,-600]
+flare = [967,-207]	; from RHESSI flarelist
+
 

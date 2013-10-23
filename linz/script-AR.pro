@@ -135,14 +135,21 @@ spec_sum = spec_d6
 spec_sum.spec_p = spec_d0.spec_p + spec_d2.spec_p + spec_d3.spec_p + $		; all det's except for 1.
 	spec_d4.spec_p + spec_d5.spec_p + spec_d6.spec_p
 
-plot,  spec_sum.energy_kev, spec_sum.spec_p/delta_t, xr=[2,20], thick=4, psym=10, /xlog, /ylog, yr=[1.e-2,1.e2], /ysty, $
+plot,  spec_sum.energy_kev, spec_sum.spec_p, xr=[2,20], thick=4, psym=10, /xlog, /ylog, /ysty, $
   xtitle='Energy [keV]', ytitle='FOXSI counts s!U-1!N keV!U-1!N', xstyle=1, line=1, $
-  title = 'FOXSI count spectrum, all detectors, First target', charsize=1.2
+  title = 'FOXSI count spectrum, all detectors, First target', charsize=1.2, yr=[1., 1.e2]
 
 ;
 ; NOTE: Need temperature array (in log and linear), temperature bin width,
 ; and areas from one of Ishikawa's sets of values, above.
 ;
+
+; If desired, subtract a background.
+bkgd = [0.,0.,0., bkgd_off, fltarr(87)] * delta_t * 16.4^2
+spec_sum.spec_p -= bkgd
+
+; If desired, assume no detection and use 3-sigma of background as a limit.
+spec_sum.spec_p = bkgd + 3*sqrt(bkgd)
 
 ; Calculate FOXSI expected counts for each temperature interval.
 ; For now, just do this for temperatures above ~3 MK.
@@ -177,32 +184,75 @@ dem18 = spec_sum.spec_p[0:9]/delta_t / sim18.counts *1.d49 / dt[18] / area
 dem19 = spec_sum.spec_p[0:9]/delta_t / sim19.counts *1.d49 / dt[19] / area
 dem20 = spec_sum.spec_p[0:9]/delta_t / sim20.counts *1.d49 / dt[20] / area
 
-popen, 'dem-loci', xsi=7, ysi=5
+; Worst-case factor for blanketing.  set =1 to ignore blanket problem.
+blanket_factor = 0.05
+dem10b = spec_sum.spec_p[0:9]/delta_t / sim10.counts *1.d49 / dt[10] / area / blanket_factor
+dem11b = spec_sum.spec_p[0:9]/delta_t / sim11.counts *1.d49 / dt[11] / area / blanket_factor
+dem12b = spec_sum.spec_p[0:9]/delta_t / sim12.counts *1.d49 / dt[12] / area / blanket_factor
+dem13b = spec_sum.spec_p[0:9]/delta_t / sim13.counts *1.d49 / dt[13] / area / blanket_factor
+dem14b = spec_sum.spec_p[0:9]/delta_t / sim14.counts *1.d49 / dt[14] / area / blanket_factor
+dem15b = spec_sum.spec_p[0:9]/delta_t / sim15.counts *1.d49 / dt[15] / area / blanket_factor
+dem16b = spec_sum.spec_p[0:9]/delta_t / sim16.counts *1.d49 / dt[16] / area / blanket_factor
+dem17b = spec_sum.spec_p[0:9]/delta_t / sim17.counts *1.d49 / dt[17] / area / blanket_factor
+dem18b = spec_sum.spec_p[0:9]/delta_t / sim18.counts *1.d49 / dt[18] / area / blanket_factor
+dem19b = spec_sum.spec_p[0:9]/delta_t / sim19.counts *1.d49 / dt[19] / area / blanket_factor
+dem20b = spec_sum.spec_p[0:9]/delta_t / sim20.counts *1.d49 / dt[20] / area / blanket_factor
+
+test4 = [dem11[4],dem12[4],dem13[4],dem14[4],dem15[4],dem16[4],dem17[4],dem18[4],dem19[4],dem20[4]]
+test5 = [dem11[5],dem12[5],dem13[5],dem14[5],dem15[5],dem16[5],dem17[5],dem18[5],dem19[5],dem20[5]]
+test4b = [dem11b[4],dem12b[4],dem13b[4],dem14b[4],dem15b[4],dem16b[4],dem17b[4],dem18b[4],dem19b[4],dem20b[4]]
+test5b = [dem11b[5],dem12b[5],dem13b[5],dem14b[5],dem15b[5],dem16b[5],dem17b[5],dem18b[5],dem19b[5],dem20b[5]]
+
+popen, 'dem-loci-4', xsi=7, ysi=5
 th=4.
 loadct, 5
+hsi_linecolors
 colors = findgen(7)*32+16
 plot, logt, dem, /ylog, psym=10, thick=4, xtit='log[ T (MK) ]', ytit='dEM [cm!U-5!N K!U-1!N]', $
-	tit='FOXSI locii', charsi=1.2
+	tit='FOXSI locii, no detection 3-sigma above bkgd', charsi=1.1
+;oplot, 	logt[11:20], $
+;	   	[dem11b[3],dem12b[3],dem13b[3],dem14b[3],dem15b[3],dem16b[3],dem17b[3],dem18b[3],dem19b[3],dem20b[3]], $
+;	   	color = 6, thick=4
+oplot, 	logt[11:20], $
+	   	[dem11b[4],dem12b[4],dem13b[4],dem14b[4],dem15b[4],dem16b[4],dem17b[4],dem18b[4],dem19b[4],dem20b[4]], $
+	   	color = 7, thick=10
+oplot, 	logt[11:20], $
+	   	[dem11b[5],dem12b[5],dem13b[5],dem14b[5],dem15b[5],dem16b[5],dem17b[5],dem18b[5],dem19b[5],dem20b[5]], $
+	   	color = 8, thick=10
+polyfill, [logt[11:20],reverse(logt[11:20])], [test4, reverse(test4b)], color=7, /line_fill
+polyfill, [logt[11:20],reverse(logt[11:20])], [test5, reverse(test5b)], color=8, /line_fill
+;oplot, 	logt[11:20], $
+;	   	[dem11b[6],dem12b[6],dem13b[6],dem14b[6],dem15b[6],dem16b[6],dem17b[6],dem18b[6],dem19b[6],dem20b[6]], $
+;	   	color = 9, thick=4
+;oplot, 	logt[11:20], $
+;	   	[dem11b[7],dem12b[7],dem13b[7],dem14b[7],dem15b[7],dem16b[7],dem17b[7],dem18b[7],dem19b[7],dem20b[7]], $
+;	   	color = 10, thick=4
+;oplot, 	logt[11:20], $
+;	   	[dem11b[8],dem12b[8],dem13b[8],dem14b[8],dem15b[8],dem16b[8],dem17b[8],dem18b[8],dem19b[8],dem20b[8]], $
+;	   	color = 12, thick=4
+;oplot, 	logt[11:20], $
+;	   	[dem11b[9],dem12b[9],dem13b[9],dem14b[9],dem15b[9],dem16b[9],dem17b[9],dem18b[9],dem19b[9],dem20b[9]], $
+;	   	color = 2, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[3],dem12[3],dem13[3],dem14[3],dem15[3],dem16[3],dem17[3],dem18[3],dem19[3],dem20[3]], $
-	   	color = colors[0], thick=4
+	   	color = 6, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[4],dem12[4],dem13[4],dem14[4],dem15[4],dem16[4],dem17[4],dem18[4],dem19[4],dem20[4]], $
-	   	color = colors[1], thick=4
+	   	color = 7, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[5],dem12[5],dem13[5],dem14[5],dem15[5],dem16[5],dem17[5],dem18[5],dem19[5],dem20[5]], $
-	   	color = colors[2], thick=4
+	   	color = 8, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[6],dem12[6],dem13[6],dem14[6],dem15[6],dem16[6],dem17[6],dem18[6],dem19[6],dem20[6]], $
-	   	color = colors[3], thick=4
+	   	color = 9, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[7],dem12[7],dem13[7],dem14[7],dem15[7],dem16[7],dem17[7],dem18[7],dem19[7],dem20[7]], $
-	   	color = colors[4], thick=4
+	   	color = 10, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[8],dem12[8],dem13[8],dem14[8],dem15[8],dem16[8],dem17[8],dem18[8],dem19[8],dem20[8]], $
-	   	color = colors[5], thick=4
+	   	color = 12, thick=4
 oplot, 	logt[11:20], $
 	   	[dem11[9],dem12[9],dem13[9],dem14[9],dem15[9],dem16[9],dem17[9],dem18[9],dem19[9],dem20[9]], $
-	   	color = colors[6], thick=4
-legend, strtrim(spec_sum.energy_kev[3:9],2)+' keV', color=colors, line=0, box=0, thick=th, charsize=1.0
+	   	color = 2, thick=4
+legend, ['4.5 keV, 95% blanket absorption','5.5 keV, 95% blanket absorption',strtrim(spec_sum.energy_kev[3:9],2)+' keV'], color=[7,8,6,7,8,9,10,12,2], line=0, box=0, thick=[10,10,4,4,4,4,4,4,4], charsize=0.8
 pclose
