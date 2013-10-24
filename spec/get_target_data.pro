@@ -125,13 +125,13 @@ if keyword_set(eband) then begin
 endif
 
 if keyword_set(good) then begin
-	d0 = d0[ where(d0.error_flag eq 0) ]	
-	d1 = d1[ where(d1.error_flag eq 0) ]	
-	d2 = d2[ where(d2.error_flag eq 0) ]	
-	d3 = d3[ where(d3.error_flag eq 0) ]	
-	d4 = d4[ where(d4.error_flag eq 0) ]	
-	d5 = d5[ where(d5.error_flag eq 0) ]	
-	d6 = d6[ where(d6.error_flag eq 0) ]	
+	if total(d0.error_flag eq 0) then d0 = d0[ where(d0.error_flag eq 0) ] else d0 = -1
+	if total(d1.error_flag eq 0) then d1 = d1[ where(d1.error_flag eq 0) ] else d1 = -1
+	if total(d2.error_flag eq 0) then d2 = d2[ where(d2.error_flag eq 0) ] else d2 = -1
+	if total(d3.error_flag eq 0) then d3 = d3[ where(d3.error_flag eq 0) ] else d3 = -1
+	if total(d4.error_flag eq 0) then d4 = d4[ where(d4.error_flag eq 0) ] else d4 = -1
+	if total(d5.error_flag eq 0) then d5 = d5[ where(d5.error_flag eq 0) ] else d5 = -1
+	if total(d6.error_flag eq 0) then d6 = d6[ where(d6.error_flag eq 0) ] else d6 = -1
 endif
 return
 

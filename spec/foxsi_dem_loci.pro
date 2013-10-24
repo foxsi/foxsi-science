@@ -50,16 +50,16 @@ get_target_data, target, d0_targ, d1_targ, d2_targ, d3_targ, d4_targ, d5_targ, d
 
 n_det = total(dindex)
 
-if dindex[0] then data = d0_targ
-if dindex[1] then if exist(data) eq 0 then data=d1_targ else data=[data,d1_targ]
-if dindex[2] then if exist(data) eq 0 then data=d2_targ else data=[data,d2_targ]
-if dindex[3] then if exist(data) eq 0 then data=d3_targ else data=[data,d3_targ]
-if dindex[4] then if exist(data) eq 0 then data=d4_targ else data=[data,d4_targ]
-if dindex[5] then if exist(data) eq 0 then data=d5_targ else data=[data,d5_targ]
-if dindex[6] then if exist(data) eq 0 then data=d6_targ else data=[data,d6_targ]
+if dindex[0] and is_struct(d0_targ) then data = d0_targ
+if dindex[1] and is_struct(d1_targ) then if exist(data) eq 0 then data=d1_targ else data=[data,d1_targ]
+if dindex[2] and is_struct(d2_targ) then if exist(data) eq 0 then data=d2_targ else data=[data,d2_targ]
+if dindex[3] and is_struct(d3_targ) then if exist(data) eq 0 then data=d3_targ else data=[data,d3_targ]
+if dindex[4] and is_struct(d4_targ) then if exist(data) eq 0 then data=d4_targ else data=[data,d4_targ]
+if dindex[5] and is_struct(d5_targ) then if exist(data) eq 0 then data=d5_targ else data=[data,d5_targ]
+if dindex[6] and is_struct(d6_targ) then if exist(data) eq 0 then data=d6_targ else data=[data,d6_targ]
 
 if exist(data) eq 0 then begin
-	print, 'No detectors selected.'
+	print, 'No detectors data selected or found.'
 	return, -1
 endif
 
