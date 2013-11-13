@@ -115,23 +115,30 @@ if keyword_set(radius) then begin
 endif
 
 if keyword_set(eband) then begin
-	d0 = d0[ where(d0.hit_energy[1,*] gt eband[0] and d0.hit_energy[1,*] lt eband[1]) ]
-	d1 = d1[ where(d1.hit_energy[1,*] gt eband[0] and d1.hit_energy[1,*] lt eband[1]) ]
-	d2 = d2[ where(d2.hit_energy[1,*] gt eband[0] and d2.hit_energy[1,*] lt eband[1]) ]
-	d3 = d3[ where(d3.hit_energy[1,*] gt eband[0] and d3.hit_energy[1,*] lt eband[1]) ]
-	d4 = d4[ where(d4.hit_energy[1,*] gt eband[0] and d4.hit_energy[1,*] lt eband[1]) ]
-	d5 = d5[ where(d5.hit_energy[1,*] gt eband[0] and d5.hit_energy[1,*] lt eband[1]) ]
-	d6 = d6[ where(d6.hit_energy[1,*] gt eband[0] and d6.hit_energy[1,*] lt eband[1]) ]
+    d0num= where(d0.hit_energy[1,*] gt eband[0] and d0.hit_energy[1,*] lt eband[1]) 
+    d1num= where(d1.hit_energy[1,*] gt eband[0] and d1.hit_energy[1,*] lt eband[1]) 
+    d2num= where(d2.hit_energy[1,*] gt eband[0] and d2.hit_energy[1,*] lt eband[1]) 
+    d3num= where(d3.hit_energy[1,*] gt eband[0] and d3.hit_energy[1,*] lt eband[1]) 
+    d4num= where(d4.hit_energy[1,*] gt eband[0] and d4.hit_energy[1,*] lt eband[1]) 
+    d5num= where(d5.hit_energy[1,*] gt eband[0] and d5.hit_energy[1,*] lt eband[1]) 
+    d6num= where(d6.hit_energy[1,*] gt eband[0] and d6.hit_energy[1,*] lt eband[1]) 
+	if total(d0num) ne -1 then d0 = d0[d0num] else d0=-1
+	if total(d1num) ne -1 then d1 = d1[d1num] else d1=-1
+	if total(d2num) ne -1 then d2 = d2[d2num] else d2=-1
+	if total(d3num) ne -1 then d3 = d3[d3num] else d3=-1
+	if total(d4num) ne -1 then d4 = d4[d4num] else d4=-1
+	if total(d5num) ne -1 then d5 = d5[d5num] else d5=-1
+	if total(d6num) ne -1 then d6 = d6[d6num] else d6=-1
 endif
 
 if keyword_set(good) then begin
-	if total(d0.error_flag eq 0) then d0 = d0[ where(d0.error_flag eq 0) ] else d0 = -1
-	if total(d1.error_flag eq 0) then d1 = d1[ where(d1.error_flag eq 0) ] else d1 = -1
-	if total(d2.error_flag eq 0) then d2 = d2[ where(d2.error_flag eq 0) ] else d2 = -1
-	if total(d3.error_flag eq 0) then d3 = d3[ where(d3.error_flag eq 0) ] else d3 = -1
-	if total(d4.error_flag eq 0) then d4 = d4[ where(d4.error_flag eq 0) ] else d4 = -1
-	if total(d5.error_flag eq 0) then d5 = d5[ where(d5.error_flag eq 0) ] else d5 = -1
-	if total(d6.error_flag eq 0) then d6 = d6[ where(d6.error_flag eq 0) ] else d6 = -1
+	if is_struct(d0) then if total(d0.error_flag eq 0) then d0 = d0[ where(d0.error_flag eq 0) ] else d0 = -1
+	if is_struct(d1) then if total(d1.error_flag eq 0) then d1 = d1[ where(d1.error_flag eq 0) ] else d1 = -1
+	if is_struct(d2) then if total(d2.error_flag eq 0) then d2 = d2[ where(d2.error_flag eq 0) ] else d2 = -1
+	if is_struct(d3) then if total(d3.error_flag eq 0) then d3 = d3[ where(d3.error_flag eq 0) ] else d3 = -1
+	if is_struct(d4) then if total(d4.error_flag eq 0) then d4 = d4[ where(d4.error_flag eq 0) ] else d4 = -1
+	if is_struct(d5) then if total(d5.error_flag eq 0) then d5 = d5[ where(d5.error_flag eq 0) ] else d5 = -1
+	if is_struct(d6) then if total(d6.error_flag eq 0) then d6 = d6[ where(d6.error_flag eq 0) ] else d6 = -1
 endif
 return
 

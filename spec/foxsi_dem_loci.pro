@@ -28,6 +28,7 @@ FUNCTION	FOXSI_DEM_LOCI, LOGTE, ENERGY_BIN, AREA, TARGET=TARGET, DINDEX=DINDEX, 
 ;			Should be % transmission through extra blanketing.  (Ex. 0.05)
 ;
 ; HISTORY
+;       Updated 10/30/2013      Ishikawa
 ;	Created 10/22/2013	Linz
 ;
 
@@ -98,11 +99,11 @@ endfor
 ; Calculate dEM.  Earlier we assumed an EM of 1.d49 cm^-5 for the simulations.
 ; The ratio of measured to simulated counts tells us how much to adjust the EM 
 ; to match well for a particular energy bin.
-; Divide by area and temperature width to get dEM in units of cm^-5.
+; Divide by area and temperature width to get dEM in units of cm^-5 K^-1.
 
 dem = dblarr( n_te )
 for i=0, n_te-1 do begin
-	dem[i] = cts_meas / cts_sim[i] *1.d49 / area
+	dem[i] = cts_meas / cts_sim[i] *1.d49 / area /dT[i]
 endfor
 
 ; Correct for blanketing absorption, if desired.

@@ -256,3 +256,25 @@ oplot, 	logt[11:20], $
 	   	color = 2, thick=4
 legend, ['4.5 keV, 95% blanket absorption','5.5 keV, 95% blanket absorption',strtrim(spec_sum.energy_kev[3:9],2)+' keV'], color=[7,8,6,7,8,9,10,12,2], line=0, box=0, thick=[10,10,4,4,4,4,4,4,4], charsize=0.8
 pclose
+
+
+;
+; Now, using the new FOXSI_DEM_LOCI routine...
+;
+
+@foxsi-setup-script
+
+energy_bin=[6.,7.]		; choose an energy bin; the function returns a single 
+						; loci curve for this bin.
+target=1				; choose a FOXSI target; default is first target
+logte = findgen(21)/10. + 5.5	; choose a temperature array
+area = 100.^2 * (0.725d8)^2		; choose an area
+detectors = [0,0,0,0,1,0,0]		; choose which detector to use.
+								; most of the counts are from D4,
+								; so best to use D4 only.
+
+loci_6keV = foxsi_dem_loci( logte, energy_bin, area, target=1, dindex=dindex, $
+	d0=data_lvl2_d0, d1=data_lvl2_d1, d2=data_lvl2_d2, d3=data_lvl2_d3, $
+	d4=data_lvl2_d4, d5=data_lvl2_d5, d6=data_lvl2_d6 )
+
+plot, logte, loci_6keV, /ylog, xtitle='Temperature [log(MK)]', ytitle='dEM [cm!U-5!N]'
