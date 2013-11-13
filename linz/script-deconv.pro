@@ -8,10 +8,11 @@
 ; Step 3: Loop through the deconvolution, displaying results at each step.
 
 
-pix=3.
+pix=2.		; usual value 3
 fov=2.		; 2 arcmin is probably the best to use, although it doesn't make much difference.
 dim = fov*60./pix
-erange=[4,15]
+;erange=[4,15]
+erange=[6,8]		; default [4,15]
 loadct, 5
 
 
@@ -57,9 +58,10 @@ endfor
 
 cen = [250., -326.]
 psf = shift_map( make_submap( m_sum, cen=cen, fov=fov ), -cen[0], -cen[1] )
-psf = rot_map( psf, 90 )
+psf_orig = shift_map( make_submap( m_sum, cen=cen, fov=fov ), -cen[0], -cen[1] )
+psf  = rot_map( psf, 79 )	; true should prob be ~79 deg.
 
-psf = make_map( frebin( psf.data, dim, dim, /total ), dx=pix, dy=pix )
+psf  = make_map( frebin( psf.data, dim, dim, /total ), dx=pix, dy=pix )
 
 ; renormalize:
 psf.data = psf.data / total(psf.data)
@@ -79,7 +81,7 @@ t6_start = 438.5		; Target 6 (flare)
 t6_end = 498.3
 
 tr = [t4_start, t6_end]
-tr = [ 360, 420 ]
+;tr = [ 360, 420 ]
 
 imdim = 10000/fix(pix)
 img0=foxsi_image_solar(data_lvl2_d0,0,psize=pix,erange=erange,trange=tr,thr_n=4.,/xycor, size=[imdim,imdim])
@@ -97,13 +99,15 @@ img6=foxsi_image_solar(data_lvl2_d6,6,psize=pix,erange=erange,trange=tr,thr_n=4.
 ;img5=foxsi_image_solar(data_lvl2_d5,5,psize=pix,erange=erange,trange=tr,thr_n=4., size=[imdim,imdim])
 ;img6=foxsi_image_solar(data_lvl2_d6,6,psize=pix,erange=erange,trange=tr,thr_n=4., size=[imdim,imdim])
 
-map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix )
-map1 = make_map( img1, xcen=0., ycen=0., dx=pix, dy=pix )
-map2 = make_map( img2, xcen=0., ycen=0., dx=pix, dy=pix )
-map3 = make_map( img3, xcen=0., ycen=0., dx=pix, dy=pix )
-map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix )
-map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix )
-map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix )
+smooth=4
+map0 = make_map( smooth(img0,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+map1 = make_map( smooth(img1,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+map2 = make_map( smooth(img2,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+map3 = make_map( smooth(img3,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+map4 = make_map( smooth(img4,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+map5 = make_map( smooth(img5,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+map6 = make_map( smooth(img6,smooth), xcen=0., ycen=0., dx=pix, dy=pix )
+;map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix )
 ;plot_map, map6, /limb, cen=flare, fov=2, /cbar
 
 ; Selecting subregions...'
@@ -133,25 +137,33 @@ print, 'Performing deconvolution...'
 iter = [1,2,3,4,5,10,20,40,60,80]
 n = n_elements(iter)
 deconv_map = replicate( raw6, n )
+reconv_map = replicate( raw6, n )
 
-raw = raw5
-;raw.data = raw0.data+raw1.data+raw2.data+raw4.data+raw5.data+raw6.data
+raw = raw6
+;raw.data = raw4.data+raw5.data+raw6.data
 ;raw.data = raw4.data+raw6.data
 
 ;.r
 for j=0, n-1 do begin & $
 undefine, deconv & $
-for i=0, iter[j] do max_likelihood, raw.data, psf.data, deconv & $
+for i=0, iter[j] do max_likelihood, raw.data, psf.data, deconv, reconv & $
 deconv_map[j].data = deconv & $
+reconv_map[j].data = reconv & $
 deconv_map[j].id=strtrim(iter[j],2)+' iter' & $
 endfor & $
 ;end
 
+cstat = fltarr(n)
+print, 'Cash statistics:'
+for j=0, n-1 do print, 'Iteration ', iter[j], ':  ', c_statistic( reconv_map[j].data, raw6.data )
+for j=0, n-1 do cstat[j] = c_statistic( reconv_map[j].data, raw6.data )
+
 print, 'Done.'
 
 ch=1.2
-popen, 'test', xsi=8, ysi=11
+;popen, 'test', xsi=8, ysi=11
 ;popen, 'deconvolution-D5-pix'+strtrim(fix(pix),2)+'arcsec', xsi=8, ysi=11
+popen, 'deconvolution-D6', xsi=8, ysi=11
 !p.multi=[0,3,4]
 plot_map, psf, tit='PSF (measured post-flight D5)', charsi=ch
 plot_map, raw, tit='Raw Det 6 image', charsi=ch
@@ -167,4 +179,4 @@ restore, 'data_2012/aia-maps-flare.sav', /v
 
 !p.multi=0
 plot_map, aia[0]
-plot_map, shift_map(deconv_map[6], flare[0], flare[1]), /over, lev=[5,10,20,40,60,80], /per
+plot_map, shift_map(deconv_map[6], flare[0], flare[1]), /over, lev=[10,20,40,60,80], /per

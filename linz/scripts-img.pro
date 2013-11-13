@@ -1,4 +1,4 @@
-@linz/foxsi-setup-script
+@foxsi-setup-script
 
 ; this selection isn't really necessary since foxsi_image_solar already makes this cut.
 i0 = where( data_lvl2_d0.error_flag eq 0 )

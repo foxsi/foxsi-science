@@ -108,13 +108,13 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
 ;  img = congrid( img_nat, size[0], size[1], /center, /interp )
 ;  img = img*total(img_nat)/total(img)
 
+if keyword_set(stop) then stop
+
   ;wdef,600,600
   ;image_cont, alog(img+1)
   ;print, 'max count = ',max(img)
   ;print, 'max count rate = ', max(img)/(trange[1]-trange[0])
   ;return, img/(trange[1]-trange[0])
-
-if keyword_set(stop) then stop
 
 return, img
 

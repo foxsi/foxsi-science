@@ -88,39 +88,43 @@ if choice eq 2 then save, energy_kev, sim_img, file='linz/sim-foxsi-img-lf.sav $
 
 restore, 'linz/sim-foxsi-img-hf.sav', /v
 sim_img_hf = sim_img
-mTotHF = make_map( total( sim_img, 1 ), dx=5., dy=5. )
-mHF1   = make_map( total( sim_img[8:11,*,*], 1 ), dx=5., dy=5. )
-mHF2   = make_map( total( sim_img[12:15,*,*], 1 ), dx=5., dy=5. )
-mHF3   = make_map( total( sim_img[16:19,*,*], 1 ), dx=5., dy=5. )
-mHF4   = make_map( total( sim_img[20:23,*,*], 1 ), dx=5., dy=5. )
-mHF67   = make_map( reform(sim_img[12,*,*]), dx=5., dy=5. )
+map_hi = make_map( total( sim_img, 1 ), dx=5., dy=5. )
+map_5_hi = make_map( total( sim_img[8:11,*,*], 1 ), dx=5., dy=5. )
+map_7_hi = make_map( total( sim_img[12:15,*,*], 1 ), dx=5., dy=5. )
+map_9_hi  = make_map( total( sim_img[16:19,*,*], 1 ), dx=5., dy=5. )
+; map_11_hi = make_map( total( sim_img[20:23,*,*], 1 ), dx=5., dy=5. )
+
+foxsi_maps_hifreq = [map_hi, map_5_hi, map_7_hi, map_9_hi]
+foxsi_maps_hifreq.id = 'FOXSI '+['4-15','4-6','6-8','8-10']+' keV'
 
 restore, 'linz/sim-foxsi-img-lf.sav', /v
 sim_img_lf = sim_img
-mTotLF = make_map( total( sim_img, 1 ), dx=5., dy=5. )
-mLF1   = make_map( total( sim_img[8:11,*,*], 1 ), dx=5., dy=5. )
-mLF2   = make_map( total( sim_img[12:15,*,*], 1 ), dx=5., dy=5. )
-mLF3   = make_map( total( sim_img[16:19,*,*], 1 ), dx=5., dy=5. )
-mLF4   = make_map( total( sim_img[20:23,*,*], 1 ), dx=5., dy=5. )
-mLF67   = make_map( reform(sim_img[12,*,*]), dx=5., dy=5. )
+map_lo = make_map( total( sim_img, 1 ), dx=5., dy=5. )
+map_5_lo = make_map( total( sim_img[8:11,*,*], 1 ), dx=5., dy=5. )
+map_7_lo = make_map( total( sim_img[12:15,*,*], 1 ), dx=5., dy=5. )
+map_9_lo = make_map( total( sim_img[16:19,*,*], 1 ), dx=5., dy=5. )
+map_11_lo = make_map( total( sim_img[20:23,*,*], 1 ), dx=5., dy=5. )
 
-!p.multi=[0,5,2]
+foxsi_maps_lofreq = [map_lo, map_5_lo, map_7_lo, map_9_lo]
+foxsi_maps_lofreq.id = 'FOXSI '+['4-15','4-6','6-8','8-10']+' keV'
+
+!p.multi=[0,4,2]
 loadct,3
 window, xsi=1000, ysi=400
 
-popen, 'sim-foxsi-img-nosc', /land  
+;popen, 'sim-foxsi-img-nosc', /land  
 
-plot_map, mTotHF, tit='FOXSI HF 4-15 keV';, /log, dmax=max(sim_img_hf)
-plot_map, mHF1, tit='HF 4-6 keV';, /log, dmax=max(2*sim_img_hf)
-plot_map, mHF2, tit='HF 6-8 keV';, /log, dmax=max(2*sim_img_hf)
-plot_map, mHF3, tit='HF 8-10 keV';, /log, dmax=max(2*sim_img_hf)
-plot_map, mHF4, tit='HF 10-12 keV';, /log, dmax=max(2*sim_img_hf)
+plot_map, map_hi, /log, dmax=max(sim_img_hf)
+plot_map, map_5_hi, /log, dmax=max(2*sim_img_hf)
+plot_map, map_7_hi, /log, dmax=max(2*sim_img_hf)
+plot_map, map_9_hi, /log, dmax=max(2*sim_img_hf)
+;plot_map, mHF4, /log, dmax=max(2*sim_img_hf)
 
-plot_map, mTotLF, tit='FOXSI LF 4-15 keV';, /log, dmax=max(sim_img_lf)
-plot_map, mLF1, tit='LF 4-6 keV';, /log, dmax=max(2*sim_img_lf)
-plot_map, mLF2, tit='LF 6-8 keV';, /log, dmax=max(2*sim_img_lf)
-plot_map, mLF3, tit='LF 8-10 keV';, /log, dmax=max(2*sim_img_lf)
-plot_map, mLF4, tit='LF 10-12 keV';, /log, dmax=max(2*sim_img_lf)
+plot_map, map_lo, /log, dmax=max(sim_img_lf)
+plot_map, map_5_lo, /log, dmax=max(2*sim_img_lf)
+plot_map, map_7_lo, /log, dmax=max(2*sim_img_lf)
+plot_map, map_9_lo, /log, dmax=max(2*sim_img_lf)
+;plot_map, mLF4, /log, dmax=max(2*sim_img_lf)
 
 
 ;

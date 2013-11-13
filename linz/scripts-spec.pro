@@ -431,5 +431,78 @@ get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, rad=rad, center=flare_xy
 spec = make_spectrum( [d0,d2,d4,d5,d6], /three, /corr, bin=0.3 )
 
 plot, spec.energy_kev, spec.spec_p, /xlo, /ylo, xr=[2.,15.], /xsty, yr=[1.e1,1.e4], psym=10
+oplot_err, spec.energy_kev, spec.spec_p, yerr=spec.spec_p_err, psym=10
+
+;
+; imaging spectroscopy of flare using D6
+;
+
+flare_xy = [1020.,-320.]
+
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6
+get_target_data, 6, d0a,d1a,d2a,d3a,d4a,d5a,d6a
+
+d6 = [d6,d6a]
+
+pix=13.
+er=[4,15]
+img=foxsi_image_solar(d6, 6, ps=pix, er=erange, thr_n=5. )
+map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix )
+plot_map, map, /limb, cen=flare_xy, fov=2, /cb
+
+n = (1080-960)/pix
+xbins = 960 + findgen(n+1)*pix
+ybins = -270 - findgen(n+1)*pix
+
+spec = make_spectrum( d6, bin=2.0 )
+spec = replicate( spec, n_elements(xbins)-1,n_elements(ybins)-1 )
+spec.spec_n = 0.
+spec.spec_p = 0.
+spec.spec_p_err = 0.
+
+.r
+for i=0, n_elements(xbins)-2 do begin
+	for j=0, n_elements(ybins)-2 do begin
+		k=where(d6.hit_xy_solar[0] ge xbins[i] and d6.hit_xy_solar[0] le xbins[i+1] and $
+				d6.hit_xy_solar[1] le ybins[j] and d6.hit_xy_solar[1] ge ybins[j+1] )
+		if n_elements(k) lt 20 then continue
+		temp = make_spectrum( d6[k], bin=2. )
+		spec[i,j] = temp
+	endfor
+endfor
+end
+
+ratio = spec.spec_p[3] / spec.spec_p[2]
+x = get_edges( xbins, /mean )
+y = get_edges( ybins, /mean )
+nx=n_elements(x)
+ny=n_elements(y)
+x = rebin( x, nx, ny)
+y = rebin( transpose(y), nx, ny)
+dist = sqrt( (x-flare_xy[0])^2 + (y-flare_xy[1])^2 )
+plot, dist, ratio, /psy
+plot_map, make_map( ratio ), /cb
+
+
+plot, spec[0,0].energy_kev, spec[0,0].spec_p, /xlo, /ylo, xr=[2.,15.], /xsty, yr=[1.e-2,1.], /nodata
+for i=0, n_elements(xbins)-1 do $
+  for j=0, n_elements(ybins)-1 do $
+    oplot, spec[i,j].energy_kev, spec[i,j].spec_p/max(spec[i,j].spec_p), psym=10
+
+pix=10.
+er=[4,6]
+imgL=foxsi_image_solar(d6, 6, ps=pix, er=er, thr_n=5. )
+mapL = make_map( imgL, xcen=0., ycen=0., dx=pix, dy=pix )
+plot_map, mapL, /limb, cen=flare_xy, fov=2, /cb
+er=[6,8]
+imgH=foxsi_image_solar(d6, 6, ps=pix, er=er, thr_n=5. )
+mapH = make_map( imgH, xcen=0., ycen=0., dx=pix, dy=pix )
+plot_map, mapH, /limb, cen=flare_xy, fov=2, /cb
+
+maph.data[ where(maph.data lt 10.) ] = 0.
+mapl.data[ where(mapl.data lt 10.) ] = 0.
+ratio = mapH
+ratio.data = maph.data / mapl.data
+plot_map, ratio, /limb, cen=flare_xy, fov=2, /cb, dmax=10.
 
 
