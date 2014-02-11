@@ -28,7 +28,7 @@ FUNCTION	FOXSI_DEM_LOCI, LOGTE, ENERGY_BIN, AREA, TARGET=TARGET, DINDEX=DINDEX, 
 ;	BLANKET_FACTOR	Ad-hoc blanketing factor to include in the loci curve.
 ;			Should be % transmission through extra blanketing.  (Ex. 0.05)
 ;	FOXSI2	Do the calculation for FOXSI-2's response.  Default is FOXSI-1.
-;	OFFAXIS	Set to an off-axis angle in degrees to include the off-axis optics response.
+;	OFFAXIS	Set to an off-axis angle in arcmin to include the off-axis optics response.
 ;			Default is zero.
 ;
 ; HISTORY
