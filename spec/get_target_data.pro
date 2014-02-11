@@ -92,28 +92,6 @@ endelse
 
 if keyword_set(stop) then stop
 
-if keyword_set(radius) then begin
-	if keyword_set(quad) then begin
-		if n_elements(center) eq 2 then center=[[center],[center],[center],[center],[center],[center],[center]]
-		d0 = d0[ where( ((d0.hit_xy_solar[0,*]-center[0,0]) le 0) and ((d0.hit_xy_solar[1,*]-center[1,0]) le 0) and sqrt((d0.hit_xy_solar[0,*]-center[0,0])^2 +(d0.hit_xy_solar[1,*]-center[1,0])^2) lt radius)	]
-		d1 = d1[ where( ((d1.hit_xy_solar[0,*]-center[0,1]) le 0) and ((d1.hit_xy_solar[1,*]-center[1,1]) le 0) and sqrt((d1.hit_xy_solar[0,*]-center[0,1])^2 +(d1.hit_xy_solar[1,*]-center[1,1])^2) lt radius)	]
-		d2 = d2[ where( ((d2.hit_xy_solar[0,*]-center[0,2]) le 0) and ((d2.hit_xy_solar[1,*]-center[1,2]) le 0) and sqrt((d2.hit_xy_solar[0,*]-center[0,2])^2 +(d2.hit_xy_solar[1,*]-center[1,2])^2) lt radius)	]
-		d3 = d3[ where( ((d3.hit_xy_solar[0,*]-center[0,3]) le 0) and ((d3.hit_xy_solar[1,*]-center[1,3]) le 0) and sqrt((d3.hit_xy_solar[0,*]-center[0,3])^2 +(d3.hit_xy_solar[1,*]-center[1,3])^2) lt radius)	]
-		d4 = d4[ where( ((d4.hit_xy_solar[0,*]-center[0,4]) le 0) and ((d4.hit_xy_solar[1,*]-center[1,4]) le 0) and sqrt((d4.hit_xy_solar[0,*]-center[0,4])^2 +(d4.hit_xy_solar[1,*]-center[1,4])^2) lt radius)	]
-		d5 = d5[ where( ((d5.hit_xy_solar[0,*]-center[0,5]) le 0) and ((d5.hit_xy_solar[1,*]-center[1,5]) le 0) and sqrt((d5.hit_xy_solar[0,*]-center[0,5])^2 +(d5.hit_xy_solar[1,*]-center[1,5])^2) lt radius)	]
-		d6 = d6[ where( ((d6.hit_xy_solar[0,*]-center[0,6]) le 0) and ((d6.hit_xy_solar[1,*]-center[1,6]) le 0) and sqrt((d6.hit_xy_solar[0,*]-center[0,6])^2 +(d6.hit_xy_solar[1,*]-center[1,6])^2) lt radius)	]
-	endif else begin
-		if n_elements(center) eq 2 then center=[[center],[center],[center],[center],[center],[center],[center]]
-		d0 = d0[ where( sqrt((d0.hit_xy_solar[0,*]-center[0,0])^2 +(d0.hit_xy_solar[1,*]-center[1,0])^2) lt radius)	]
-		d1 = d1[ where( sqrt((d1.hit_xy_solar[0,*]-center[0,1])^2 +(d1.hit_xy_solar[1,*]-center[1,1])^2) lt radius)	]
-		d2 = d2[ where( sqrt((d2.hit_xy_solar[0,*]-center[0,2])^2 +(d2.hit_xy_solar[1,*]-center[1,2])^2) lt radius)	]
-		d3 = d3[ where( sqrt((d3.hit_xy_solar[0,*]-center[0,3])^2 +(d3.hit_xy_solar[1,*]-center[1,3])^2) lt radius)	]
-		d4 = d4[ where( sqrt((d4.hit_xy_solar[0,*]-center[0,4])^2 +(d4.hit_xy_solar[1,*]-center[1,4])^2) lt radius)	]
-		d5 = d5[ where( sqrt((d5.hit_xy_solar[0,*]-center[0,5])^2 +(d5.hit_xy_solar[1,*]-center[1,5])^2) lt radius)	]
-		d6 = d6[ where( sqrt((d6.hit_xy_solar[0,*]-center[0,6])^2 +(d6.hit_xy_solar[1,*]-center[1,6])^2) lt radius)	]
-	endelse
-endif
-
 if keyword_set(eband) then begin
     d0num= where(d0.hit_energy[1,*] gt eband[0] and d0.hit_energy[1,*] lt eband[1]) 
     d1num= where(d1.hit_energy[1,*] gt eband[0] and d1.hit_energy[1,*] lt eband[1]) 
@@ -140,6 +118,32 @@ if keyword_set(good) then begin
 	if is_struct(d5) then if total(d5.error_flag eq 0) then d5 = d5[ where(d5.error_flag eq 0 or d5.error_flag eq 3 or d5.error_flag eq 64 or d5.error_flag eq 72) ] else d5 = -1
 	if is_struct(d6) then if total(d6.error_flag eq 0) then d6 = d6[ where(d6.error_flag eq 0 or d6.error_flag eq 3 or d6.error_flag eq 64 or d6.error_flag eq 72) ] else d6 = -1
 endif
+
+if keyword_set(radius) then begin
+	if keyword_set(quad) then begin
+		if n_elements(center) eq 2 then center=[[center],[center],[center],[center],[center],[center],[center]]
+		d0 = d0[ where( ((d0.hit_xy_solar[0,*]-center[0,0]) le 0) and ((d0.hit_xy_solar[1,*]-center[1,0]) le 0) and sqrt((d0.hit_xy_solar[0,*]-center[0,0])^2 +(d0.hit_xy_solar[1,*]-center[1,0])^2) lt radius)	]
+		d1 = d1[ where( ((d1.hit_xy_solar[0,*]-center[0,1]) le 0) and ((d1.hit_xy_solar[1,*]-center[1,1]) le 0) and sqrt((d1.hit_xy_solar[0,*]-center[0,1])^2 +(d1.hit_xy_solar[1,*]-center[1,1])^2) lt radius)	]
+		d2 = d2[ where( ((d2.hit_xy_solar[0,*]-center[0,2]) le 0) and ((d2.hit_xy_solar[1,*]-center[1,2]) le 0) and sqrt((d2.hit_xy_solar[0,*]-center[0,2])^2 +(d2.hit_xy_solar[1,*]-center[1,2])^2) lt radius)	]
+		d3 = d3[ where( ((d3.hit_xy_solar[0,*]-center[0,3]) le 0) and ((d3.hit_xy_solar[1,*]-center[1,3]) le 0) and sqrt((d3.hit_xy_solar[0,*]-center[0,3])^2 +(d3.hit_xy_solar[1,*]-center[1,3])^2) lt radius)	]
+		d4 = d4[ where( ((d4.hit_xy_solar[0,*]-center[0,4]) le 0) and ((d4.hit_xy_solar[1,*]-center[1,4]) le 0) and sqrt((d4.hit_xy_solar[0,*]-center[0,4])^2 +(d4.hit_xy_solar[1,*]-center[1,4])^2) lt radius)	]
+		d5 = d5[ where( ((d5.hit_xy_solar[0,*]-center[0,5]) le 0) and ((d5.hit_xy_solar[1,*]-center[1,5]) le 0) and sqrt((d5.hit_xy_solar[0,*]-center[0,5])^2 +(d5.hit_xy_solar[1,*]-center[1,5])^2) lt radius)	]
+		d6 = d6[ where( ((d6.hit_xy_solar[0,*]-center[0,6]) le 0) and ((d6.hit_xy_solar[1,*]-center[1,6]) le 0) and sqrt((d6.hit_xy_solar[0,*]-center[0,6])^2 +(d6.hit_xy_solar[1,*]-center[1,6])^2) lt radius)	]
+	endif else begin
+		if n_elements(center) eq 2 then center=[[center],[center],[center],[center],[center],[center],[center]]
+		data = [d0,d2,d4,d5,d6]
+		data = data[ where( sqrt((data.hit_xy_solar[0,*]-center[0,0])^2 +(data.hit_xy_solar[1,*]-center[1,0])^2) lt radius)	]
+		d0 = data
+;		d0 = d0[ where( sqrt((d0.hit_xy_solar[0,*]-center[0,0])^2 +(d0.hit_xy_solar[1,*]-center[1,0])^2) lt radius)	]
+;		d1 = d1[ where( sqrt((d1.hit_xy_solar[0,*]-center[0,1])^2 +(d1.hit_xy_solar[1,*]-center[1,1])^2) lt radius)	]
+;		d2 = d2[ where( sqrt((d2.hit_xy_solar[0,*]-center[0,2])^2 +(d2.hit_xy_solar[1,*]-center[1,2])^2) lt radius)	]
+;		d3 = d3[ where( sqrt((d3.hit_xy_solar[0,*]-center[0,3])^2 +(d3.hit_xy_solar[1,*]-center[1,3])^2) lt radius)	]
+;		d4 = d4[ where( sqrt((d4.hit_xy_solar[0,*]-center[0,4])^2 +(d4.hit_xy_solar[1,*]-center[1,4])^2) lt radius)	]
+;		d5 = d5[ where( sqrt((d5.hit_xy_solar[0,*]-center[0,5])^2 +(d5.hit_xy_solar[1,*]-center[1,5])^2) lt radius)	]
+;		d6 = d6[ where( sqrt((d6.hit_xy_solar[0,*]-center[0,6])^2 +(d6.hit_xy_solar[1,*]-center[1,6])^2) lt radius)	]
+	endelse
+endif
+
 return
 
 END
