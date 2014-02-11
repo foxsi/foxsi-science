@@ -46,6 +46,8 @@ obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specf
 obj = ospex()
 obj-> set, spex_specfile= 'linz/hsi_spec_20121102_30sec_D1.fits'
 obj-> set, spex_drmfile= 'linz/hsi_srm_20121102_30sec_D1.fits'
+obj-> set, spex_bk_time_interval=[' 2-Nov-2012 17:50:30.000', ' 2-Nov-2012 17:53:00.000']
+obj-> set, spex_fit_time_interval= [[' 2-Nov-2012 18:01:30.000', ' 2-Nov-2012 18:02:00.000']]
 
 ; 0.00753, 0.732
 ; 0.00588, 0.751

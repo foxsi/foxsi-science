@@ -4,7 +4,21 @@ T = 9.4  ; temperature in MK
 EM = 4.8e-3  ; emission measure in units of 10^49
 bin=0.3
 
-time_int = 60.
+; new parameters after using drm_mod:
+T = 9.18
+EM = 3.77e-3
+
+time_int = 1.
+bin=0.3
+
+spec = get_target_spectra( 4, /correct, binwidth=bin )
+spec_d0 = spec[0]
+spec_d1 = spec[1]
+spec_d2 = spec[2]
+spec_d3 = spec[3]
+spec_d4 = spec[4]
+spec_d5 = spec[5]
+spec_d6 = spec[6]
 
 sim_det0 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det108_asic2.sav' )
 sim_det1 = foxsi_count_spectrum(em, t, time=time_int, binsize=bin, /single, let_file='efficiency_det109_asic2.sav' )
@@ -31,7 +45,7 @@ plot, sim_det6.energy_kev, sim_det6.counts, xr=[2,10], /xlo, /ylo, /xsty, /ysty,
 ;	title='Comparison of sim and measured counts for detector 6 (1 minute)', $
 	psym=10
 oplot, spec_d6.energy_kev, spec_d6.spec_p, psym=10, color=2
-
+oplot, sim.energy_kev, sim.counts/60., psym=10, color=2
 
 ; Calculate absorption due to various multiples of the blanketing.
 mylar=82.55

@@ -1,4 +1,4 @@
-@linz/foxsi-setup-script
+@foxsi-setup-script
 
 ; Plot basic spectra (integrated over whole flight)
 spex0=make_spectrum( data_lvl2_d0, bin=0.1, /corr )
@@ -505,4 +505,132 @@ ratio = mapH
 ratio.data = maph.data / mapl.data
 plot_map, ratio, /limb, cen=flare_xy, fov=2, /cb, dmax=10.
 
+;
+; Look at first target again.
+;
+
+;binwidth=1.
+
+@foxsi-setup-script
+get_target_data, 1, d0,d1,d2,d3,d4,d5,d6
+get_target_data, 2, d0_good2,d1_good2,d2_good2,d3_good2,d4_good2,d5_good2,d6_good2, /good
+
+i0=where(d0.hit_energy[1] gt 4 and d0.hit_energy[1] lt 15)
+i1=where(d1.hit_energy[1] gt 4 and d1.hit_energy[1] lt 15)
+i2=where(d2.hit_energy[1] gt 4 and d2.hit_energy[1] lt 15)
+i3=where(d3.hit_energy[1] gt 4 and d3.hit_energy[1] lt 15)
+i4=where(d4.hit_energy[1] gt 4 and d4.hit_energy[1] lt 15)
+i5=where(d5.hit_energy[1] gt 4 and d5.hit_energy[1] lt 15)
+i6=where(d6.hit_energy[1] gt 4 and d6.hit_energy[1] lt 15)
+i0g=where(d0_good.hit_energy[1] gt 4 and d0_good.hit_energy[1] lt 15)
+i1g=where(d1_good.hit_energy[1] gt 4 and d1_good.hit_energy[1] lt 15)
+i2g=where(d2_good.hit_energy[1] gt 4 and d2_good.hit_energy[1] lt 15)
+i3g=where(d3_good.hit_energy[1] gt 4 and d3_good.hit_energy[1] lt 15)
+i4g=where(d4_good.hit_energy[1] gt 4 and d4_good.hit_energy[1] lt 15)
+i5g=where(d5_good.hit_energy[1] gt 4 and d5_good.hit_energy[1] lt 15)
+i6g=where(d6_good.hit_energy[1] gt 4 and d6_good.hit_energy[1] lt 15)
+
+j0=where(d0.error_flag eq 4)
+j1=where(d1.error_flag eq 4)
+j2=where(d2.error_flag eq 4)
+j3=where(d3.error_flag eq 4)
+j4=where(d4.error_flag eq 4)
+j5=where(d5.error_flag eq 4)
+j6=where(d6.error_flag eq 4)
+
+n0=n_elements(d0)
+n1=n_elements(d1)
+n2=n_elements(d2)
+n3=n_elements(d3)
+n4=n_elements(d4)
+n5=n_elements(d5)
+n6=n_elements(d6)
+n0g2=n_elements(d0_good2)
+n1g2=n_elements(d1_good2)
+n2g2=n_elements(d2_good2)
+n3g2=n_elements(d3_good2)
+n4g2=n_elements(d4_good2)
+n5g2=n_elements(d5_good2)
+n6g2=n_elements(d6_good2)
+
+ratio = [float(n0g)/n0,float(n1g)/n1,float(n2g)/n2,float(n3g)/n3,float(n4g)/n4,float(n5g)/n5,float(n6g)/n6]
+
+pix=10.
+er=[4,15]
+tr = [t2_start, t2_end]
+
+i = where(d4.error_flag eq 4)
+img4err=foxsi_image_solar( d4[i], 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img4=foxsi_image_solar( d4, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img4good=foxsi_image_solar( d4_good2, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+map4err = make_map( img4err, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+map4good = make_map( img4good, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+
+plot_map, map4, cen=cen1, fov=20, /limb
+
+
+img0=foxsi_image_solar( d0, 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img1=foxsi_image_solar( d1, 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img2=foxsi_image_solar( d2, 2, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img3=foxsi_image_solar( d3, 3, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img4=foxsi_image_solar( d4, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img5=foxsi_image_solar( d5, 5, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img6=foxsi_image_solar( d6, 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img =foxsi_image_solar_int( d0,d1,d2,d3,d4,d5,d6, $
+		psize=pix, erange=er, trange=tr-t_launch, thr_n=4.);, /xycor )
+img0g=foxsi_image_solar( d0_good, 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img1g=foxsi_image_solar( d1_good, 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img2g=foxsi_image_solar( d2_good, 2, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img3g=foxsi_image_solar( d3_good, 3, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img4g=foxsi_image_solar( d4_good, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img5g=foxsi_image_solar( d5_good, 5, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img6g=foxsi_image_solar( d6_good, 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+imgg =foxsi_image_solar_int( d0_good,d1_good,d2_good,d3_good,d4_good,d5_good,d6_good, $
+		psize=pix, erange=er, trange=tr-t_launch, thr_n=4., /xycor )
+img0e=foxsi_image_solar( d0[where(d0.error_flag eq 4)], 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img1e=foxsi_image_solar( d1[where(d1.error_flag eq 4)], 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img2e=foxsi_image_solar( d2[where(d2.error_flag eq 4)], 2, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img3e=foxsi_image_solar( d3[where(d3.error_flag eq 4)], 3, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img4e=foxsi_image_solar( d4[where(d4.error_flag eq 4)], 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img5e=foxsi_image_solar( d5[where(d5.error_flag eq 4)], 5, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+img6e=foxsi_image_solar( d6[where(d6.error_flag eq 4)], 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
+imge =foxsi_image_solar_int( d0[where(d0.error_flag eq 4)],d1[where(d1.error_flag eq 4)],d2[where(d2.error_flag eq 4)],d3[where(d3.error_flag eq 4)],d4[where(d4.error_flag eq 4)],d5[where(d5.error_flag eq 4)],d6[where(d6.error_flag eq 4)], $
+		psize=pix, erange=er, trange=tr-t_launch, thr_n=4.);, /xycor )
+
+map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix, id='D0',time=anytim( anytim(t0)+tr[0], /yo))
+map1 = make_map( img1, xcen=0., ycen=0., dx=pix, dy=pix, id='D1',time=anytim( anytim(t0)+tr[0], /yo))
+map2 = make_map( img2, xcen=0., ycen=0., dx=pix, dy=pix, id='D2',time=anytim( anytim(t0)+tr[0], /yo))
+map3 = make_map( img3, xcen=0., ycen=0., dx=pix, dy=pix, id='D3',time=anytim( anytim(t0)+tr[0], /yo))
+map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix, id='D5',time=anytim( anytim(t0)+tr[0], /yo))
+map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix, id='D6',time=anytim( anytim(t0)+tr[0], /yo))
+map  = make_map( img,  xcen=0., ycen=0., dx=pix, dy=pix, id='5dets',time=anytim( anytim(t0)+tr[0], /yo))
+map0g = make_map( img0g, xcen=0., ycen=0., dx=pix, dy=pix, id='D0',time=anytim( anytim(t0)+tr[0], /yo))
+map1g = make_map( img1g, xcen=0., ycen=0., dx=pix, dy=pix, id='D1',time=anytim( anytim(t0)+tr[0], /yo))
+map2g = make_map( img2g, xcen=0., ycen=0., dx=pix, dy=pix, id='D2',time=anytim( anytim(t0)+tr[0], /yo))
+map3g = make_map( img3g, xcen=0., ycen=0., dx=pix, dy=pix, id='D3',time=anytim( anytim(t0)+tr[0], /yo))
+map4g = make_map( img4g, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+map5g = make_map( img5g, xcen=0., ycen=0., dx=pix, dy=pix, id='D5',time=anytim( anytim(t0)+tr[0], /yo))
+map6g = make_map( img6g, xcen=0., ycen=0., dx=pix, dy=pix, id='D6',time=anytim( anytim(t0)+tr[0], /yo))
+mapg  = make_map( imgg,  xcen=0., ycen=0., dx=pix, dy=pix, id='5dets',time=anytim( anytim(t0)+tr[0], /yo))
+map0e = make_map( img0e, xcen=0., ycen=0., dx=pix, dy=pix, id='D0',time=anytim( anytim(t0)+tr[0], /yo))
+map1e = make_map( img1e, xcen=0., ycen=0., dx=pix, dy=pix, id='D1',time=anytim( anytim(t0)+tr[0], /yo))
+map2e = make_map( img2e, xcen=0., ycen=0., dx=pix, dy=pix, id='D2',time=anytim( anytim(t0)+tr[0], /yo))
+map3e = make_map( img3e, xcen=0., ycen=0., dx=pix, dy=pix, id='D3',time=anytim( anytim(t0)+tr[0], /yo))
+map4e = make_map( img4e, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+map5e = make_map( img5e, xcen=0., ycen=0., dx=pix, dy=pix, id='D5',time=anytim( anytim(t0)+tr[0], /yo))
+map6e = make_map( img6e, xcen=0., ycen=0., dx=pix, dy=pix, id='D6',time=anytim( anytim(t0)+tr[0], /yo))
+mape  = make_map( imge,  xcen=0., ycen=0., dx=pix, dy=pix, id='5dets',time=anytim( anytim(t0)+tr[0], /yo))
+
+
+plot_map, map, cen=cen1, fov=20, /limb
+
+plot_map, aia_maps[0], cen=cen1, fov=20, /limb
+plot_map, map, /over
+
+shift = [-200, -45]
+plot_map, aia_maps[0], cen=[-300,-200], fov=7, /limb, /log
+;plot_map, aia_maps[9], cen=[cen1[0]+180,cen1[1]-50], fov=7, /limb, /log
+plot_map, shift_map(map, shift[0], shift[1]), /over
 
