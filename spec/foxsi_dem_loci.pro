@@ -1,6 +1,6 @@
 FUNCTION	FOXSI_DEM_LOCI, LOGTE, ENERGY_BIN, AREA, TARGET=TARGET, DINDEX=DINDEX, $
 			D0=D0, D1=D1, D2=D2, D3=D3, D4=D4, D5=D5, D6=D6, BLANKET_FACTOR=BLANKET_FACTOR, $
-			FOXSI2=FOXSI2
+			FOXSI2=FOXSI2, OFFAXIS=OFFAXIS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;												;;
@@ -27,6 +27,9 @@ FUNCTION	FOXSI_DEM_LOCI, LOGTE, ENERGY_BIN, AREA, TARGET=TARGET, DINDEX=DINDEX, 
 ;			from the calling script if multiple calls are performed.
 ;	BLANKET_FACTOR	Ad-hoc blanketing factor to include in the loci curve.
 ;			Should be % transmission through extra blanketing.  (Ex. 0.05)
+;	FOXSI2	Do the calculation for FOXSI-2's response.  Default is FOXSI-1.
+;	OFFAXIS	Set to an off-axis angle in degrees to include the off-axis optics response.
+;			Default is zero.
 ;
 ; HISTORY
 ;		Feb. 2014	Linz	Added FOXSI2 keyword
@@ -94,7 +97,8 @@ i_en = where( spec_sim.energy_kev gt energy_bin[0] and spec_sim.energy_kev le en
 ; in the desired energy range, times the number of detectors we included in the measurement
 ; ( total(dindex) ).
 for i=0, n_te-1 do begin
-	spec_sim = foxsi_count_spectrum(1., T[i]/1.d6, binsize=0.05, time=1., /single, foxsi2=foxsi2)
+	spec_sim = foxsi_count_spectrum(1., T[i]/1.d6, binsize=0.05, time=1., /single, $
+	foxsi2=foxsi2, offaxis=offaxis)
 	cts_sim[i] = total( spec_sim.counts[i_en] ) * total(dindex)
 endfor
 
