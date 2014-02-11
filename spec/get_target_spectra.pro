@@ -1,8 +1,11 @@
-FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH
+FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GOOD
 
 ;	Returns structure array (7 elements) holding spectra for all detectors
 ;   for the selected target.  (Targets numbered 1-6.)
 ;	Units are counts per keV per second.
+;
+;	2014 Feb	Linz	Added keyword GOOD
+;
 
 default, binwidth, 0.5
 
@@ -51,13 +54,24 @@ endcase
 
 delta_t = t2 - t1
 
-i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2)
-i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2)
-i2 = where(data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2)
-i3 = where(data_lvl2_d3.wsmr_time gt t1 and data_lvl2_d3.wsmr_time lt t2)
-i4 = where(data_lvl2_d4.wsmr_time gt t1 and data_lvl2_d4.wsmr_time lt t2)
-i5 = where(data_lvl2_d5.wsmr_time gt t1 and data_lvl2_d5.wsmr_time lt t2)
-i6 = where(data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2)
+if keyword_set(good) then begin
+	i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2 and data_lvl2_d0.error_flag eq 0)
+	i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2 and data_lvl2_d1.error_flag eq 0)
+	i2 = where(data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2 and data_lvl2_d2.error_flag eq 0)
+	i3 = where(data_lvl2_d3.wsmr_time gt t1 and data_lvl2_d3.wsmr_time lt t2 and data_lvl2_d3.error_flag eq 0)
+	i4 = where(data_lvl2_d4.wsmr_time gt t1 and data_lvl2_d4.wsmr_time lt t2 and data_lvl2_d4.error_flag eq 0)
+	i5 = where(data_lvl2_d5.wsmr_time gt t1 and data_lvl2_d5.wsmr_time lt t2 and data_lvl2_d5.error_flag eq 0)
+	i6 = where(data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2 and data_lvl2_d6.error_flag eq 0)
+endif else begin
+	i0 = where(data_lvl2_d0.wsmr_time gt t1 and data_lvl2_d0.wsmr_time lt t2)
+	i1 = where(data_lvl2_d1.wsmr_time gt t1 and data_lvl2_d1.wsmr_time lt t2)
+	i2 = where(data_lvl2_d2.wsmr_time gt t1 and data_lvl2_d2.wsmr_time lt t2)
+	i3 = where(data_lvl2_d3.wsmr_time gt t1 and data_lvl2_d3.wsmr_time lt t2)
+	i4 = where(data_lvl2_d4.wsmr_time gt t1 and data_lvl2_d4.wsmr_time lt t2)
+	i5 = where(data_lvl2_d5.wsmr_time gt t1 and data_lvl2_d5.wsmr_time lt t2)
+	i6 = where(data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2)
+endelse
+
 spec_d0 = make_spectrum( data_lvl2_d0[i0], bin=binwidth, correct=correct )
 spec_d1 = make_spectrum( data_lvl2_d1[i1], bin=binwidth, correct=correct )
 spec_d2 = make_spectrum( data_lvl2_d2[i2], bin=binwidth, correct=correct )

@@ -41,7 +41,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 ;		data_lvl2_D4, data_lvl2_D5, data_lvl2_d6, $
 ;		file = 'data_2012/foxsi_level2_data.sav'
 ;
-; History:	Version 1, 2013-Mar-08, Lindsay Glesener
+; History:	2013 Dec	Linz	Added fix to make it work with calibration data.
+;			Version 1, 2013-Mar-08, Lindsay Glesener
 ;-
 
 	add_path, 'util'
@@ -177,6 +178,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 				endelse				
 			endfor
 		endfor
+		
+		if keyword_set(stop) then stop
 		
 		;if data_struct[evt].error_flag eq 0 then stop
 

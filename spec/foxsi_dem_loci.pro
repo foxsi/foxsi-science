@@ -1,5 +1,6 @@
 FUNCTION	FOXSI_DEM_LOCI, LOGTE, ENERGY_BIN, AREA, TARGET=TARGET, DINDEX=DINDEX, $
-			D0=D0, D1=D1, D2=D2, D3=D3, D4=D4, D5=D5, D6=D6, BLANKET_FACTOR=BLANKET_FACTOR
+			D0=D0, D1=D1, D2=D2, D3=D3, D4=D4, D5=D5, D6=D6, BLANKET_FACTOR=BLANKET_FACTOR, $
+			FOXSI2=FOXSI2
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;												;;
@@ -28,8 +29,9 @@ FUNCTION	FOXSI_DEM_LOCI, LOGTE, ENERGY_BIN, AREA, TARGET=TARGET, DINDEX=DINDEX, 
 ;			Should be % transmission through extra blanketing.  (Ex. 0.05)
 ;
 ; HISTORY
+;		Feb. 2014	Linz	Added FOXSI2 keyword
 ;       Updated 10/30/2013      Ishikawa
-;	Created 10/22/2013	Linz
+;		Created 10/22/2013	Linz
 ;
 
 default, target, 1
@@ -92,7 +94,7 @@ i_en = where( spec_sim.energy_kev gt energy_bin[0] and spec_sim.energy_kev le en
 ; in the desired energy range, times the number of detectors we included in the measurement
 ; ( total(dindex) ).
 for i=0, n_te-1 do begin
-	spec_sim = foxsi_count_spectrum(1., T[i]/1.d6, binsize=0.05, time=1., /single)
+	spec_sim = foxsi_count_spectrum(1., T[i]/1.d6, binsize=0.05, time=1., /single, foxsi2=foxsi2)
 	cts_sim[i] = total( spec_sim.counts[i_en] ) * total(dindex)
 endfor
 

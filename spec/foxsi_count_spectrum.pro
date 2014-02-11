@@ -1,5 +1,6 @@
 FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
-	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS
+	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS, $
+	FOXSI2 = FOXSI2
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -18,8 +19,10 @@ FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 ;	SINGLE:	scale counts for a single module only (as opposed to all 7)
 ;	OFFAXIS:	off-axis angle in arcmin.  (Default 0.0)
 ;
-; History: 	Updated 9/5/2013 Linz
-; 			Created summer 2012 Linz
+; History: 	
+;			Linz	2/6/2014	Added FOXSI2 keyword
+;			Linz	9/5/2013 	Updated
+; 			Linz	Created summer 2012
 ;
 
 default, time, 1.
@@ -63,7 +66,8 @@ area_offaxis = get_foxsi_effarea( $		; optics + off-axis response factor
 
 ; Now, the full response.  This is the one we'll use.
 area = get_foxsi_effarea( $
-		energy=emid, data_dir=data_dir, let_file=let_file , offaxis_angle=offaxis )
+		energy=emid, data_dir=data_dir, let_file=let_file , $
+		offaxis_angle=offaxis, foxsi2=foxsi2 )
 
 if keyword_set(stop) then stop
 

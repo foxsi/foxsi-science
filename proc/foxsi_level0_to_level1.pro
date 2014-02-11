@@ -27,7 +27,8 @@
 ;		data_lvl1_D4, data_lvl1_D5, data_lvl1_d6, $
 ;		file = 'data_2012/foxsi_level1_data.sav'
 ;
-; History:	Version 1, 2013-Feb-12, Lindsay Glesener
+; History:	2013 Dec	Linz	Added fix to make it work with calibration data.	
+;			Version 1, 2013-Feb-12, Lindsay Glesener
 ;-
 
 FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
@@ -89,18 +90,21 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 	data_struct.channel_mask  = data0.channel_mask
 	data_struct.hit_adc	  = data0.hit_adc
 	
-	; Calculate livetime, which is time before trigger for this frame only.
-	; (i.e. this doesn't include livetime due to empty frames.)
-	print, '  Calculating livetime…'
-	t_word = 2000./256	; transmit time per word (~8 us)
-	nHskp = 23		; 23 words in the housekeeping header
-	setup_time = (nHskp + (detector+1)*33) * t_word
-	i_evt = where(data_struct.trigger_time gt 0)
-;	data_struct[i_evt].livetime = (data_struct[i_evt].trigger_time - data_struct[i_evt].frame_time mod 2^16)*0.1 - 2000 - setup_time
-	data_struct[i_evt].livetime = (data_struct[i_evt].trigger_time - data_struct[i_evt].frame_time mod double(2)^16)*0.1 + 2000 - setup_time
-	; if livetime<0 then counter has rolled over.  Add 16 bits.
-	i=where(data_struct.livetime lt 0)
-	data_struct[i].livetime = data_struct[i].livetime + 2.^16*0.1
+	; if CHAN MASK is all zero, it's a USB file and don't worry about livetime.
+	if max(data0.channel_mask) ne 0 then begin
+		; Calculate livetime, which is time before trigger for this frame only.
+		; (i.e. this doesn't include livetime due to empty frames.)
+		print, '  Calculating livetime…'
+		t_word = 2000./256	; transmit time per word (~8 us)
+		nHskp = 23		; 23 words in the housekeeping header
+		setup_time = (nHskp + (detector+1)*33) * t_word
+		i_evt = where(data_struct.trigger_time gt 0)
+	;	data_struct[i_evt].livetime = (data_struct[i_evt].trigger_time - data_struct[i_evt].frame_time mod 2^16)*0.1 - 2000 - setup_time
+		data_struct[i_evt].livetime = (data_struct[i_evt].trigger_time - data_struct[i_evt].frame_time mod double(2)^16)*0.1 + 2000 - setup_time
+		; if livetime<0 then counter has rolled over.  Add 16 bits.
+		i=where(data_struct.livetime lt 0)
+		data_struct[i].livetime = data_struct[i].livetime + 2.^16*0.1
+	endif
 	
 	;;
 	; Calculate hit, associated, and unrelated parameters (ADC, CM, and position)
@@ -157,6 +161,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 	; Identify events where the highest p-side ADC value was on ASIC 2
 	; ---------------------
 	i2 = where(data0.hit_asic[1] eq 2)
+	if i2[0] ne -1 then begin
 	data_struct[i2].hit_cm[1] = data0[i2].common_mode[2]
 	data_struct[i2].unrel_cm[1] = data0[i2].common_mode[3]
 
@@ -175,6 +180,8 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 	data_struct[i2].unrel_xy[0,*,0] = 127 - data0[i2].strips[3,*]
 	data_struct[i2].unrel_xy[1,*,0] = 127 - data0[i2].strips[3,*]
 	data_struct[i2].unrel_xy[2,*,0] = 127 - data0[i2].strips[3,*]
+	
+	endif
 	; ---------------------
 
 	; Identify events where the highest p-side ADC value was on ASIC 3
@@ -207,7 +214,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 	; First, in detector pixel coords.
 	data_struct[i0].hit_xy_det[1] = 127 - data0[i0].hit_strip[0]
 	data_struct[i1].hit_xy_det[1] = 63 - data0[i1].hit_strip[0]
-	data_struct[i2].hit_xy_det[0] = 63 - data0[i2].hit_strip[1]
+	if i2[0] ne -1 then data_struct[i2].hit_xy_det[0] = 63 - data0[i2].hit_strip[1]
 	data_struct[i3].hit_xy_det[0] = 127 - data0[i3].hit_strip[1]
 
 	; Change hit position to payload coordinates
@@ -261,34 +268,38 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 	; Bit 6: Livetime value out of range ([1,1714] us)
 	print, "  Checking data and flagging abnormalities."
 	
-	check = where(data0.common_mode[0] gt 1023 or data0.common_mode[1] gt 1023 or $
-			  	  data0.common_mode[2] gt 1023 or data0.common_mode[3] gt 1023)
-	data_struct[check].error_flag = data_struct[check].error_flag + 1
+	; if CHAN MASK is all zero, it's a USB file and errors are already removed.
+	if max(data0.channel_mask) ne 0 then begin
+		check = where(data0.common_mode[0] gt 1023 or data0.common_mode[1] gt 1023 or $
+				  	  data0.common_mode[2] gt 1023 or data0.common_mode[3] gt 1023)
+		data_struct[check].error_flag = data_struct[check].error_flag + 1
 
-	check = where(data0.hit_asic[0] eq -1 or data0.hit_asic[1] eq -1)
-	data_struct[check].error_flag = data_struct[check].error_flag + 2
+		check = where(data0.hit_asic[0] eq -1 or data0.hit_asic[1] eq -1)
+		data_struct[check].error_flag = data_struct[check].error_flag + 2
 
-	check = where(data_struct.hit_cm[1] eq 0)
-	data_struct[check].error_flag = data_struct[check].error_flag + 4
+		check = where(data_struct.hit_cm[1] eq 0)
+		data_struct[check].error_flag = data_struct[check].error_flag + 4
 	
-	if keyword_set(ground) then begin
-		check = where(data_struct.hv ne 200)
-	endif else begin
-		check = where(data_struct.hv ne 200 or data_struct.wsmr_time lt 64610)
-	endelse
-	data_struct[check].error_flag = data_struct[check].error_flag + 8
+		if keyword_set(ground) then begin
+			check = where(data_struct.hv ne 200)
+		endif else begin
+			check = where(data_struct.hv ne 200 or data_struct.wsmr_time lt 64610)
+		endelse
+		data_struct[check].error_flag = data_struct[check].error_flag + 8
 	
 	
-	check = where(data_struct.hit_cm[0] gt data_struct.hit_adc[0] or $
-				  data_struct.hit_cm[1] gt data_struct.hit_adc[1])
-	data_struct[check].error_flag = data_struct[check].error_flag + 16
+		check = where(data_struct.hit_cm[0] gt data_struct.hit_adc[0] or $
+					  data_struct.hit_cm[1] gt data_struct.hit_adc[1])
+		data_struct[check].error_flag = data_struct[check].error_flag + 16
 	
-	check = where(data_struct.hit_xy_det[0] lt 3 or data_struct.hit_xy_det[0] gt 124 or $
-				  data_struct.hit_xy_det[1] lt 3 or data_struct.hit_xy_det[1] gt 124)
-	data_struct[check].error_flag = data_struct[check].error_flag + 32
+		check = where(data_struct.hit_xy_det[0] lt 3 or data_struct.hit_xy_det[0] gt 124 or $
+					  data_struct.hit_xy_det[1] lt 3 or data_struct.hit_xy_det[1] gt 124)
+		data_struct[check].error_flag = data_struct[check].error_flag + 32
 	
-	check = where(data_struct.livetime gt 2000. or data_struct.livetime lt 1.)
-	data_struct[check].error_flag = data_struct[check].error_flag + 64
+		check = where(data_struct.livetime gt 2000. or data_struct.livetime lt 1.)
+		data_struct[check].error_flag = data_struct[check].error_flag + 64
+
+	endif
 	
 	if keyword_set(stop) then stop
 

@@ -1,5 +1,32 @@
 @foxsi-setup-script
 
+map0.time = '02-Nov-2012 18:02:00'
+map1.time = '02-Nov-2012 18:02:00'
+map2.time = '02-Nov-2012 18:02:00'
+map3.time = '02-Nov-2012 18:02:00'
+map4.time = '02-Nov-2012 18:02:00'
+map5.time = '02-Nov-2012 18:02:00'
+map6.time = '02-Nov-2012 18:02:00'
+map0.id = 'Det 0 raw data'
+map1.id = 'Det 1 raw data'
+map2.id = 'Det 2 raw data'
+map3.id = 'Det 3 raw data'
+map4.id = 'Det 4 raw data'
+map5.id = 'Det 5 raw data'
+map6.id = 'Det 6 raw data'
+
+popen, xsi=8, ysi=4
+!p.multi=[0,4,2]
+plot_map, map0, cen=map_centroid(map0,thresh=0.3*max(map0.data)), fov=3, /nodate
+plot_map, map1, cen=map_centroid(map2,thresh=0.3*max(map2.data)), fov=3, /nodate
+plot_map, map2, cen=map_centroid(map2,thresh=0.3*max(map2.data)), fov=3, /nodate
+plot_map, map3, cen=map_centroid(map3,thresh=0.3*max(map3.data)), fov=3, /nodate
+plot_map, map4, cen=map_centroid(map4,thresh=0.3*max(map4.data)), fov=3, /nodate
+plot_map, map5, cen=map_centroid(map5,thresh=0.3*max(map5.data)), fov=3, /nodate
+plot_map, map6, cen=map_centroid(map6,thresh=0.3*max(map6.data)), fov=3, /nodate
+pclose
+
+
 ; this selection isn't really necessary since foxsi_image_solar already makes this cut.
 i0 = where( data_lvl2_d0.error_flag eq 0 )
 i1 = where( data_lvl2_d1.error_flag eq 0 )
@@ -10,11 +37,24 @@ i5 = where( data_lvl2_d5.error_flag eq 0 )
 i6 = where( data_lvl2_d6.error_flag eq 0 )
 
 pix=3.
-er=[4,15]
-tr = [t1_start, t6_end]
-img=foxsi_image_solar(data_lvl2_d6, 6, ps=pix, er=erange, tr=tr-t_launch, thr_n=5. )
+er=[4,10]
+tr = [t4_start, t6_end]
+
+popen, 'test', xsi=8, ysi=8
+!p.multi=[0,3,3]
+.r
+for i=0, 109 do begin
+rot=i
+img=foxsi_image_solar(data_lvl2_d0, 0, ps=pix, er=erange, tr=tr-t_launch, thr_n=4.,rot=rot);,/xy )
 map = make_map( img, xcen=0., ycen=0., dx=pix, dy=pix )
-plot_map, map, /limb, dmax=5, cen=cen1, fov=16
+map.id=strtrim(i,2)
+plot_map, map, /limb, cen=[1030,-310], fov=2
+endfor
+end
+pclose
+
+;plot_map, map, /limb, cen=flare, fov=2
+plot_map, map, /limb, dmax=5, cen=cen3, fov=5
 
 img=foxsi_image_solar(d6, 6, psize=50)
 
@@ -22,15 +62,15 @@ pix=3.
 er=[4,15]
 tr = [t4_start, t6_end]
 
-img0=foxsi_image_solar( data_lvl2_d0[i0], 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img1=foxsi_image_solar( data_lvl2_d1[i1], 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img2=foxsi_image_solar( data_lvl2_d2[i2], 2, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img3=foxsi_image_solar( data_lvl2_d3[i3], 3, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img4=foxsi_image_solar( data_lvl2_d4[i4], 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img5=foxsi_image_solar( data_lvl2_d5[i5], 5, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img6=foxsi_image_solar( data_lvl2_d6[i6], 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4.);, /xy)
-img =foxsi_image_solar_int( data_lvl2_d0[i0], data_lvl2_d1[i1], data_lvl2_d2[i2], $
-		data_lvl2_d3[i3], data_lvl2_d4[i4], data_lvl2_d5[i5], data_lvl2_d6[i6], $
+img0=foxsi_image_solar( data_lvl2_d0, 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img1=foxsi_image_solar( data_lvl2_d1, 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img2=foxsi_image_solar( data_lvl2_d2, 2, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img3=foxsi_image_solar( data_lvl2_d3, 3, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img4=foxsi_image_solar( data_lvl2_d4, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img5=foxsi_image_solar( data_lvl2_d5, 5, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img6=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img =foxsi_image_solar_int( data_lvl2_d0, data_lvl2_d1, data_lvl2_d2, $
+		data_lvl2_d3, data_lvl2_d4, data_lvl2_d5, data_lvl2_d6, $
 		psize=pix, erange=er, trange=tr-t_launch, thr_n=4.);, /xycor )
 
 map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix, id='D0',time=anytim( anytim(t0)+tr[0], /yo))
@@ -1157,3 +1197,33 @@ aia_prep, f, -1, i, d, /do_write_fits, outdir='~/data/aia/20121102/'
 
 f2 = file_search( '~/data/aia/20121102/AIA*0131.fits' )
 
+;
+; Images for Ishikawa's paper
+;
+
+; Make FOXSI image.
+@foxsi-setup-script
+get_target_data, 1, d0,d1,d2,d3,d4,d5,d6
+pix=10.
+er=[4,15]
+tr = [t1_start, t1_end]
+img4g=foxsi_image_solar( d4, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+map4g = make_map( img4g, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+
+; Figure out offset.  From flare image, FOXSI coords need to be adjusted [-69", 116"].
+; The FOXSI image is already adjusted.
+; Target 1 nominal center is [-480,-350]; adjusted center is [-549,-234].
+; AR center is approx [-320,-402].  This is [160,-52], or 2.8 arcmin off.
+; From FOXSI's pointing center, AR center is [229,-168], or 4.7 arcmin.
+cen1_adj = [-549,-234]
+
+; Get AIA data.
+; 171 [index 3] is nicest; 131 [index 0] is also a good choice.
+restore, 'data_2012/aia_maps.sav'
+
+popen, xsi=7, ysi=7
+aia_lct, rr, gg, bb, wavelnth=171, /load
+plot_map, aia_maps[3], cen=cen1_adj, fov=20, /log, dmin=100., charsi=1.1
+plot_map, map4g, /over, col=255, thick=6
+draw_fov, det=4, target=1, /xycor, thick=6, col=255
+pclose
