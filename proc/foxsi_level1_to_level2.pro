@@ -91,6 +91,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
 		livetime:double(0),		$	; Livetime in microsec since previous event
 		hit_energy:fltarr(2), 	$	; Energy value for hit strip, [n,p]
+		hit_xy_det:fltarr(2),		$	; Hit position in detector coordinates [strips]
 		hit_xy_pay:fltarr(2),		$	; Hit position in payload coordinates [arcsec]
 		hit_xy_solar:fltarr(2),		$	; Hit position in heliographic coordinates [arcsec]
 		assoc_energy:fltarr(3,3,2),$	; "associated" energies, including hit.
@@ -117,6 +118,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 	data_struct.inflight      = data1.inflight
 	data_struct.altitude	  = data1.altitude
 	data_struct.error_flag	  = data1.error_flag
+	data_struct.hit_xy_det 	  = data1.hit_xy_det
 	
 	;;;; WHAT DO YOU WANT TO DO ABOUT LIVETIME??? ;;;;
 	
