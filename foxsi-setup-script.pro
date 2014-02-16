@@ -39,4 +39,14 @@ cen5 = [1000,-900]
 cen6 = [ 700,-600]
 flare = [967,-207]	; from RHESSI flarelist
 
+; Rotation angles for all detectors (as designed, no tweaks yet).
+rot0 = 82.5
+rot1 = 75.
+rot2 = -67.5
+rot3 = -75.
+rot4 = 97.5
+rot5 = 90.
+rot6 = -60.
+
+
 
