@@ -1227,3 +1227,77 @@ plot_map, aia_maps[3], cen=cen1_adj, fov=20, /log, dmin=100., charsi=1.1
 plot_map, map4g, /over, col=255, thick=6
 draw_fov, det=4, target=1, /xycor, thick=6, col=255
 pclose
+
+;
+; Flare images again, this time being more careful about the rotation / binning
+;
+
+;
+; Trying again, starting from the Level 1 data
+;
+
+restore, 'data_2012/foxsi_level1_data.sav',/v
+
+rot0 = 82.5
+rot1 = 75.
+rot2 = -67.5
+rot3 = -75.
+rot4 = 97.5
+rot5 = 90.
+rot6 = -60.
+
+image0 = foxsi_image_det( data_lvl1_d0 )
+image1 = foxsi_image_det( data_lvl1_d1 )
+image2 = foxsi_image_det( data_lvl1_d2 )
+image3 = foxsi_image_det( data_lvl1_d3 )
+image4 = foxsi_image_det( data_lvl1_d4 )
+image5 = foxsi_image_det( data_lvl1_d5 )
+image6 = foxsi_image_det( data_lvl1_d6 )
+
+map0 = rot_map( make_map(image0,dx=7.78,dy=7.78), rot0 )
+map1 = rot_map( make_map(image1,dx=7.78,dy=7.78), rot1 )
+map2 = rot_map( make_map(image2,dx=7.78,dy=7.78), rot2 )
+map3 = rot_map( make_map(image3,dx=7.78,dy=7.78), rot3 )
+map4 = rot_map( make_map(image4,dx=7.78,dy=7.78), rot4 )
+map5 = rot_map( make_map(image5,dx=7.78,dy=7.78), rot5 )
+map6 = rot_map( make_map(image6,dx=7.78,dy=7.78), rot6 )
+
+plot_map, map6, cen=[320,300], fov=3
+
+plot_map, raw6
+window,0
+plot_map, test6
+window,1
+plot_map, raw6 
+
+;
+; check evolution of flare image over time.
+;
+
+pix=3.
+er=[4,15]
+tr1 = [t4_start, t4_start+60.]
+tr2 = [t6_start, t6_start+60.]
+
+img0=foxsi_image_solar( data_lvl2_d0, 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img1=foxsi_image_solar( data_lvl2_d1, 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img2=foxsi_image_solar( data_lvl2_d2, 2, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img3=foxsi_image_solar( data_lvl2_d3, 3, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img4=foxsi_image_solar( data_lvl2_d4, 4, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img5=foxsi_image_solar( data_lvl2_d5, 5, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img6=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
+img =foxsi_image_solar_int( data_lvl2_d0, data_lvl2_d1, data_lvl2_d2, $
+		data_lvl2_d3, data_lvl2_d4, data_lvl2_d5, data_lvl2_d6, $
+		psize=pix, erange=er, trange=tr-t_launch, thr_n=4.);, /xycor )
+
+map0 = make_map( img0, xcen=0., ycen=0., dx=pix, dy=pix, id='D0',time=anytim( anytim(t0)+tr[0], /yo))
+map1 = make_map( img1, xcen=0., ycen=0., dx=pix, dy=pix, id='D1',time=anytim( anytim(t0)+tr[0], /yo))
+map2 = make_map( img2, xcen=0., ycen=0., dx=pix, dy=pix, id='D2',time=anytim( anytim(t0)+tr[0], /yo))
+map3 = make_map( img3, xcen=0., ycen=0., dx=pix, dy=pix, id='D3',time=anytim( anytim(t0)+tr[0], /yo))
+map4 = make_map( img4, xcen=0., ycen=0., dx=pix, dy=pix, id='D4',time=anytim( anytim(t0)+tr[0], /yo))
+map5 = make_map( img5, xcen=0., ycen=0., dx=pix, dy=pix, id='D5',time=anytim( anytim(t0)+tr[0], /yo))
+map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix, id='D6',time=anytim( anytim(t0)+tr[0], /yo))
+map  = make_map( img,  xcen=0., ycen=0., dx=pix, dy=pix, id='5dets',time=anytim( anytim(t0)+tr[0], /yo))
+
+plot_map, map, /limb, cen=cen1, fov=20, /cbar
+

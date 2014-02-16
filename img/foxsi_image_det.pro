@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
+FUNCTION FOXSI_IMAGE_DET, DATA, ADCRANGE = ADCRANGE, TRANGE = TRANGE, $
                           XYCOR = XYCOR, THR_N = THR_N, STOP = STOP
 ;
 ; written Jan 2014 by Linz
@@ -10,7 +10,7 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 ;
 ; Inputs:
 ;	DATA	FOXSI Level 1 data structure
-;	ERANGE	Energy range to include in image (in keV)
+;	ADCRANGE	Energy range to include in image (in keV)
 ;	TRANGE	Time range to include in image (in seconds *from launch*)
 ;	XYCOR	Correct for detector and payload offsets.
 ;			These values are hardcoded and were obtained by
@@ -20,9 +20,9 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;  	if not keyword_set(erange) then erange=[4.,15.]      ; energy range in keV
+  	if not keyword_set(adcrange) then adcrange=[90.,200.]      ; energy range in ADC
   	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
-  	if not keyword_set(thr_n) then thr_n =3.0    ; desired n-side energy threshold
+  	if not keyword_set(thr_n) then thr_n =50.    ; desired n-side ADC threshold
 
   	tlaunch=long(64500.)	; time of launch in seconds-of-day
   
@@ -31,12 +31,16 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 ;  	yerr=[-135.977, -131.124, -130.241, -92.7310, -95.3080, -120.276, -106.360]
 
 	; throw out any potentially bad events
-	data = data[ where( data.error_flag eq 0 ) ]
+	data2 = data[ where( data.error_flag eq 0 ) ]
+	
+	; restrict ADC range
+	data2 = data2[ where( data2.hit_adc[1] gt adcrange[0] and data2.hit_adc[1] lt adcrange[1]$
+				 and data2.hit_adc[0] gt thr_n ) ]
 
 ;	native_bin = 7.735*( cos(rotation) + sin(rotation) )
 	
   	istart=long(0)
-  	i_times = where( data.wsmr_time ge (trange[0]+tlaunch) and data.wsmr_time le (trange[1]+tlaunch) )
+  	i_times = where( data2.wsmr_time ge (trange[0]+tlaunch) and data2.wsmr_time le (trange[1]+tlaunch) )
 	if i_times[0] eq -1 then begin
 		print, 'No events in time range.'
 		return, -1
@@ -53,15 +57,15 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 	; Note: values are pinned to a pixel corner in data structure.
 	; Change this to the pixel center.
 ;    err = get_payload_coords([64,64],detector) - xyerr
-    position = data[i].hit_xy_det
+    position = data2[i].hit_xy_det
     xpix = (long(position))[0]
     ypix = (long(position))[1]
     img[xpix, ypix] += 1
           
 ;    if xpix ge 0 and xpix lt size_nat[0] and ypix ge 0 and ypix lt size_nat[1] and $
 ;    	; data[i].error_flag eq 0 and $
-;    	data[i].hit_energy[1] ge erange[0] and $
-;        data[i].hit_energy[1] le erange[1] and data[i].hit_energy[0] gt thr_n then begin
+;    if data[i].hit_adc[1] ge adcrange[0] and $
+;        data[i].hit_adc[1] le adcrange[1] and data[i].hit_adc[0] gt thr_n then begin
 ;        img_nat(xpix, ypix)+=1.
 ;    endif
 
