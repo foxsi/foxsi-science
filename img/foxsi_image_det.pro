@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-FUNCTION FOXSI_IMAGE_DET, DATA, ADCRANGE = ADCRANGE, TRANGE = TRANGE, $
+FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           XYCOR = XYCOR, THR_N = THR_N, STOP = STOP
 ;
 ; written Jan 2014 by Linz
@@ -10,7 +10,7 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ADCRANGE = ADCRANGE, TRANGE = TRANGE, $
 ;
 ; Inputs:
 ;	DATA	FOXSI Level 1 data structure
-;	ADCRANGE	Energy range to include in image (in keV)
+;	ERANGE	Energy range to include in image (in keV)
 ;	TRANGE	Time range to include in image (in seconds *from launch*)
 ;	XYCOR	Correct for detector and payload offsets.
 ;			These values are hardcoded and were obtained by
@@ -20,9 +20,9 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ADCRANGE = ADCRANGE, TRANGE = TRANGE, $
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-  	if not keyword_set(adcrange) then adcrange=[90.,200.]      ; energy range in ADC
+	default, erange, [4.,15.]
   	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
-  	if not keyword_set(thr_n) then thr_n =50.    ; desired n-side ADC threshold
+  	if not keyword_set(thr_n) then thr_n =4.    ; desired n-side ADC threshold
 
   	tlaunch=long(64500.)	; time of launch in seconds-of-day
   
@@ -34,8 +34,8 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ADCRANGE = ADCRANGE, TRANGE = TRANGE, $
 	data2 = data[ where( data.error_flag eq 0 ) ]
 	
 	; restrict ADC range
-	data2 = data2[ where( data2.hit_adc[1] gt adcrange[0] and data2.hit_adc[1] lt adcrange[1]$
-				 and data2.hit_adc[0] gt thr_n ) ]
+	data2 = data2[ where( data2.hit_energy[1] gt erange[0] and data2.hit_energy[1] lt erange[1]$
+				 and data2.hit_energy[0] gt thr_n ) ]
 
 ;	native_bin = 7.735*( cos(rotation) + sin(rotation) )
 	
@@ -64,8 +64,8 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ADCRANGE = ADCRANGE, TRANGE = TRANGE, $
           
 ;    if xpix ge 0 and xpix lt size_nat[0] and ypix ge 0 and ypix lt size_nat[1] and $
 ;    	; data[i].error_flag eq 0 and $
-;    if data[i].hit_adc[1] ge adcrange[0] and $
-;        data[i].hit_adc[1] le adcrange[1] and data[i].hit_adc[0] gt thr_n then begin
+;    if data[i].hit_energy[1] ge erange[0] and $
+;        data[i].hit_energy[1] le erange[1] and data[i].hit_adc[0] gt thr_n then begin
 ;        img_nat(xpix, ypix)+=1.
 ;    endif
 
