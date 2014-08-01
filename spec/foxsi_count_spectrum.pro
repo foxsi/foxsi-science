@@ -1,6 +1,6 @@
 FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS, $
-	FOXSI2 = FOXSI2
+	FOXSI2 = FOXSI2, SMEAR = SMEAR, N_BLANKETS = N_BLANKETS, OFFSET = OFFSET
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -18,6 +18,8 @@ FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 ;	LET_FILE:	detector efficiency file to use. (Default "average" LET.)
 ;	SINGLE:	scale counts for a single module only (as opposed to all 7)
 ;	OFFAXIS:	off-axis angle in arcmin.  (Default 0.0)
+;	SMEAR:	if set, smear the counts to simulate imperfect energy resolution.
+;	N_BLANKETS:  n times nominal blanketing thickness.
 ;
 ; History: 	
 ;			Linz	2/6/2014	Added FOXSI2 keyword
@@ -30,11 +32,14 @@ default, binsize, 0.5
 default, let_file, 'efficiency_averaged.sav'
 default, data_dir, 'detector_data/'
 default, offaxis, 0.
+default, n_blankets, 1.
+default, offset, 0.
 
 ; Set up energy bins 0-20 keV. These bins are finer than those desired!!
 e1 = dindgen(2000)/100
 e2 = get_edges(e1,/edges_2)
 emid = get_edges(e1,/mean)
+ewid = get_edges(e1,/width)
 
 TEMP = T/11.6      ; switch temperature to units of keV
 
@@ -69,11 +74,32 @@ area = get_foxsi_effarea( $
 		energy=emid, data_dir=data_dir, let_file=let_file , $
 		offaxis_angle=offaxis, foxsi2=foxsi2 )
 
+; Multiply that area by extra blanketing attenuation.
+; Since one set of blankets was already included in the previous call,
+; need to add in n-1 layers.
+if n_blankets gt 1 then begin
+	atten = get_blanket_atten( energy=emid, factor = n_blankets-1 )
+	; allow a percentage of the flux to not be blocked.
+	area.eff_area_cm2 = area.eff_area_cm2 * (offset + (1-offset)*atten.shut_eff)
+endif
+
 if keyword_set(stop) then stop
 
 ; fold flux with FOXSI response
 counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
 ;counts = counts*binsize		 ; now the units are counts per second. DONT USE!
+
+
+; Smear to account for imperfect energy resolution (~0.5 keV).
+if keyword_set(smear) then begin
+	i=where( emid gt 3. and emid lt 30. )
+	nbins = 0.5 / average(ewid)
+	ni = n_elements(i)
+	s = smooth( flux[i], nbins )
+	if i[ni-1] gt (n_elements(flux)-1) then flux2 = [flux[0:i[0]-1],s] $
+		else flux2 = [flux[0:i[0]-1],s,flux[ni+1:n_elements(flux)-1]]
+endif
+
 
 ; use coarser, user-specified energy bins
 e1_coarse = findgen(20./binsize+1)*binsize
@@ -94,24 +120,6 @@ y_err_raw = sqrt(counts_coarse)				; units also in counts / keV
 ;	y_err_raw[i] = sqrt(-1)
 ;endif
 
-; Leftover code used for smearing to simulate imperfect energy resolution.
-; Not used here.
-
-;; smear with a Gaussian for imperfect energy resolution.
-;i = where( counts_coarse gt 0 )
-;if i[0] ne -1 then begin
-;	print, total(counts_coarse[i])
-;	print,i
-;	i = i[1:n_elements(i)-2]
-;	print,i
-;	n = n_elements(counts_coarse)
-;	adjust = fltarr(n)
-;	adjust[i] = adjust[i] + 0.15*counts_coarse[i+1]
-;	adjust[i] = adjust[i] + 0.15*counts_coarse[i-1]
-;	adjust[i] = adjust[i] - 0.3*counts_coarse[i]
-;	counts_coarse = counts_coarse + adjust
-;	print, total(counts_coarse[i])
-;endif else counts_coarse = fltarr(n_elements(counts_coarse))
 
 result = create_struct("energy_keV", emid_coarse, $
 			 		   "counts", counts_coarse, $

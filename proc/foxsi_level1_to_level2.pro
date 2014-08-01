@@ -181,13 +181,9 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 			endfor
 		endfor
 		
-		if keyword_set(stop) then stop
-		
 		;if data_struct[evt].error_flag eq 0 then stop
 
     endfor
-
-	if keyword_set(stop) then stop
 
 	; Transform all positions to payload coords.
 	; For some reason this was done only for the primary hit in Lvl1 data
@@ -232,6 +228,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1]
 	endelse	
 
+	if keyword_set(stop) then stop
+		
 	print, "  Done!"
 
 	return, data_struct

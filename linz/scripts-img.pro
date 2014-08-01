@@ -60,7 +60,7 @@ img=foxsi_image_solar(d6, 6, psize=50)
 
 pix=3.
 er=[4,15]
-tr = [t4_start, t6_end]
+tr = [t4_start, t4_end]
 
 img0=foxsi_image_solar( data_lvl2_d0, 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
 img1=foxsi_image_solar( data_lvl2_d1, 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
@@ -1276,8 +1276,51 @@ plot_map, raw6
 
 pix=3.
 er=[4,15]
-tr1 = [t4_start, t4_start+60.]
-tr2 = [t6_start, t6_start+60.]
+;tr1 = [t4_start, t4_start+30.]
+tr1 = [t4_start, t4_end]
+tr2 = [t4_start+30, t4_start+60.]
+tr3 = [t6_start, t6_start+30.]
+tr4 = [t6_start+30, t6_start+60.]
+tr = [t6_start, t6_end]
+
+im1 = foxsi_image_det( data_lvl2_d6, eran=er, trange=tr1-t_launch )
+im2 = foxsi_image_det( data_lvl2_d6, eran=er, trange=tr2-t_launch )
+im3 = foxsi_image_det( data_lvl2_d6, eran=er, trange=tr3-t_launch )
+im4 = foxsi_image_det( data_lvl2_d6, eran=er, trange=tr4-t_launch )
+
+map1 = rot_map( make_map(im1,dx=7.78,dy=7.78), rot6 )
+map2 = rot_map( make_map(im2,dx=7.78,dy=7.78), rot6 )
+map3 = rot_map( make_map(im3,dx=7.78,dy=7.78), rot6 )
+map4 = rot_map( make_map(im4,dx=7.78,dy=7.78), rot6 )
+
+!p.multi=[0,2,2]
+plot_map, map1, cen=[320,300], fov=3
+plot_map, map2, cen=[320,300], fov=3
+plot_map, map3, cen=[320,300], fov=3
+plot_map, map4, cen=[320,300], fov=3
+
+restore, 'data_2012/aia-maps-flare.sav'
+plot_map, aia, fov=3
+test = shift_map(map2,flare[0]-cen[0],flare[1]-cen[1])
+plot_map, shift_map(map2,flare[0]-cen[0],flare[1]-cen[1])
+
+image0 = foxsi_image_det( data_lvl2_d0, eran=er, trange=tr-t_launch )
+image1 = foxsi_image_det( data_lvl2_d1, eran=er, trange=tr-t_launch )
+image2 = foxsi_image_det( data_lvl2_d2, eran=er, trange=tr-t_launch )
+image3 = foxsi_image_det( data_lvl2_d3, eran=er, trange=tr-t_launch )
+image4 = foxsi_image_det( data_lvl2_d4, eran=er, trange=tr-t_launch )
+image5 = foxsi_image_det( data_lvl2_d5, eran=er, trange=tr-t_launch )
+image6 = foxsi_image_det( data_lvl2_d6, eran=er, trange=tr-t_launch )
+
+map0 = rot_map( make_map(image0,dx=7.78,dy=7.78), rot0 )
+map1 = rot_map( make_map(image1,dx=7.78,dy=7.78), rot1 )
+map2 = rot_map( make_map(image2,dx=7.78,dy=7.78), rot2 )
+map3 = rot_map( make_map(image3,dx=7.78,dy=7.78), rot3 )
+map4 = rot_map( make_map(image4,dx=7.78,dy=7.78), rot4 )
+map5 = rot_map( make_map(image5,dx=7.78,dy=7.78), rot5 )
+map6 = rot_map( make_map(image6,dx=7.78,dy=7.78), rot6 )
+
+plot_map, map6, cen=[320,300], fov=3
 
 img0=foxsi_image_solar( data_lvl2_d0, 0, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
 img1=foxsi_image_solar( data_lvl2_d1, 1, ps=pix, er=er, tr=tr-t_launch, thr_n=4., /xy)
@@ -1300,4 +1343,68 @@ map6 = make_map( img6, xcen=0., ycen=0., dx=pix, dy=pix, id='D6',time=anytim( an
 map  = make_map( img,  xcen=0., ycen=0., dx=pix, dy=pix, id='5dets',time=anytim( anytim(t0)+tr[0], /yo))
 
 plot_map, map, /limb, cen=cen1, fov=20, /cbar
+
+;
+; Investigate dynamic range
+;
+
+pix=7.7
+er=[4,15]
+
+tr = [t4_start, t4_end]
+img4=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4.)
+tr = [t6_start, t6_end]
+img6=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=er, tr=tr-t_launch, thr_n=4.)
+
+map = img4
+map.data += img6.data
+
+flare_xy = [1020.,-310]
+sub = make_submap(map, cen=flare_xy, fov=5 )
+test=sub
+help, test.data
+; test.data[50,*]=10.
+;test.data[*,49]=10.
+test.data[*,20]=10.
+plot_map, test, fov=2
+cut = sub.data[*,20]
+fxi_max1 = max(cut, fxi_ind1)
+plot, findgen(40)*7.7, cut/max(cut), /ylog, yr=[0.001,1.], psym=10
+print, max(cut,max)
+i=where( cut/max(cut) gt 0.1 )
+help, i, max
+print, [i[0],i[17]]*3.-max*3.
+
+; Do the same for the RHESSI image.
+restore, 'sam/rhessi_imaging_foxsi_flare_march2013.sav'
+hsi_map = rot_map(c3n,-16)
+hsi_map2 = hsi_map
+hsi_map2.data[*,70]=10.
+plot_map, hsi_map2, /log
+hsi_cut1 = hsi_map.data[*,70]
+hsi_max1 = max(hsi_cut1,hsi_ind1)
+plot, findgen(128)-hsi_ind1, hsi_cut1/max(hsi_cut1), /ylog, psym=10, yr=[0.001,1.]
+oplot, (findgen(101)-fxi_ind1)*3., cut/max(cut), psym=10
+
+; And again for the FOXSI deconvolved image (D6, 10th iter)
+deconv_sub = make_submap(deconv_map[5], cen=[0.,0.], fov=1.4 )
+test2=deconv_sub
+test2.data[*,43]=10.
+plot_map, test2
+fxi_cut = deconv_sub.data[*,43]
+fxi_max1 = max(fxi_cut, fxi_dec_ind1)
+plot, findgen(101)-fxi_dec_ind1, fxi_cut/max(fxi_cut), /ylog, yr=[0.0001,1.], psym=10
+
+hsi_linecolors
+
+plot, findgen(128)-hsi_ind1, hsi_cut1/max(hsi_cut1), /ylog, psym=10, yr=[0.01,10.], $
+	thick=4, charsi=1.2, xtit='Arcsec', ytit='Normalized flux', $
+	title='Cross-section across narrow dimension
+oplot, (findgen(101)-fxi_ind1)*7.7, cut/max(cut), psym=10, col=6, thick=4
+oplot, findgen(101)-fxi_dec_ind1, fxi_cut/max(fxi_cut), psym=10, col=7, thick=4
+legend, ['RHESSI CLEAN','FOXSI raw','FOXSI deconvolved'], textcol=[0,6,7], thick=4, $
+	box=0
+
+; Axis 1: Flux drops to 10% in 37 arcsec and 1% in 68 arcsec.
+; Axis 1: Flux drops to 10% in 26 arcsec and 1% in 47 arcsec.
 

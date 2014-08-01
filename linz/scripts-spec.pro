@@ -634,3 +634,336 @@ plot_map, aia_maps[0], cen=[-300,-200], fov=7, /limb, /log
 ;plot_map, aia_maps[9], cen=[cen1[0]+180,cen1[1]-50], fov=7, /limb, /log
 plot_map, shift_map(map, shift[0], shift[1]), /over
 
+;
+; Basic count spectrum of flare using D6
+;
+
+get_target_data, 4, d0_t4,d1_t4,d2_t4,d3_t4,d4_t4,d5_t4,d6_t4
+get_target_data, 6, d0_t6,d1_t6,d2_t6,d3_t6,d4_t6,d5_t6,d6_t6
+;get_target_data, 2, d0b,d1b,d2b,d3b,d4b,d5b,d6b
+
+d6_t4 = d6_t4[ where( d6_t4.error_flag eq 0 ) ]
+d6_t6 = d6_t6[ where( d6_t6.error_flag eq 0 ) ]
+;d6b = d6b[ where( d6b.error_flag eq 0 ) ]
+
+d6 = [d6_t4,d6_t6]
+
+spec = make_spectrum( d6, bin=0.5 )
+spec_t4 = make_spectrum( d6_t4, bin=0.5 )
+spec_t6 = make_spectrum( d6_t6, bin=0.5 )
+;specb = make_spectrum( d6b, bin=1. )
+; values are counts per keV.
+
+time4 = t4_end - t4_start
+time6 = t6_end - t6_start
+
+time_int = time4 + time6
+time_intb = t2_end - t2_start
+
+popen, xsi=7, ysi=7
+ploterr, spec.energy_kev, spec.spec_p/time_int, spec.energy_kev*0., spec.spec_p_err/time_int, $
+	/xlo, /ylo, charsi=1.2, $
+	xr=[3.,20.], yr=[1.e-3,1.e2], /xsty, /ysty, psym=10, thick=4, errthick=4, nohat=0, $
+	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N detector!U-1!N'
+oploterr, specb.energy_kev, specb.spec_p/time_intb, specb.energy_kev*0., specb.spec_p_err/time_intb, $
+	psym=10, thick=4, line=1
+legend, ['Flare, detector 6','Second target, detector 6'], line=[0,1], thick=4, charsi=1.2, box=0.
+pclose
+
+ploterr, spec_t4.energy_kev, spec_t4.spec_p/time4, spec_t4.energy_kev*0., $
+	spec_t4.spec_p_err/time4, /xlo, /ylo, charsi=1.2, $
+	xr=[3.,20.], yr=[1.e-3,1.e2], /xsty, /ysty, psym=10, thick=1, errthick=1, nohat=0, $
+	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N detector!U-1!N'
+oploterr, spec_t6.energy_kev, spec_t6.spec_p/time6, spec_t6.energy_kev*0., $
+	spec_t6.spec_p_err/time6, psym=10, thick=1, color=6, errcolor=6
+
+
+;
+; Lightcurve
+;
+
+data = data_lvl2_d6[ where(data_lvl2_d6.error_flag eq 0) ]
+hist = histogram( data.wsmr_time, min=min(data.wsmr_time), max=max(data.wsmr_time),bin=5.)
+int = max(data.wsmr_time) - min(data.wsmr_time)
+time = anytim( anytim('2012-nov-02') + data[0].wsmr_time + findgen(78)*5., /yo)
+
+popen, xsi=7, ysi=7
+utplot, time, hist/5., psym=10, thick=4, ytit='Counts s!U-1!N detector!U-1!N', charsi=1.2
+pclose
+
+;
+; Make a spectrogram
+;
+
+time = d6.wsmr_time
+en = d6.hit_energy[1]
+n1 = 49
+n2 = 81
+time_axis = fltarr(n1)
+spectro = fltarr(n1, n2)
+
+.run
+for i=0, n1-1 do begin
+	j = where( time ge time[0]+2.5*i and time lt time[0]+2.5*(i+1) )
+	if j[0] eq -1 then continue
+	hist = histogram( en[j], min=0, max=20, bin=0.25 )
+	spectro[i,*] = hist
+	time_axis[i] = time[0]+2.5*i
+endfor
+end
+
+time_axis = anytim('2012-nov-02')+time_axis 
+spectro_plot, spectro, time_axis, findgen(16), /cbar
+spectro_plot, spectro, /cbar
+
+
+pix=4.
+er=[6,15]
+m0a = foxsi_image_solar(d0, 0, ps=pix, er=erange, thr_n=erange[0] )
+m1a = foxsi_image_solar(d1, 1, ps=pix, er=erange, thr_n=erange[0] )
+m2a = foxsi_image_solar(d2, 2, ps=pix, er=erange, thr_n=erange[0] )
+m3a = foxsi_image_solar(d3, 3, ps=pix, er=erange, thr_n=erange[0] )
+m4a = foxsi_image_solar(d4, 4, ps=pix, er=erange, thr_n=erange[0] )
+m5a = foxsi_image_solar(d5, 5, ps=pix, er=erange, thr_n=erange[0] )
+m6a = foxsi_image_solar(d6, 6, ps=pix, er=erange, thr_n=erange[0] )
+m0b = foxsi_image_solar(d0a, 0, ps=pix, er=erange, thr_n=erange[0] )
+m1b = foxsi_image_solar(d1a, 1, ps=pix, er=erange, thr_n=erange[0] )
+m2b = foxsi_image_solar(d2a, 2, ps=pix, er=erange, thr_n=erange[0] )
+m3b = foxsi_image_solar(d3a, 3, ps=pix, er=erange, thr_n=erange[0] )
+m4b = foxsi_image_solar(d4a, 4, ps=pix, er=erange, thr_n=erange[0] )
+m5b = foxsi_image_solar(d5a, 5, ps=pix, er=erange, thr_n=erange[0] )
+m6b = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0] )
+
+m6a = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[ 0,10] )
+m6b = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[10,20] )
+m6c = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[20,30] )
+m6d = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[30,40] )
+m6e = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[40,50] )
+m6f = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[50,60] )
+m6g = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[60,70] )
+m6h = foxsi_image_solar(d6a, 6, ps=pix, er=erange, thr_n=erange[0], trange=t6_start-t_launch+[70,80] )
+
+m6_targ4=m6
+m6_targ6 = [m6a,m6b,m6c,m6d,m6e,m6f]
+
+movie_map, m6_targ6, cen=flare, fov=2, /cbar
+
+plot_map, map, /limb, cen=flare, fov=2, /cb
+
+n = (1080-960)/pix
+xbins = 960 + findgen(n+1)*pix
+ybins = -270 - findgen(n+1)*pix
+
+spec = make_spectrum( d6, bin=2.0 )
+spec = replicate( spec, n_elements(xbins)-1,n_elements(ybins)-1 )
+spec.spec_n = 0.
+spec.spec_p = 0.
+spec.spec_p_err = 0.
+
+
+;
+; more imaging spectroscopy
+;
+
+@foxsi-setup-script
+
+flare_xy = [1020.,-320.]
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6_t4_flare, cen=flare_xy, rad=50.
+get_target_data, 6, d0,d1,d2,d3,d4,d5,d6_t6_flare, cen=flare_xy, rad=50.
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6_t4_near, cen=flare_xy, rad=100.
+get_target_data, 6, d0,d1,d2,d3,d4,d5,d6_t6_near, cen=flare_xy, rad=100.
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6_t4_bkgd, cen=[500,-700],rad=200.
+get_target_data, 6, d0,d1,d2,d3,d4,d5,d6_t6_bkgd, cen=[500,-700],rad=200.
+
+d6src  = [d6_t4_flare, d6_t6_flare]
+d6near = [d6_t4_near, d6_t6_near]
+d6bkgd = [d6_t4_bkgd, d6_t6_bkgd]
+d6src  = d6src [ where( d6src.error_flag eq 0 ) ]
+d6near = d6near[ where( d6near.error_flag eq 0 ) ]
+d6bkgd = d6bkgd[ where( d6bkgd.error_flag eq 0 ) ]
+
+spec_src  = make_spectrum( d6src,  bin=0.5 )
+spec_near = make_spectrum( d6near, bin=0.5 )
+spec_bkgd = make_spectrum( d6bkgd, bin=2. )
+
+; subtract spec_src from spec_near to get an annulus
+; then scale all the counts to the area used for the flare spectrum.
+spec_bkgd.spec_n /= 16.
+spec_bkgd.spec_p /= 16.
+spec_bkgd.spec_p_err /= 16.
+spec_near.spec_n = (spec_near.spec_n - spec_src.spec_n) / 3.
+spec_near.spec_p = (spec_near.spec_p - spec_src.spec_p) / 3.
+spec_near.spec_p_err = sqrt( spec_near.spec_p_err^2 + spec_src.spec_p_err^2 ) / 3.
+
+; values are counts per keV.
+time_int = t4_end + t6_end - t4_start - t6_start
+
+;; manual rebinning of the histograms.
+;energy = spec.energy_kev
+;counts = spec.spec_p/time_int
+;yerr   = spec.spec_p_err/time_int
+;n = n_elements(energy)
+;i_low = where( energy le 8. )
+;i_hi  = where( energy gt 8. and findgen(n-2) mod 2 eq 0 )
+;counts_low = counts[i_low]
+;counts_hi = counts[i_hi] + counts[i_hi+1]
+;new_en = [energy[i_low],energy[i_hi]]
+;new_counts = [counts_low,counts_hi]
+
+popen, xsi=7, ysi=6
+ploterr, spec_src.energy_kev, spec_src.spec_p/time_int, spec_src.energy_kev*0., $
+	spec_src.spec_p_err/time_int, /xlo, /ylo, charsi=1.3, $
+	xr=[3.,15.], yr=[1.e-4,1.e2], /xsty, /ysty, psym=10, thick=4, errthick=4, nohat=0, $
+	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N'
+oploterr, spec_near.energy_kev, spec_near.spec_p/time_int, spec_near.energy_kev*0., $
+	spec_near.spec_p_err/time_int, psym=10, thick=4, line=2
+oploterr, spec_bkgd.energy_kev, spec_bkgd.spec_p/time_int, spec_bkgd.energy_kev*0., $
+	spec_bkgd.spec_p_err/time_int, psym=10, thick=4, line=1
+legend, ['Flare','50" annulus','Background'], line=[0,2,1], thick=4, charsi=1.2, box=0., /right
+pclose
+
+;ploterr, new_en, new_counts, spec.energy_kev*0., $
+;	spec.spec_p_err/time_int, /xlo, /ylo, charsi=1.2, $
+;	xr=[3.,20.], yr=[1.e-5,1.e2], /xsty, /ysty, psym=10, thick=4, errthick=4, nohat=0, $
+;	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N detector!U-1!N'
+
+;
+; imaging spectroscopy using a 50% contour level...
+;
+
+@foxsi-setup-script
+
+flare_xy = [1020.,-320.]
+pix=3.
+er=[4,15]
+tr = [t4_start, t4_end]
+
+; reference map to select the core pixels.
+img6=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[3.,15.], tr=tr-t_launch, thr_n=4.)
+;core = hsi_select_box(img6.data)
+;save, core, file='core.sav'
+restore,'core.sav'
+
+; create the image cube for Target 4
+tr = [t4_start, t4_end]
+m4 = replicate( img6, 21 )
+m4.data = 0.
+m4[0]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[3.,3.5], tr=tr-t_launch, thr_n=4.)
+m4[1]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[3.5,4.], tr=tr-t_launch, thr_n=4.)
+m4[2]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[4.,4.5], tr=tr-t_launch, thr_n=4.)
+m4[3]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[4.5,5.], tr=tr-t_launch, thr_n=4.)
+m4[4]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[5.,5.5], tr=tr-t_launch, thr_n=4.)
+m4[5]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[5.5,6.], tr=tr-t_launch, thr_n=4.)
+m4[6]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[6.,6.5], tr=tr-t_launch, thr_n=4.)
+m4[7]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[6.5,7.], tr=tr-t_launch, thr_n=4.)
+m4[8]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[7.,7.5], tr=tr-t_launch, thr_n=4.)
+m4[9]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[7.5,8.], tr=tr-t_launch, thr_n=4.)
+m4[10]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[8.,8.5], tr=tr-t_launch, thr_n=4.)
+m4[11]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[8.5,9.], tr=tr-t_launch, thr_n=4.)
+m4[12]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[9.,9.5], tr=tr-t_launch, thr_n=4.)
+m4[13]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[9.5,10.], tr=tr-t_launch, thr_n=4.)
+m4[14]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[10.,10.5], tr=tr-t_launch, thr_n=4.)
+m4[15]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[10.5,11.], tr=tr-t_launch, thr_n=4.)
+m4[16]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[11.,11.5], tr=tr-t_launch, thr_n=4.)
+m4[17]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[11.5,12.], tr=tr-t_launch, thr_n=4.)
+m4[18]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[12.,13.], tr=tr-t_launch, thr_n=4.)
+m4[19]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[13.,14.], tr=tr-t_launch, thr_n=4.)
+m4[20]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[14.,15.], tr=tr-t_launch, thr_n=4.)
+
+; repeat for Target 6!
+tr = [t6_start, t6_end]
+m6 = replicate( img6, 21 )
+m6.data = 0.
+;m6[0]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[3.,3.5], tr=tr-t_launch, thr_n=4.)
+m6[1]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[3.5,4.], tr=tr-t_launch, thr_n=4.)
+m6[2]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[4.,4.5], tr=tr-t_launch, thr_n=4.)
+m6[3]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[4.5,5.], tr=tr-t_launch, thr_n=4.)
+m6[4]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[5.,5.5], tr=tr-t_launch, thr_n=4.)
+m6[5]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[5.5,6.], tr=tr-t_launch, thr_n=4.)
+m6[6]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[6.,6.5], tr=tr-t_launch, thr_n=4.)
+m6[7]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[6.5,7.], tr=tr-t_launch, thr_n=4.)
+m6[8]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[7.,7.5], tr=tr-t_launch, thr_n=4.)
+m6[9]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[7.5,8.], tr=tr-t_launch, thr_n=4.)
+m6[10]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[8.,8.5], tr=tr-t_launch, thr_n=4.)
+m6[11]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[8.5,9.], tr=tr-t_launch, thr_n=4.)
+m6[12]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[9.,9.5], tr=tr-t_launch, thr_n=4.)
+m6[13]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[9.5,10.], tr=tr-t_launch, thr_n=4.)
+m6[14]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[10.,10.5], tr=tr-t_launch, thr_n=4.)
+m6[15]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[10.5,11.], tr=tr-t_launch, thr_n=4.)
+m6[16]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[11.,11.5], tr=tr-t_launch, thr_n=4.)
+m6[17]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[11.5,12.], tr=tr-t_launch, thr_n=4.)
+;m6[18]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[12.,13.], tr=tr-t_launch, thr_n=4.)
+;m6[19]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[13.,14.], tr=tr-t_launch, thr_n=4.)
+;m6[20]=foxsi_image_solar( data_lvl2_d6, 6, ps=pix, er=[14.,15.], tr=tr-t_launch, thr_n=4.)
+
+m4.data[ where(finite(m4.data) eq 0) ] = 0.
+m6.data[ where(finite(m6.data) eq 0) ] = 0.
+
+m = replicate( img6, 21 )
+m.data = m4.data + m6.data
+
+; values are counts.  Make it counts per keV per sec.
+time_int = t4_end + t6_end - t4_start - t6_start
+en  = [findgen(19)*0.5+3.,13.,14.,15.]
+width = get_edges(en, /width)
+cts = fltarr(21)
+for i=0, 20 do cts[i]=total(m[i].data[core]) / time_int / width[i]
+err = sqrt(cts) / time_int / width
+
+; now get the background counts, using the earlier method.
+;get_target_data, 4, d0,d1,d2,d3,d4,d5,d6_t4_bkgd, cen=[500,-700],rad=200.
+;get_target_data, 6, d0,d1,d2,d3,d4,d5,d6_t6_bkgd, cen=[500,-700],rad=200.
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6_t4_bkgd, cen=[350,-700],rad=200.
+get_target_data, 6, d0,d1,d2,d3,d4,d5,d6_t6_bkgd, cen=[350,-700],rad=200.
+
+d6bkgd = [d6_t4_bkgd, d6_t6_bkgd]
+d6bkgd = d6bkgd[ where( d6bkgd.error_flag eq 0 ) ]
+spec_bkgd = make_spectrum( d6bkgd, bin=2. )
+
+; scale to same area as flare
+flare_area = n_elements(core)*3.^2	; factor of 3 is because core pix were 3" wide.
+bkgd_area  = !pi*200.^2
+scale = flare_area / bkgd_area
+spec_bkgd.spec_n *= scale
+spec_bkgd.spec_p *= scale
+spec_bkgd.spec_p_err *= scale
+bkgd_err = spec_bkgd.spec_p_err
+bkgd_err_lower = bkgd_err
+i=where(bkgd_err eq spec_bkgd.spec_p)
+bkgd_err_lower[i] /= 1.1
+
+;ploterr, en, cts, en*0., err, /xlo, /ylo, xr=[3.,15.], /xsty, yr=[1.,1.e4], psym=10
+
+popen, xsi=7, ysi=5.5
+plot_oo, en, cts, /xlo, /ylo, charsi=1.5, xr=[3.,15.], yr=[1.e-5,1.e1], /xsty, /ysty, /nodata, $
+	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N', ytickformat='logticks_exp'
+oploterr, en, cts, en*0.,err, $;, /xlo, /ylo, charsi=1.4, $
+;	xr=[3.,15.], yr=[1.e-5,1.e1], /xsty, /ysty, 
+	psym=10, thick=4, errthick=4, nohat=0
+oploterr, spec_bkgd.energy_kev, spec_bkgd.spec_p/time_int, spec_bkgd.energy_kev*0., $
+	bkgd_err/time_int, psym=10, thick=4, line=2, /HIBAR
+oploterr, spec_bkgd.energy_kev, spec_bkgd.spec_p/time_int, spec_bkgd.energy_kev*0., $
+	bkgd_err_lower/time_int, psym=10, thick=4, line=2, /LOBAR
+legend, ['Flare','Background'], line=[0,2], thick=4, charsi=1.2, box=0., /right
+pclose
+
+; qsum = SQRT( Total(stack^2, 3) )
+
+;
+; off-axis response
+;
+
+e1 = dindgen(1200)/100+3
+e2 = get_edges(e1,/edges_2)
+emid = get_edges(e1,/mean)
+
+;rhessi = rhessi_eff_area(e1, 0.25, 0)
+area = get_foxsi_offaxis_resp(energy_arr=emid, offaxis=7.3 )
+
+spec = get_target_spectra(2, /corr, /good)
+
+plot, spec[6].energy_kev, spec[6].spec_p, psym=10.; /xlo, /ylo, $
+	psym=10, yr=[1.e-2,1.], xr=[3.,100], /xsty
+
+
+
