@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
-                          XYCOR = XYCOR, THR_N = THR_N, STOP = STOP
+                          XYCOR = XYCOR, THR_N = THR_N, STOP = STOP, KEEPALL = KEEPALL, $
+                          YEAR=YEAR
 ;
 ; written Jan 2014 by Linz
 ;        
@@ -23,15 +24,18 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 	default, erange, [4.,15.]
   	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
   	if not keyword_set(thr_n) then thr_n =4.    ; desired n-side ADC threshold
+  	default, year, 2012
+  	default, trange, [0,420]
 
-  	tlaunch=long(64500.)	; time of launch in seconds-of-day
+	; launch time in seconds of day.
+	if year eq 2012 then tlaunch=long(64500.) else if year eq 2014 then tlaunch=long(69060)
   
   	; Here are Ishikawa's offsets used if XYCOR is set:
 ;  	xerr=[55.4700,    81.490,   96.360,  87.8900,  48.2700,   49.550,   63.450]
 ;  	yerr=[-135.977, -131.124, -130.241, -92.7310, -95.3080, -120.276, -106.360]
 
 	; throw out any potentially bad events
-	data2 = data[ where( data.error_flag eq 0 ) ]
+	if keyword_set( keepall ) then data2=data else data2 = data[ where( data.error_flag eq 0 ) ]
 	
 	; restrict ADC range
 	data2 = data2[ where( data2.hit_energy[1] gt erange[0] and data2.hit_energy[1] lt erange[1]$
@@ -39,14 +43,17 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 
 ;	native_bin = 7.735*( cos(rotation) + sin(rotation) )
 	
-  	istart=long(0)
-  	i_times = where( data2.wsmr_time ge (trange[0]+tlaunch) and data2.wsmr_time le (trange[1]+tlaunch) )
-	if i_times[0] eq -1 then begin
-		print, 'No events in time range.'
-		return, -1
-	endif
-	istart = i_times[0]
-	iend = i_times[n_elements(i_times)-1]
+	  	istart=long(0)
+	  	i_times = where( data2.wsmr_time ge (trange[0]+tlaunch) and data2.wsmr_time le (trange[1]+tlaunch) )
+		if i_times[0] eq -1 then begin
+			print, 'No events in time range.'
+			return, -1
+		endif
+		istart = i_times[0]
+		iend = i_times[n_elements(i_times)-1]
+;		istart = 0
+;		iend = n_elements(data2)-1
+
   	img = fltarr( 128, 128 )
 
 ;  	xyerr = fltarr(2)

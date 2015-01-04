@@ -1,4 +1,4 @@
-FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy
+FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year
 
 	;	produces a FOXSI lightcurve given a FOXSI level2 data structure.
 	;	DT is the time interval.  Constant for entire curve.
@@ -38,11 +38,19 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy
 		if j[0] gt -1 then lc[i] = n_elements(j)	
 	endfor
 	
-	lc = create_struct('time', anytim('2012-nov-02')+get_edges(time_array,/mean), $
-					   'persec', float(lc)/dt)
+	time_mean = get_edges(time_array,/mean)
+	
+	CASE year OF
+		2012: date = '2012-nov-02'
+		2014: date = '2014-dec-11'
+	ENDCASE
+	curve=create_struct('time',anytim(date)+time_mean[0],'persec', double(lc[0])/dt)
+	curve = replicate(curve, nInt)
+	curve.time = anytim(date)+time_mean
+	curve.persec = float(lc)/dt
 	
 	if keyword_set(stop) then stop
 	
-	return, lc
+	return, curve
 
 END

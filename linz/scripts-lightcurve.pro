@@ -158,3 +158,30 @@ oplot, lc6a, psym=10, color=2, thick=th
 
 ; Result: "error free" and "all inflight" data curves look the same except for scaling, 
 ; so from here on out only look at error-free data.
+
+
+; RHESSI lightcurve
+
+time_range = '2012-nov-02 ' + ['17:50','18:10']
+obs_obj = hsi_obs_summary( obs_time_interval=time_range )
+;obs_obj->plotman, /ylog		; to check that this is what we want.
+data = obs_obj->getdata()	; extract data from the observing summary.
+
+rate3  = data.countrate[0,*]		; 3-6 keV
+rate6  = data.countrate[1,*]		; 6-12 keV
+rate12 = data.countrate[2,*]		; 12-25 keV
+rate25 = data.countrate[3,*]		; 25-50 keV
+
+; time bins are every 4 seconds (~1 roll period) between time_range[0] and time_range[1]
+; This info can be used to build a time array.
+interval = anytim(time_range[1]) - anytim(time_range[0])
+times = anytim( time_range[0] ) + 4.*findgen( interval/4. )
+
+hsi_linecolors
+utplot,  anytim( times,/yo ), rate3, /ylog, psym=10, thick=4, yr=[1.e0,1.e2], $
+	ytitle='Count rate (s!U-1!N detector!U-1!N)', title='RHESSI lightcurves'
+outplot, anytim( times,/yo ), rate6,  color=2, psym=10, thick=4
+legend, ['3-6 keV','6-12 keV'], col=[0,2], thick=4, line=0, $
+	/bottom, charsi=0.8
+	
+

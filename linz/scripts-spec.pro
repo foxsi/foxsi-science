@@ -934,7 +934,7 @@ bkgd_err_lower[i] /= 1.1
 
 ;ploterr, en, cts, en*0., err, /xlo, /ylo, xr=[3.,15.], /xsty, yr=[1.,1.e4], psym=10
 
-popen, xsi=7, ysi=5.5
+;popen, xsi=7, ysi=5.5
 plot_oo, en, cts, /xlo, /ylo, charsi=1.5, xr=[3.,15.], yr=[1.e-5,1.e1], /xsty, /ysty, /nodata, $
 	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N', ytickformat='logticks_exp'
 oploterr, en, cts, en*0.,err, $;, /xlo, /ylo, charsi=1.4, $
@@ -945,7 +945,7 @@ oploterr, spec_bkgd.energy_kev, spec_bkgd.spec_p/time_int, spec_bkgd.energy_kev*
 oploterr, spec_bkgd.energy_kev, spec_bkgd.spec_p/time_int, spec_bkgd.energy_kev*0., $
 	bkgd_err_lower/time_int, psym=10, thick=4, line=2, /LOBAR
 legend, ['Flare','Background'], line=[0,2], thick=4, charsi=1.2, box=0., /right
-pclose
+;pclose
 
 ; qsum = SQRT( Total(stack^2, 3) )
 

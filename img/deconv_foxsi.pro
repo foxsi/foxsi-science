@@ -4,7 +4,8 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 					   PLATE_SCALE=PLATE_SCALE, PSF_SMOOTH=PSF_SMOOTH, $
 					   IMG_SMOOTH=IMG_SMOOTH, ROTATION=ROTATION, $
 					   MEASURED_PSF = MEASURED_PSF, STOP = STOP, FIRST = FIRST, $
-					   PSF_map=PSF_map, FIX4=FIX4, iter=iter
+					   PSF_map=PSF_map, FIX4=FIX4, iter=iter, $
+					   RECONV_map = reconv_map, CSTAT=cstat
  
  	; Detector should be an index array saying which detectors we're using.
  	; Example [0,0,0,0,0,1] for D6.
@@ -19,7 +20,7 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 	default, img_smooth, 15
 	default, rotation, 79
 	default, measured_psf, 0
-	default, iter, [1,2,3,4,5,10,20,40,80]
+	default, iter, [1,2,3,4,5,10,20,40,80,100]
 
 	
 	print
@@ -86,13 +87,18 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
   	endif else begin
 	
 		; or, use a gaussian PSF
-		params = [ 0.0, 0.0, 0.0, 0.9875, 0.218387, 0.0762158, 1.27836, 1.77492, 4.36214, $
+		params = [ 0.0, 0.0, 0.0, 0.9875, 0.218387, 0.0762158, 1.27836, 1.77492, 4.36214,$
 		   7.21397, 47.5, 240.314, 0.0 ]	; parameters from Steven
 		   	
-		psf1 = psf_gaussian( npix=[120,120], /double, st_dev=[1.27836, 1.77492]/pix )
-		psf2 = psf_gaussian( npix=[120,120], /double, $
+		;psf1 = psf_gaussian( npix=[120,120], /double, st_dev=[1.27836, 1.77492]/pix )
+		;psf2 = psf_gaussian( npix=[120,120], /double, $
+		;					 st_dev=2.*[4.36214, 7.21397]/pix )*params[4]
+		;psf3 = psf_gaussian( npix=[120,120], /double, $
+		;					 st_dev=2.*[47.5, 240.314]/pix )*params[4]*params[5]
+		psf1 = psf_gaussian( npix=[dim,dim], /double, st_dev=[1.27836, 1.77492]/pix )
+		psf2 = psf_gaussian( npix=[dim,dim], /double, $
 							 st_dev=2.*[4.36214, 7.21397]/pix )*params[4]
-		psf3 = psf_gaussian( npix=[120,120], /double, $
+		psf3 = psf_gaussian( npix=[dim,dim], /double, $
 							 st_dev=2.*[47.5, 240.314]/pix )*params[4]*params[5]
 		psftest = make_map( psf1+psf2+psf3, dx=pix, dy=pix )
 		psf = rot_map( psftest, -45 )
@@ -140,7 +146,7 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 	rot6 = -60.
 
 ;	imdim = 1000/fix(pix)
-	imdim=dim
+	imdim=128*7.78/pix
 
  	if n_det eq 1 then begin
 
@@ -184,7 +190,7 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 		first = make_submap( first, cen=first_cen, fov=3 )
 		; this gets returned in keyword FIRST to use as sample unprocessed image.
 		
-		flare_new=map_centroid( map, thresh=0.3*max(map.data) )
+		flare_new=map_centroid( map, thresh=0.3*max(map.data) ) - 45
 		raw = shift_map( make_submap( map, cen=flare_new, fov=fov+1), -flare_new[0], -flare_new[1] )
 		raw.xc=0
 		raw.yc=0
@@ -220,6 +226,20 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 		map4 = rebin_map( map4_raw, imdim, imdim )
 		map5 = rebin_map( map5_raw, imdim, imdim )
 		map6 = rebin_map( map6_raw, imdim, imdim )
+		map0.dx = pix
+		map0.dy = pix
+		map1.dx = pix
+		map1.dy = pix
+		map2.dx = pix
+		map2.dy = pix
+		map3.dx = pix
+		map3.dy = pix
+		map4.dx = pix
+		map4.dy = pix
+		map5.dx = pix
+		map5.dy = pix
+		map6.dx = pix
+		map6.dy = pix
 		map0.data = map0.data/total(map0.data)*total(img0)
 		map1.data = map1.data/total(map1.data)*total(img1)
 		map2.data = map2.data/total(map2.data)*total(img2)
@@ -248,13 +268,13 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 		map4_raw = rot_map( map4_raw, rot4 )
 		map5_raw = rot_map( map5_raw, rot5 )
 		map6_raw = rot_map( map6_raw, rot6 )
-		centr0 = map_centroid(map0,th=0.2*max(map0.data))
-		centr1 = map_centroid(map1,th=0.2*max(map1.data))
-		centr2 = map_centroid(map2,th=0.2*max(map2.data))
-		centr3 = map_centroid(map3,th=0.2*max(map3.data))
-		centr4 = map_centroid(map4,th=0.2*max(map4.data))
-		centr5 = map_centroid(map5,th=0.2*max(map5.data))
-		centr6 = map_centroid(map6,th=0.2*max(map6.data))
+		centr0 = map_centroid(map0,th=0.2*max(map0.data)) - 45
+		centr1 = map_centroid(map1,th=0.2*max(map1.data)) - 45
+		centr2 = map_centroid(map2,th=0.2*max(map2.data)) - 45
+		centr3 = map_centroid(map3,th=0.2*max(map3.data)) - 45
+		centr4 = map_centroid(map4,th=0.2*max(map4.data)) - 45
+		centr5 = map_centroid(map5,th=0.2*max(map5.data)) - 45
+		centr6 = map_centroid(map6,th=0.2*max(map6.data)) - 45
 		raw0 = shift_map( make_submap( map0, cen=centr0, fov=fov+1), -centr0[0], -centr0[1] )
 		raw1 = shift_map( make_submap( map1, cen=centr1, fov=fov+1), -centr1[0], -centr1[1] )
 		raw2 = shift_map( make_submap( map2, cen=centr2, fov=fov+1), -centr2[0], -centr2[1] )
@@ -286,17 +306,29 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 		first = make_submap( first, cen=first_cen, fov=3 )
 		; this gets returned in keyword FIRST to use as sample unprocessed image.
 
-		raw.xc=0
-		raw.yc=0
-		raw.dx = pix
-		raw.dy = pix
+;		raw.xc=0
+;		raw.yc=0
+;		raw.dx = pix
+;		raw.dy = pix
 		
 		raw.data = smooth( raw.data, img_smooth/pix )	
 		raw = make_submap( raw, cen=[0.,0.], fov=fov )
 
 	endelse  
-
-	if keyword_set(stop) then stop
+	
+	; a kludge to fix the problem that im dimensions may one-off.
+	data_psf = psf.data
+	data_raw = raw.data
+	nDimPsf = size( psf.data )
+	nDimRaw = size( raw.data )
+	if n_elements(raw.data) gt n_elements(psf.data) then begin
+		sub_map, raw, new, dim=nDimPsf[1:2], ref=psf
+		raw = new
+	endif
+	if n_elements(psf.data) gt n_elements(raw.data) then begin
+		sub_map, psf, new, dim=nDimRaw[1:2], ref=raw
+		psf = new
+	endif
 
  	; Step 3: Do the deconvolution! :D
  
@@ -308,14 +340,26 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
  	n = n_elements(iter)
  	deconv_map = replicate( raw, n+1 )	; leave an extra at beginning to contain raw image.
  	reconv_map = replicate( raw, n+1 )
-  
- 	for j=0, n-1 do begin
-  		undefine, deconv
-  		print, j, iter[j]
-  		for i=0, iter[j] do max_likelihood, raw.data, psf.data, deconv, reconv
-  		deconv_map[j+1].data = deconv
-  		reconv_map[j+1].data = reconv
-  		deconv_map[j+1].id=strtrim(iter[j],2)+' iter'
+    
+;	for j=0, n-1 do begin
+;		undefine, deconv
+;		print, j, iter[j]
+;		for i=0, iter[j] do max_likelihood, raw.data, psf.data, deconv, reconv
+;		deconv_map[j+1].data = deconv
+;		reconv_map[j+1].data = reconv
+;		deconv_map[j+1].id=strtrim(iter[j],2)+' iter'
+;	endfor
+ 
+ 	undefine, deconv
+ 	undefine, reconv
+ 	for j=0, iter[n-1] do begin
+  		max_likelihood, raw.data, psf.data, deconv, reconv
+  		if total( j eq iter ) gt 0 then begin
+  			i = where( j eq iter )
+  			deconv_map[i+1].data = deconv
+  			reconv_map[i+1].data = reconv
+  			deconv_map[i+1].id=strtrim(iter[i],2)+' iter'
+  		endif
  	endfor
  
  	print

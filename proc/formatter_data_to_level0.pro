@@ -221,6 +221,8 @@ function cmapply, op, array, dimapply, double=dbl, type=type, $
 end
   
 ;+
+; FORMATTER_DATA_TO_LEVEL0
+;
 ; This function reads in a FORMATTER CALIBRATION-style data file (*.dat) and processes 
 ; it into Level 0 FOXSI data.  The Level 0 FOXSI data structure is meant for use with
 ; flight data; this function allows the conversion of calibration into a form that can
@@ -229,7 +231,7 @@ end
 ;
 ; Inputs:	FILENAME = File to process.  Must be a FORMATTER CALIBRATION-style data file.
 ;
-; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
+; Keywords:	DETECTOR = Detector position number (0-6).  Each detector data
 ;			   must be processed individually.  Default D0
 ;		STOP = stop before returning, for debugging
 ;
@@ -247,8 +249,8 @@ end
 ;		data_lvl0_D4, data_lvl0_D5, data_lvl0_d6, $
 ;		file = 'data_2012/formatter_data.sav'
 ;
-; History:	Version 1, 2013-May-09, Lindsay Glesener
-;
+; History:	Version 1, 2013-May-09, Linz
+;-
 
 FUNCTION	FORMATTER_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 

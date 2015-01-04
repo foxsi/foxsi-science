@@ -95,3 +95,14 @@ obj-> set, clean_niter = 300
 data = obj-> getdata()
 obj-> plotman
 obj->fitswrite
+
+;
+; RHESSI SPEX from Säm
+;
+
+restore,'rhessi_spectral_fit_foxsi_flare_September2014.sav',/verbose
+plot_oo,average(ebins,1),obs_all(*,0),xrange=[4,12],xstyle=1,yrange=[1e-3,1e4], psym=10
+    for i=0,det_dim-1 do oplot,average(ebins,1),obs_all(*,i), psym=10
+    ;for i=0,det_dim-1 do oplot,average(ebins,1),bkg_all(*,i), psym=10
+    oplot,average(ebins,1),average(bkg_all,2),thick=3,color=1, psym=10
+    oplot,average(ebins,1),average(ph_all,2),thick=3,color=6, psym=10

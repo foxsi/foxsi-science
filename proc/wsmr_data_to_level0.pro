@@ -5,12 +5,13 @@
 ; WSMR data files too.  More documentation is available in the FOXSI
 ; data description doc.
 ;
-; Inputs:	FILENAME = File to process.  Must be a WSMR .log file.
-;			   Default is the 2012 Nov 2 flight data file.
+; Inputs:	FILENAME	File to process.  Must be a WSMR .log file.
+;			   			Default is the 2012 Nov 2 flight data file.
 ;
-; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
-;			   must be processed individually.  Default D0
-;		STOP = stop before returning, for debugging
+; Keywords:	DETECTOR	Detector number (0-6).  Each detector data
+;						must be processed individually.  Default D0
+;			YEAR		Specify 2012 or 2014. This is a temporary fix while we
+;						wait for altitude data for FOXSI-2.
 ;
 ; To process flight data into Level 0 IDL structures and save them:
 ;
@@ -26,14 +27,17 @@
 ;		data_lvl0_D4, data_lvl0_D5, data_lvl0_d6, $
 ;		file = 'data_2012/foxsi_level0_data.sav'
 ;
-; History:	Version 1, 2013-Jan-20, Lindsay Glesener
-;		2013-Feb-07, LG, Updated structure name and added altitude data
-;		2013-Feb-13, LG, Fixed altitude glitch and shifted "inflight" flag to 70 seconds later.
+; History:	
+;		2015-Dec	Linz	Updated to work for 2014 data too.
+;		2013-Feb-13	Linz	Fixed altitude glitch and shifted "inflight" flag to 70 seconds later.
+;		2013-Feb-07	Linz	Updated structure name and added altitude data
+;		2013-Jan-20	Linz	Created routine
 ;-
 
-FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
+FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 
 	add_path, 'util/'
+	default, year, 2012
 	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
@@ -83,7 +87,8 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 	; Note that including the MSB of the time (from the frame word 2) is not strictly necessary
 	; since this value is zero for our entire flight.  However, it's done anyway for 
 	; completeness.
-	seconds = uint( reform( frame[1,*] + ishft(ishft(frame[2,*],-15),16) ) )
+	frame = ulong64(frame)
+	seconds = reform( frame[1,*] + ishft(ishft(frame[2,*],-15),16) )
 	mil = ishft(ishft(frame[2,*],6),-6)/double(1000.)
 	data_struct.wsmr_time = double(seconds)+mil
 
@@ -243,23 +248,25 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 		data_struct[ where( ishft(data_struct.hv,-4)/8 gt 190  ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
-	; Get altitude data from text file
-	data_alt=read_ascii('data_2012/36255.txt')
-	time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
-	altitude = data_alt.field01[9,*]
+	if year eq 2012 then begin
+		; Get altitude data from text file
+		data_alt=read_ascii('data_2012/36255.txt')
+		time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
+		altitude = data_alt.field01[9,*]
 
-	; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
-	; So resize the altitude data by repeating values.
-	; I don't like the way "interpol" interpolates this, and I think the 
-	; "discrete" step nature is good so that you can see the real
-	; resolution of the altitude data.
+		; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
+		; So resize the altitude data by repeating values.
+		; I don't like the way "interpol" interpolates this, and I think the 
+		; "discrete" step nature is good so that you can see the real
+		; resolution of the altitude data.
 	
-	i_flight = long(0)
-	for i=long(0), nFrames-1 do begin
-		if data_struct[i].wsmr_time lt 64500 then continue
-		data_struct[i].altitude = altitude[i_flight/250]
-		i_flight++;
-	endfor
+		i_flight = long(0)
+		for i=long(0), nFrames-1 do begin
+			if data_struct[i].wsmr_time lt 64500 then continue
+			data_struct[i].altitude = altitude[i_flight/250]
+			i_flight++;
+		endfor
+	endif
 
 	; Compress data by getting rid of "zero" frames.  If a detector's trigger time
 	; is 0, then the frame is empty for that detector.  However, to not lose any

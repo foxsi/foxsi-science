@@ -8,7 +8,7 @@
 
 f1map094=map_rflag_cube(dmap094,r=1000,/out)
 
-@linz/foxsi-setup-script
+@foxsi-setup-script
 
 get_target_data, 2, d0,d1,d2,d3,d4,d5,d6, /good
 
@@ -111,3 +111,59 @@ print, n_elements( where( sqrt(coords[0,*]^2 + coords[1,*]^2) gt 1017) ) / 128.^
 
 bkgd_disk = [ 0.000106, 0.00201, 0.00529, 0.00624, 0.00254, 0.000952, 0.000423, 0.000423, 0.000106, 0.0]
 bkgd_off  = [ 0.0, 0.000329, 0.000494, 0.000576, 0.000247, 0.000165, 0.0000823, 0.0000823, 0.000165, 0.0]
+
+;
+; Background estimates using first target.
+;
+
+spec = get_target_spectra( 1, bin=1., /good )
+
+;plot, spec[0].energy_kev, spec[0].spec_p, psym=10, /xlo, /ylog, yr=[1.e-2,1.e1], /ysty, $
+;	xr=[3.,13.], /xsty
+	
+i=where(spec[0].energy_kev ge 4. and spec[0].energy_kev le 15.)
+print, total( spec[0].spec_p[i] ) / (15.-4.)
+print, total( spec[1].spec_p[i] ) / (15.-4.)
+print, total( spec[2].spec_p[i] ) / (15.-4.)
+print, total( spec[3].spec_p[i] ) / (15.-4.)
+print, total( spec[4].spec_p[i] ) / (15.-4.)
+print, total( spec[5].spec_p[i] ) / (15.-4.)
+print, total( spec[6].spec_p[i] ) / (15.-4.)
+
+; Results:
+;
+; D0: 0.0475
+; D1: 0.0610
+; D2: 0.0413
+; D3: 0.0370
+; D4: 0.150
+; D5: 0.0196
+; D6: 0.0270
+;
+; Average = 0.0548 cts / sec / keV
+;
+;
+; Scale to HPD area of ~30"
+;
+; Detector active area is (128x7.75")^2 = (992")^2 = 991697 sq arcsec
+; HPD area is !pi*(30")^2 = 2827.43
+; Ratio is 2827.43 / 984064 = 0.002851
+;
+; Average cts/sec/keV scaled = 0.000156
+;
+; Other notes:  HPD of 27" corresponds to 261.8 um on the detector, or 3.49 strips.
+; Half of this (i.e. the radius) is 130.9 um.
+; encircled area is 5.38e-4 cm2.  x2 for both sides --> 1.08e-3 cm2.
+; Vol. is 2.69e-5 cm3.
+
+; RHESSI bkgd counts
+
+restore,'rhessi_spectral_fit_foxsi_flare_September2014.sav',/verbose
+en1 = get_edges(ebins, /edges_1)
+rhessi = rhessi_eff_area(en1, 0.25, 0) / 9.
+hsi_bkgd = average(bkg_all, 2)
+hsi_bkgd_cts = hsi_bkgd*rhessi
+; by now, units are probably cts/kev/sec.  Just average over the energy range.
+;
+; Result: average is 0.64 cts / sec / kev.
+;

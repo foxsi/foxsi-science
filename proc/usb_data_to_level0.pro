@@ -1,6 +1,6 @@
 ;
 ; First, some utility functions.
-; Main procedure is below and is 'formatter_data_to_level0'
+; Main procedure is below and is 'USB_data_to_level0'
 ;
 
 ;; Utility function, adapted from CMPRODUCT
@@ -40,7 +40,6 @@ pro cmapply_redim, newarr, dimapply, dimkeep, nkeep, totcol, totkeep
   newarr = reform(newarr, [totcol, totkeep], /overwrite)
 end
 
-;; Main function
 function cmapply, op, array, dimapply, double=dbl, type=type, $
                   functargs=functargs, nocatch=nocatch
 
@@ -221,19 +220,21 @@ function cmapply, op, array, dimapply, double=dbl, type=type, $
 end
   
 ;+
-; This function reads in a FORMATTER CALIBRATION-style data file (*.dat) and processes 
+; This function reads in a USB (ACTEL) CALIBRATION-style data file (*.dat) and processes 
 ; it into Level 0 FOXSI data.  The Level 0 FOXSI data structure is meant for use with
 ; flight data; this function allows the conversion of calibration into a form that can
 ; be analyzed with flight data software. More documentation of the data structure is 
 ; available in the FOXSI data description doc.
 ;
-; Inputs:	FILENAME = File to process.  Must be a FORMATTER CALIBRATION-style data file.
+; Inputs:	
+;		FILENAME	File to process.  Must be a USB CALIBRATION-style data file.
 ;
-; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
-;			   must be processed individually.  Default D0
-;		STOP = stop before returning, for debugging
+; Keywords:	
+;		DETECTOR	Detector number (0-6).  Each detector data
+;			   	must be processed individually.  Default D0
 ;
-; To process formatter data into Level 0 IDL structures and save them:
+; Example:
+; 	To process formatter data into Level 0 IDL structures and save them:
 ;
 ;	filename = 'data_2012/data_121102_114631.dat'
 ; 	data_lvl0_D0 = formatter_data_to_level0( filename, det=0 )
@@ -247,8 +248,10 @@ end
 ;		data_lvl0_D4, data_lvl0_D5, data_lvl0_d6, $
 ;		file = 'data_2012/formatter_data.sav'
 ;
-; History:	Version 1, 2013-May-09, Lindsay Glesener
-;
+; History:	
+;	
+;	2013-May-09	Linz	Created routine
+;-
 
 FUNCTION	USB_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP
 
