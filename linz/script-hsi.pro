@@ -73,7 +73,7 @@ obj-> set, det_index_mask= [0B, 0B, 1B, 1B, 1B, 1B, 1B, 1B, 0B]
 obj-> set, im_energy_binning= [4., 10.]
 obj-> set, im_time_interval= t2
 obj-> set, image_dim= [128, 128]
-obj-> set, pixel_size= [1., 1.]*0.5
+obj-> set, pixel_size= [1., 1.]
 ;obj-> set, use_auto_time_bin= 1L
 obj-> set, use_flare_xyoffset= 1L
 
@@ -82,12 +82,12 @@ obj-> set, use_phz_stacker= 1L
 
 obj-> set, image_algorithm= 'Clean'
 obj-> set, natural_weighting= 1L
-obj-> set, uniform_weighting= 0L
+;obj-> set, uniform_weighting= 0L
 ;obj -> set,clean_show_maps=0L
-;obj-> set, clean_niter = 200
-obj-> set, clean_beam_width_factor = 1.5
+obj-> set, clean_niter = 300
+;obj-> set, clean_beam_width_factor = 1.5
 
-obj -> set, CLEAN_REGRESS_COMBINE=1L
+;obj -> set, CLEAN_REGRESS_COMBINE=1L
 
 ;obj-> set, image_algorithm= 'MEM_NJIT'
 ;obj-> set, image_alg = 'EM'
@@ -95,3 +95,14 @@ obj -> set, CLEAN_REGRESS_COMBINE=1L
 data = obj-> getdata()
 obj-> plotman
 obj->fitswrite
+
+;
+; RHESSI SPEX from Säm
+;
+
+restore,'rhessi_spectral_fit_foxsi_flare_September2014.sav',/verbose
+plot_oo,average(ebins,1),obs_all(*,0),xrange=[4,12],xstyle=1,yrange=[1e-3,1e4], psym=10
+    for i=0,det_dim-1 do oplot,average(ebins,1),obs_all(*,i), psym=10
+    ;for i=0,det_dim-1 do oplot,average(ebins,1),bkg_all(*,i), psym=10
+    oplot,average(ebins,1),average(bkg_all,2),thick=3,color=1, psym=10
+    oplot,average(ebins,1),average(ph_all,2),thick=3,color=6, psym=10

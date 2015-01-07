@@ -26,12 +26,27 @@ dem = [ 9.2702526e+20, 7.7229808e+17, 6.7899155e+15, 1.1811620e+15, 8.3469140e+1
 		2.6657822e+15 ]
 title = '100"x100" Hinode AR'
 file  = 'hinode-ar-25pix'
+
+; alternatively, use the values from a file.
+;t=dat.logt*1.e6
+;dem=10.^dat.dem
+;t=t[0:40]
+;logt=alog10(t)
+;dem=dem[0:40]
+data = read_ascii( 'linz/dem_hinode.dat' )
+logt = data.field1[0,*]
+t = 10.^logt
+dem = data.field1[1,*]
+area = 120.^2 * (0.725d8)^2
+
+n = n_elements(dem)
 		
 ; Calculate EM in cm^-3 for each bin.
-T = 10.^logt
+T = reform(10.^logt)
+dem = 10.^dem
 dT = get_edges(T, /width)
-dt = [dt, dt[19]]
-em = dem*dt*area
+dt = [dt, dt[n-2]]
+em = reform(dem*dt*area)
 
 ; energy arrays for simulated thermal fluxes
 en1 = findgen(500)/20 + 1.
@@ -41,7 +56,7 @@ n = n_elements(t)
 
 ; calculate thermal X-ray fluxes for each temperature/EM pair.
 flux = dblarr( n_elements(en), n )
-for i=0, 20 do flux[*,i] = f_vth( en2, [em[i]/1.d49, t[i]/11.8/1.d6, 1.] )
+for i=0, n-1 do flux[*,i] = f_vth( en2, [em[i]/1.d49, t[i]/11.8/1.e6, 1.], /chianti )
 
 ; The next routine calculates the expected FOXSI count spectrum for given thermal params.
 ; This includes contributions from the optics, detectors, and nominal blanketing.
@@ -49,11 +64,11 @@ for i=0, 20 do flux[*,i] = f_vth( en2, [em[i]/1.d49, t[i]/11.8/1.d6, 1.] )
 ; Off-axis angle is assumed 0.
 
 ; Sample sim to set up arrays.
-simA = foxsi_count_spectrum(em[10]/1.d49, t[10]/1.d6, time=1. )
+simA = foxsi_count_spectrum(em[10]/1.d49, t[10]/1.d6, time=1., n_blankets=5 )
 ; Now do it for all temperature bins.
 sim = dblarr( n_elements(simA.energy_keV), n_elements(logt) )
 .run
-for i=0, 20 do begin sim2 = foxsi_count_spectrum(em[i]/1.d49, t[i]/1.d6, time=1. )
+for i=0, n-1 do begin sim2 = foxsi_count_spectrum(em[i]/1.d49, t[i]/1.d6, time=1., n=5 )
 	sim[*,i] = sim2.counts
 endfor
 end
@@ -69,7 +84,7 @@ colors = 220-findgen(n)*10+20
 ;popen, file, xsi=7, ysi=5
 plot, en, flux[*,15], psym=10, /xlo, /ylo, xr=[1.,30.], yr=[1.e-2, 1.e5], /xsty, /ysty, $
 	xtit='Energy [keV]', ytit='Phot s!U-1!N cm!U-2!N keV!U-1!N', charsi=1.1, $
-	tit='Photon flux, '+title
+	tit='Photon flux';, '+title
 for i=0, n_elements(logt)-1 do $
 	oplot, en, flux[*,i], psym=10, thick=3, col=colors[i]
 legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th, $
@@ -77,10 +92,25 @@ legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th, $
 
 plot, simA.energy_kev, sim[*,15], psym=10, /xlo, /ylo, xr=[1.,30], /xsty, $
 	yr=[1.e-3, 1.e3], /ysty, xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N', $
-	tit='Simulated FOXSI flux, '+title
+	tit='Simulated FOXSI flux';, '+title
 for i=0, n_elements(logt)-1 do oplot, simA.energy_kev, sim[*,i], psym=10, thick=3, col=colors[i]
 legend, strtrim( logt ,2), textcolor=colors, box=0, thick=th
 ;pclose
+
+; calculate total counts above a given energy.
+sim[ where( finite(sim) eq 0 ) ] = 0.
+counts_sim = 0.5*sim*44	; 0.5 keV bins and 44 seconds.
+print, total(counts_sim)
+; above 10 keV
+i = where( simA.energy_kev lt 6. )
+sim[i,*] = 0.
+counts_sim = 0.5*sim*44	; 0.5 keV bins and 44 seconds.
+print, total(counts_sim)
+; above 6 keV
+i = where( simA.energy_kev lt 10. )
+sim[i,*] = 0.
+counts_sim = 0.5*sim*44	; 0.5 keV bins and 44 seconds.
+print, total(counts_sim)
 
 
 ;
@@ -278,3 +308,51 @@ loci_6keV = foxsi_dem_loci( logte, energy_bin, area, target=1, dindex=dindex, $
 	d4=data_lvl2_d4, d5=data_lvl2_d5, d6=data_lvl2_d6 )
 
 plot, logte, loci_6keV, /ylog, xtitle='Temperature [log(MK)]', ytitle='dEM [cm!U-5!N]'
+
+;
+; Calculate expected FOXSI count rates from a given DEM in a file.
+;
+
+data = read_ascii( 'linz/dem_hinode.dat' )
+logte = data.field1[0,*]
+em = data.field1[1,*]
+
+t=dat.logt*1.e6
+dem=10.^dat.dem
+t=t[0:40]
+logt=alog10(t)
+dem=dem[0:40]
+area = 120.^2 * (0.725d8)^2
+
+n = n_elements(dem)
+		
+; Calculate EM in cm^-3 for each bin.
+T = 10.^logt
+dT = get_edges(T, /width)
+dt = [dt, dt[n-2]]
+em = dem*dt*area
+
+; energy arrays for simulated thermal fluxes
+en1 = findgen(500)/20 + 1.
+en2 = get_edges(en1, /edges_2)
+en  = get_edges(en1, /mean)
+n = n_elements(t)
+
+; calculate thermal X-ray fluxes for each temperature/EM pair.
+flux = dblarr( n_elements(en), n )
+for i=0, n-1 do flux[*,i] = f_vth( en2, [em[i]/1.d49, t[i]/11.8/1.e6, 1.], /chianti )
+
+; The next routine calculates the expected FOXSI count spectrum for given thermal params.
+; This includes contributions from the optics, detectors, and nominal blanketing.
+; The extra blanketing isn't included.
+; Off-axis angle is assumed 0.
+
+; Sample sim to set up arrays.
+simA = foxsi_count_spectrum(em[10]/1.d49, t[10]/1.d6, time=1. )
+; Now do it for all temperature bins.
+sim = dblarr( n_elements(simA.energy_keV), n_elements(logt) )
+.run
+for i=0, n-1 do begin sim2 = foxsi_count_spectrum(em[i]/1.d49, t[i]/1.d6, time=1. )
+	sim[*,i] = sim2.counts
+endfor
+end
