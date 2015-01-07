@@ -241,10 +241,10 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 	; Identify which events occurred after HV upramp and before HV downramp, or "in flight"
 	; Do this only if the file is the flight data file.
 	; Post-ramp events will have a '1' in the 'inflight' tag.
-	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
+	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 $
+		or strmatch(filename,'*36_295_Krucker_FLIGHT_HOT_TM2.log') eq 1 $
+	 	then begin
 		print, "  File is flight data.  Flagging post-launch events."
-;		data_struct[ where( data_struct.wsmr_time gt 64570 ) ].inflight = 1
-	; update: instead of going by time, just check where the HV is close to 200V.
 		data_struct[ where( ishft(data_struct.hv,-4)/8 gt 190  ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
