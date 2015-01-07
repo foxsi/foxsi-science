@@ -73,8 +73,8 @@ al=2.6
 kapton=203.2
 
 ; plot ratio of two and compare to blanketing schemes.
-area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/')
-areaX = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/')
+areaX = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=5.8*mylar, al=5.8*al, kap=5.8*kapton)
 			
 plot, area.energy_kev, 0.025 + areax.eff_area_cm2 / area.eff_area_cm2, $
@@ -82,11 +82,11 @@ plot, area.energy_kev, 0.025 + areax.eff_area_cm2 / area.eff_area_cm2, $
 	thick=5
 
 
-areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=2.*mylar, al=2*al, kap=2*kapton)
-areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=4.*mylar, al=4*al, kap=4*kapton)
-areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=6.*mylar, al=6*al, kap=6*kapton)
 
 ;bkgd = get_target_spectra( 2, /correct )
@@ -298,19 +298,19 @@ EM = 4.8e-3  ; emission measure in units of 10^49
 time_int = 60.
 bin=0.3
 
-sim_det0 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det0 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det108_asic2.sav', /single )
-sim_det1 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det1 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det109_asic2.sav', /single )
-sim_det2 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det2 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det102_asic3.sav', /single )
-sim_det3 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det3 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det103_asic3.sav', /single )
-sim_det4 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det4 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det104_asic2.sav', /single )
-sim_det5 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det5 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det105_asic2.sav', /single )
-sim_det6 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det6 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det106_asic3.sav', /single )
 
 ; correct by an attenuation factor
@@ -320,8 +320,8 @@ kapton=203.2
 extra_sets = 4
 const = 0.08
 factor = (1+extra_sets)
-area_control = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/')
-area_test = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+area_control = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='calibration_data/')
+area_test = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=factor*mylar, al=factor*al, kap=factor*kapton)
 ratio = area_test.eff_area_cm2 / area_control.eff_area_cm2
 sim_det0.counts = sim_det0.counts * (ratio + const)
@@ -353,25 +353,25 @@ al=2.6
 kapton=203.2
 
 ; plot ratio of two and compare to blanketing schemes.
-area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/')
-areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/')
+areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=2.*mylar, al=2*al, kap=2*kapton)
-areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=4.*mylar, al=4*al, kap=4*kapton)
-areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=6.*mylar, al=6*al, kap=6*kapton)
 
 density = [1.30, 2.7, 1.42]
 mylar=82.55
 al=2.6
 kapton=203.2
-test = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+test = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=mylar, al=al, kap=kapton)
-test1 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+test1 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=mylar, al=al, kap=300.)
-test2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+test2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=2*mylar, al=2*al, kap=300)
-test3 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+test3 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=mylar, al=al, kap=2*kapton)
 
 plot, test.eff_area_cm2

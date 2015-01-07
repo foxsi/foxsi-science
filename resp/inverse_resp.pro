@@ -21,7 +21,7 @@ FUNCTION	INVERSE_RESP, ENERGY, PER_MODULE = per_module, $
 ; throw in blanketing.
 ; compute inverse and return.
 
-	default, data_dir, 'detector_data/'
+	default, data_dir, 'calibration_data/'
 	default, offaxis_angle, 0
 	default, n_blankets, 1
 	default, foxsi2, 0

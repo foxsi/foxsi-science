@@ -186,7 +186,7 @@ e2 = get_edges(e1,/edges_2)
 emid = get_edges(e1,/mean)
 
 rhessi = rhessi_eff_area(e1, 0.25, 0)
-area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/')
+area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/')
 
 plot, area.energy_kev, area.eff_area_cm2, line=2, thick=4, yr=[1.,1000], charsize=1.2, $
 	xtitle='Energy[keV]', ytitle='Effective area [cm!U2!N]', /ylog
@@ -394,7 +394,7 @@ restore, 'data_2012/foxsi_level2_data.sav', /v
 en1 = findgen(2000)/100.
 en_mid = get_edges(en1, /mean)
 en2 = get_edges(en1, /edges_2)
-dir = 'detector_data/'
+dir = 'calibration_data/'
 let_file = 'efficiency_averaged.sav'
 i=where(en1 ge 3.)
 

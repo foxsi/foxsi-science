@@ -21,7 +21,7 @@ FUNCTION COUNTS2ENERGY_DIAGONAL, DATA, PEAKSFILE=PEAKSFILE, THRESH_P, THRESH_N, 
 ;	lvl1 = data_D6
 ;	i=where(lvl1.error_flag eq 0)
 ;	data = lvl0[i]
-;	spec_D6 = counts2energy_diagonal( data, peaksfile='detector_data/peaks_det106.sav' )
+;	spec_D6 = counts2energy_diagonal( data, peaksfile='calibration_data/peaks_det106.sav' )
 ;	save, spec_D6, file = 'basic_spectra.sav'
 ;
 

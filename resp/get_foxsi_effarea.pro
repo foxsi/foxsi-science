@@ -22,7 +22,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, PER_MODULE = per_module, $
 ; Updated: LG, 2013-Mar-03
 
 default, type, 'si'
-default, data_dir, 'detector_data/'
+default, data_dir, 'calibration_data/'
 default, offaxis_angle, 0.0
 default, let_file, 'efficiency_averaged.sav'
 

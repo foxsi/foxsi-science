@@ -42,13 +42,13 @@ print, median( d[i].hit_xy_pay[0] ), median( d[i].hit_xy_pay[1] )
 ; Create Level 2 data
 file0 = 'data_2012/foxsi_level0_data.sav'
 file1 = 'data_2012/foxsi_level1_data.sav'
-cal0 = 'detector_data/peaks_det108.sav'
-cal1 = 'detector_data/peaks_det109.sav'
-cal2 = 'detector_data/peaks_det102.sav'
-cal3 = 'detector_data/peaks_det103.sav'
-cal4 = 'detector_data/peaks_det104.sav'
-cal5 = 'detector_data/peaks_det105.sav'
-cal6 = 'detector_data/peaks_det106.sav'
+cal0 = 'calibration_data/peaks_det108.sav'
+cal1 = 'calibration_data/peaks_det109.sav'
+cal2 = 'calibration_data/peaks_det102.sav'
+cal3 = 'calibration_data/peaks_det103.sav'
+cal4 = 'calibration_data/peaks_det104.sav'
+cal5 = 'calibration_data/peaks_det105.sav'
+cal6 = 'calibration_data/peaks_det106.sav'
 data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0 )
 data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1 )
 data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2 )
@@ -93,13 +93,13 @@ save, data_lvl1_D0, data_lvl1_D1, data_lvl1_D2, data_lvl1_D3, data_lvl1_D4, $
 ; Create Level 2 data
 file0 = 'data_2012/sequence_level0_data.sav'
 file1 = 'data_2012/sequence_level1_data.sav'
-cal0 = 'detector_data/peaks_det108.sav'
-cal1 = 'detector_data/peaks_det109.sav'
-cal2 = 'detector_data/peaks_det102.sav'
-cal3 = 'detector_data/peaks_det103.sav'
-cal4 = 'detector_data/peaks_det104.sav'
-cal5 = 'detector_data/peaks_det105.sav'
-cal6 = 'detector_data/peaks_det106.sav'
+cal0 = 'calibration_data/peaks_det108.sav'
+cal1 = 'calibration_data/peaks_det109.sav'
+cal2 = 'calibration_data/peaks_det102.sav'
+cal3 = 'calibration_data/peaks_det103.sav'
+cal4 = 'calibration_data/peaks_det104.sav'
+cal5 = 'calibration_data/peaks_det105.sav'
+cal6 = 'calibration_data/peaks_det106.sav'
 data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0, /ground )
 data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1, /ground )
 data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2, /ground )
@@ -167,13 +167,13 @@ data_lvl1_d6 = foxsi_level0_to_level1( 'data_2012/post-check-lvl0.sav', det=6 )
 save, data_lvl1_d0, data_lvl1_d1, data_lvl1_d2, data_lvl1_d4, data_lvl1_d5, data_lvl1_d6, $
 	file = 'data_2012/post-check-lvl1.sav'
 
-cal0 = 'detector_data/peaks_det108.sav'
-cal1 = 'detector_data/peaks_det109.sav'
-cal2 = 'detector_data/peaks_det102.sav'
-cal3 = 'detector_data/peaks_det103.sav'
-cal4 = 'detector_data/peaks_det104.sav'
-cal5 = 'detector_data/peaks_det105.sav'
-cal6 = 'detector_data/peaks_det106.sav'
+cal0 = 'calibration_data/peaks_det108.sav'
+cal1 = 'calibration_data/peaks_det109.sav'
+cal2 = 'calibration_data/peaks_det102.sav'
+cal3 = 'calibration_data/peaks_det103.sav'
+cal4 = 'calibration_data/peaks_det104.sav'
+cal5 = 'calibration_data/peaks_det105.sav'
+cal6 = 'calibration_data/peaks_det106.sav'
 
 d0 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=0, calib=cal0, /ground )
 d1 = foxsi_level1_to_level2( 'data_2012/post-check-lvl0.sav', 'data_2012/post-check-lvl1.sav', det=1, calib=cal1, /ground )
@@ -309,13 +309,13 @@ data_lvl1_d6 = foxsi_level0_to_level1( 'data_2012/pre-check-lvl0.sav', det=6 )
 save, data_lvl1_d0, data_lvl1_d1, data_lvl1_d2, data_lvl1_d4, data_lvl1_d5, data_lvl1_d3,$
 	data_lvl1_d6, file = 'data_2012/pre-check-lvl1.sav'
 
-cal0 = 'detector_data/peaks_det108.sav'
-cal1 = 'detector_data/peaks_det109.sav'
-cal2 = 'detector_data/peaks_det102.sav'
-cal3 = 'detector_data/peaks_det103.sav'
-cal4 = 'detector_data/peaks_det104.sav'
-cal5 = 'detector_data/peaks_det105.sav'
-cal6 = 'detector_data/peaks_det106.sav'
+cal0 = 'calibration_data/peaks_det108.sav'
+cal1 = 'calibration_data/peaks_det109.sav'
+cal2 = 'calibration_data/peaks_det102.sav'
+cal3 = 'calibration_data/peaks_det103.sav'
+cal4 = 'calibration_data/peaks_det104.sav'
+cal5 = 'calibration_data/peaks_det105.sav'
+cal6 = 'calibration_data/peaks_det106.sav'
 
 d0 = foxsi_level1_to_level2( 'data_2012/pre-check-lvl0.sav', 'data_2012/pre-check-lvl1.sav', det=0, calib=cal0, /ground )
 d1 = foxsi_level1_to_level2( 'data_2012/pre-check-lvl0.sav', 'data_2012/pre-check-lvl1.sav', det=1, calib=cal1, /ground )
@@ -411,12 +411,12 @@ spex_post6.spec_p = spex_post6.spec_p / t6_post
 mylar=82.55
 al=2.6
 kapton=203.2
-area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/')
-areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+area = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/')
+areaX2 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=2.*mylar, al=2*al, kap=2*kapton)
-areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX4 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=4.*mylar, al=4*al, kap=4*kapton)
-areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='detector_data/', $
+areaX6 = get_foxsi_effarea(energy_arr=emid, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=6.*mylar, al=6*al, kap=6*kapton)
 
 !p.multi=[0,2,3]
@@ -510,7 +510,7 @@ binwidth=0.5
 ;lvl1 = data_D6
 ;i=where(lvl1.error_flag eq 0 and lvl1.wsmr_time gt t1 and lvl1.wsmr_time lt t2)
 ;data = lvl0[i]
-;spec = counts2energy_diagonal( data, peaksfile='detector_data/peaks_det106.sav', $
+;spec = counts2energy_diagonal( data, peaksfile='calibration_data/peaks_det106.sav', $
 ;	binwidth=binwidth  )
 ;plot,  sim.energy_kev, sim.counts., xr=[1,20],yr=[10.,1.e4], thick=4, psym=10, $
 ;  xtitle='Energy [keV]', ytitle='FOXSI counts/keV', /ylog, /xlog, xstyle=1, line=1, $
@@ -533,13 +533,13 @@ file4 = file_search('~/FOXSI-calib/det104/struct_data_*_am*')
 file5 = file_search('~/FOXSI-calib/det105/struct_data_*_am*')
 file6 = file_search('~/FOXSI-calib/det106/struct_data_*_am*')
 
-cal0 = 'detector_data/peaks_det108.sav'
-cal1 = 'detector_data/peaks_det109.sav'
-cal2 = 'detector_data/peaks_det102.sav'
-cal3 = 'detector_data/peaks_det103.sav'
-cal4 = 'detector_data/peaks_det104.sav'
-cal5 = 'detector_data/peaks_det105.sav'
-cal6 = 'detector_data/peaks_det106.sav'
+cal0 = 'calibration_data/peaks_det108.sav'
+cal1 = 'calibration_data/peaks_det109.sav'
+cal2 = 'calibration_data/peaks_det102.sav'
+cal3 = 'calibration_data/peaks_det103.sav'
+cal4 = 'calibration_data/peaks_det104.sav'
+cal5 = 'calibration_data/peaks_det105.sav'
+cal6 = 'calibration_data/peaks_det106.sav'
 cal = [cal0,cal1,cal2,cal3,cal4,cal5,cal6]
 
 det = 6

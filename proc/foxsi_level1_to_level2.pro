@@ -23,13 +23,13 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;
 ;	file0 = 'data_2012/foxsi_level0_data.sav'
 ;	file1 = 'data_2012/foxsi_level1_data.sav'
-;	cal0 = 'detector_data/peaks_det108.sav'
-;	cal1 = 'detector_data/peaks_det109.sav'
-;	cal2 = 'detector_data/peaks_det102.sav'
-;	cal3 = 'detector_data/peaks_det103.sav'
-;	cal4 = 'detector_data/peaks_det104.sav'
-;	cal5 = 'detector_data/peaks_det105.sav'
-;	cal6 = 'detector_data/peaks_det106.sav'
+;	cal0 = 'calibration_data/peaks_det108.sav'
+;	cal1 = 'calibration_data/peaks_det109.sav'
+;	cal2 = 'calibration_data/peaks_det102.sav'
+;	cal3 = 'calibration_data/peaks_det103.sav'
+;	cal4 = 'calibration_data/peaks_det104.sav'
+;	cal5 = 'calibration_data/peaks_det105.sav'
+;	cal6 = 'calibration_data/peaks_det106.sav'
 ;	data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0 )
 ;	data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1 )
 ;	data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2 )

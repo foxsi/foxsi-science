@@ -35,19 +35,19 @@ bin=0.3
 
 time_int = 60.
 
-sim_det0 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det0 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det108_asic2.sav', /single )
-sim_det1 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det1 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det109_asic2.sav', /single )
-sim_det2 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det2 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det102_asic3.sav', /single )
-sim_det3 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det3 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det103_asic3.sav', /single )
-sim_det4 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det4 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det104_asic2.sav', /single )
-sim_det5 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det5 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det105_asic2.sav', /single )
-sim_det6 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='detector_data/',$
+sim_det6 = foxsi_count_spectrum(em, t, time=time_int, bin=bin, data_dir='calibration_data/',$
 						 		let_file='efficiency_det106_asic3.sav', /single )
 
 ;
@@ -61,12 +61,12 @@ kapton=203.2
 ;factor = (1+extra_sets)
 
 ; attenuation factors due to excess blankets
-area_control = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/')
-area_2X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+area_control = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='calibration_data/')
+area_2X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=2*mylar, al=2*al, kap=2*kapton)
-area_4X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+area_4X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=3*mylar, al=3*al, kap=3*kapton)
-area_6X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='detector_data/', $
+area_6X = get_foxsi_effarea(energy_arr=sim_det0.energy_kev, /nodet, /noshut, data_dir='calibration_data/', $
 			mylar=4*mylar, al=4*al, kap=4*kapton)
 
 ratio = area_test.eff_area_cm2 / area_control.eff_area_cm2

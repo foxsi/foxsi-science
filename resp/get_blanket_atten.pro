@@ -20,7 +20,7 @@ FUNCTION get_blanket_atten, ENERGY_ARR = energy_arr, PLOT = plot, $
 ;WRITTEN: Steven Christe (25-Mar-09)
 ; Updated with nominal flight blanketing defaults, LG March 2013
 
-default, data_dir, 'detector_data/'
+default, data_dir, 'calibration_data/'
 
 ; These defaults are the nominal blanket material thicknesses in microns, according to Paul.
 ; They should be rechecked once payload is entirely disassembled.

@@ -9,7 +9,7 @@ FUNCTION get_foxsi_deteff, ENERGY_ARR = energy_arr, DET_THICK = det_thick, PLOT 
 ; WRITTEN: Steven Christe (23-Mar-09)
 ; UPDATED L.G. Sept. 2012
 
-default, data_dir, 'detector_data/'
+default, data_dir, 'calibration_data/'
 default, let_file, 'efficiency_averaged.sav'
 default, type, 'si'
 

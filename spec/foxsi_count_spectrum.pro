@@ -30,7 +30,7 @@ FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 default, time, 1.
 default, binsize, 0.5
 default, let_file, 'efficiency_averaged.sav'
-default, data_dir, 'detector_data/'
+default, data_dir, 'calibration_data/'
 default, offaxis, 0.
 default, n_blankets, 1.
 default, offset, 0.

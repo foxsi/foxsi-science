@@ -1,13 +1,13 @@
-restore, 'data_2014/foxsi_level2_data.sav', /v
+@foxsi-setup-script-2014
 
 dt = 5.
-lc0 = foxsi_lc( data_lvl2_d0[ where( data_lvl2_d0.hv eq 200 ) ], energy=0., year=2014, dt=dt)
-lc1 = foxsi_lc( data_lvl2_d1[ where( data_lvl2_d1.hv eq 200 ) ], energy=0., year=2014, dt=dt)
-lc2 = foxsi_lc( data_lvl2_d2[ where( data_lvl2_d2.hv eq 200 ) ], energy=0., year=2014, dt=dt)
-lc3 = foxsi_lc( data_lvl2_d3[ where( data_lvl2_d3.hv eq 200 ) ], energy=0., year=2014, dt=dt)
-lc4 = foxsi_lc( data_lvl2_d4[ where( data_lvl2_d4.hv eq 200 ) ], energy=0., year=2014, dt=dt)
-lc5 = foxsi_lc( data_lvl2_d5[ where( data_lvl2_d5.hv eq 200 ) ], energy=0., year=2014, dt=dt)
-lc6 = foxsi_lc( data_lvl2_d6[ where( data_lvl2_d6.hv eq 200 ) ], energy=0., year=2014, dt=dt)
+lc0 = foxsi_lc( data_lvl2_d0, year=2014, dt=dt)
+lc1 = foxsi_lc( data_lvl2_d1, year=2014, dt=dt)
+lc2 = foxsi_lc( data_lvl2_d2, year=2014, dt=dt)
+lc3 = foxsi_lc( data_lvl2_d3, year=2014, dt=dt)
+lc4 = foxsi_lc( data_lvl2_d4, year=2014, dt=dt)
+lc5 = foxsi_lc( data_lvl2_d5, year=2014, dt=dt)
+lc6 = foxsi_lc( data_lvl2_d6, year=2014, dt=dt)
 
 lc0.time -= 36
 lc1.time -= 36
