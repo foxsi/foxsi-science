@@ -22,23 +22,23 @@ default, time_int, 60.	; time interval over which to simulate
 
 case det of
 	0:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det108_asic2.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det108_asic2.sav' )
 	1:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det109_asic2.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det109_asic2.sav' )
 	2:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det102_asic3.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det102_asic3.sav' )
 	3:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det103_asic3.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det103_asic3.sav' )
 	4:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det104_asic2.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det104_asic2.sav' )
 	5:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det105_asic2.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det105_asic2.sav' )
 	6:	sim = foxsi_count_spectrum(em, t, time=time_int, bin=bin, /single, $
-				data_dir='detector_data/', let_file='efficiency_det106_asic3.sav' )
+				data_dir='calibration_data/', let_file='efficiency_det106_asic3.sav' )
 endcase
 
 if keyword_set( fe_th ) then begin
-	a=read_ascii('detector_data/iron_data_NIST.txt')
+	a=read_ascii('calibration_data/iron_data_NIST.txt')
 	dens = 7.87
 	en_Fe = 1000.*a.field1[0,*]
 	atten_Fe = exp((-1)*fe_th*a.field1[1,*]*dens)
@@ -47,7 +47,7 @@ if keyword_set( fe_th ) then begin
 endif
 
 if keyword_set( ni_th ) then begin
-	a=read_ascii('detector_data/nickel_data_NIST.txt')
+	a=read_ascii('calibration_data/nickel_data_NIST.txt')
 	dens = 8.91
 	en_ni = 1000.*a.field1[0,*]
 	atten_Ni = exp((-1)*ni_th*a.field1[1,*]*dens)
@@ -56,7 +56,7 @@ if keyword_set( ni_th ) then begin
 endif
 
 if keyword_set( cu_th ) then begin
-	a=read_ascii('detector_data/copper_data_NIST.txt')
+	a=read_ascii('calibration_data/copper_data_NIST.txt')
 	dens = 8.96
 	en_cu = 1000.*a.field1[0,*]
 	atten_Cu = exp((-1)*cu_th*a.field1[1,*]*dens)
@@ -75,13 +75,13 @@ kapton=203.2
 
 ; attenuation factors due to excess blankets
 area_control = get_foxsi_effarea( energy_arr=sim.energy_kev, /nodet, /noshut, $
-				data_dir='detector_data/')
+				data_dir='calibration_data/')
 area_2X = get_foxsi_effarea( energy_arr=sim.energy_kev, /nodet, /noshut, $
-				data_dir='detector_data/', mylar=2*mylar, al=al, kap=2*kapton)
+				data_dir='calibration_data/', mylar=2*mylar, al=al, kap=2*kapton)
 area_3X = get_foxsi_effarea( energy_arr=sim.energy_kev, /nodet, /noshut, $
-				data_dir='detector_data/', mylar=3*mylar, al=al, kap=3*kapton)
+				data_dir='calibration_data/', mylar=3*mylar, al=al, kap=3*kapton)
 area_4X = get_foxsi_effarea( energy_arr=sim.energy_kev, /nodet, /noshut, $
-				data_dir='detector_data/', mylar=4*mylar, al=4*al, kap=4*kapton)
+				data_dir='calibration_data/', mylar=4*mylar, al=4*al, kap=4*kapton)
 
 ratio_2X = area_2X.eff_area_cm2 / area_control.eff_area_cm2
 ratio_3X = area_3X.eff_area_cm2 / area_control.eff_area_cm2

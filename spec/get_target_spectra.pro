@@ -1,4 +1,5 @@
-FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GOOD
+FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GOOD, $
+			YEAR=YEAR, STOP=STOP
 
 ;	Returns structure array (7 elements) holding spectra for all detectors
 ;   for the selected target.  (Targets numbered 1-6.)
@@ -8,27 +9,55 @@ FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GO
 ;
 
 default, binwidth, 0.5
+default, year, 2012
 
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/resp'
-add_path, '~/Documents/foxsi/flight-analysis/foxsi-science/spec'
+if year ne 2012 and year ne 2014 then begin
+	print, 'Flight choices are 2012 and 2014 only.'
+	return, -1
+endif
 
-restore, 'data_2012/foxsi_level2_data.sav', /v
+if year eq 2012 then restore, 'data_2012/foxsi_level2_data.sav', /v
+if year eq 2014 then restore, 'data_2014/foxsi_level2_data.sav', /v
 
-; For reference, times of all target windows (from RLG on or target stable to new 
-; target received or RLG off)
-t_launch = 64500
-t1_start = t_launch + 108.3		; Target 1 (AR)
-t1_end = t_launch + 151.8
-t2_start = t_launch + 154.8		; Target 2 (AR)
-t2_end = t_launch + 244.7
-t3_start = t_launch + 247		; Target 3 (quiet Sun)
-t3_end = t_launch + 337.3
-t4_start = t_launch + 340		; Target 4 (flare)
-t4_end = t_launch + 421.2
-t5_start = t_launch + 423.5		; Target 5 (off-pointing)
-t5_end = t_launch + 435.9
-t6_start = t_launch + 438.5		; Target 6 (flare)
-t6_end = t_launch + 498.3
+
+; Target times for each flight.
+; *** Times for 2014 are still rough! ***
+
+if year eq 2012 then begin
+	t_launch = 64500
+	t1_start = t_launch + 108.3		; Target 1 (AR)
+	t1_end = t_launch + 151.8
+	t2_start = t_launch + 154.8		; Target 2 (AR)
+	t2_end = t_launch + 244.7
+	t3_start = t_launch + 247		; Target 3 (quiet Sun)
+	t3_end = t_launch + 337.3
+	t4_start = t_launch + 340		; Target 4 (flare)
+	t4_end = t_launch + 421.2
+	t5_start = t_launch + 423.5		; Target 5 (off-pointing)
+	t5_end = t_launch + 435.9
+	t6_start = t_launch + 438.5		; Target 6 (flare)
+	t6_end = t_launch + 498.3
+endif
+
+if year eq 2014 then begin
+; Right now target times are eyeballed from Jesus's plots.  Later, we'll get the real data.
+	offset = 36.		; time offset in WSMR data, for unknown reason.
+	t_launch = 69060
+	t1_start = 100. + offset + t_launch
+	t1_adj1  = 140. + offset + t_launch
+	t1_adj2  = 165. + offset + t_launch
+	t1_end   = 210. + offset + t_launch
+	t2_start = 220. + offset + t_launch
+	t2_end 	 = 275. + offset + t_launch
+	t3_start = 280. + offset + t_launch
+	t3_adj1	 = 310. + offset + t_launch
+	t3_adj2  = 325. + offset + t_launch
+	t3_end	 = 370. + offset + t_launch
+	t4_start = 370. + offset + t_launch
+	t4_end	 = 470. + offset + t_launch
+	t5_start = 470. + offset + t_launch
+	t5_end	 = 500. + offset + t_launch
+endif
 
 case target of
 	1:  t1 = t1_start
@@ -85,6 +114,8 @@ spec = [spec_d0, spec_d1, spec_d2, spec_d3, spec_d4, spec_d5, spec_d6]
 spec.spec_n = spec.spec_n / delta_t
 spec.spec_p = spec.spec_p / delta_t
 spec.spec_p_err = spec.spec_p_err / delta_t
+
+if keyword_set(stop) then stop
 
 return, spec
 

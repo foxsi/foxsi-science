@@ -8,10 +8,13 @@
 ; THIS FUNCTION IS FOR HOUSEKEEPING DATA! If detector data is desired,
 ; use wsmr_data_to_level0.pro
 ;
-; Inputs:	FILENAME = File to process.  Must be a WSMR .log file.
-;			   Default is the 2012 Nov 2 flight data file.
+; Inputs:
+;		FILENAME	File to process. Must be a WSMR .log file.
+;			   		Default is the 2012 Nov 2 flight data file.
 ;
-; Keywords:	STOP = stop before returning, for debugging
+; Keywords:	
+;
+; Example:
 ;
 ; To process WSMR files into Level 0 housekeeping IDL structures and save them:
 ;
@@ -19,12 +22,12 @@
 ; 	hskp_data = wsmr_data_to_hskp_level0( filename )
 ;	save, hskp_data, file = 'data_2012/foxsi_level0_hskp_data.sav'
 ;
-; History:	Version 1, 2013-Jan-28, Lindsay Glesener
+; History:	
+;			2013-Jan-28	Linz	Created routine
 ;-
 
 FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME, STOP=STOP
 
-;	add_path, 'util'
 	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words

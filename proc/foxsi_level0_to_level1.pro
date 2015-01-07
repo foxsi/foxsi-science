@@ -1,19 +1,23 @@
 ;+
+; FOXSI_LEVEL0_TO_LEVEL1
+;
 ; This function reads in a Level 0 FOXSI data file (*.sav) and processes it
-; into Level 1 FOXSI data.  The function is intended for use with the 
-; data from the first flight on 2012 Nov 2, but should work for other
-; data files too.  More documentation is available in the FOXSI
-; data description document.
+; into Level 1 FOXSI data.  The function was originally written for use with the 
+; data from the first flight on 2012 Nov 2, but also works with other data,
+; for example FOXSI-2 flight data and calibration data.  More documentation 
+; is available in the FOXSI data description document.
 ;
-; Inputs:	FILENAME = File to process.  Must be a FOXSI save file with correct Level 0 data structure.
-;			   Default is the 2012 Nov 2 flight data file.
+; Inputs:	FILENAME	File to process.  
+;					 	Must be a FOXSI SAV file with Level 0 data structure.
+;			  			Default is 2012 flight data file.
 ;
-; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
-;			   must be processed individually.  Default D0
-;		STOP = stop before returning, for debugging
-;		GROUND:	indicates this is not flight data.
+; Keywords:	
+;			DETECTOR	Detector number (0-6).  Each detector data
+;			   			must be processed individually.  Default D0
+;			GROUND		Indicates this is calibration, not flight data.
 ;
-; To process level 0 data into Level 1 IDL structures and save them:
+; Example:
+; 	To process level 0 data into Level 1 IDL structures and save them:
 ;
 ;	filename = 'data_2012/foxsi_level0_data.sav'
 ;	data_lvl1_D0 = foxsi_level0_to_level1( filename, det=0 )
@@ -25,14 +29,17 @@
 ;	data_lvl1_D6 = foxsi_level0_to_level1( filename, det=6 )
 ;	save, data_lvl1_D0, data_lvl1_D1, data_lvl1_D2, data_lvl1_D3, $
 ;		data_lvl1_D4, data_lvl1_D5, data_lvl1_d6, $
-;		file = 'data_2012/foxsi_level1_data.sav'
+;		file = 'data_2014/foxsi_level1_data.sav'
 ;
-; History:	2013 Dec	Linz	Added fix to make it work with calibration data.	
-;			Version 1, 2013-Feb-12, Lindsay Glesener
+; History:	
+;			2014-Dec	Linz	Updated to work with 2014 data --
+;								Eliminated events with HV ne 200V.
+;			2013-Dec	Linz	Added fix to make it work with calibration data.	
+;			2013-Feb-12	Linz	Created routine
 ;-
 
-FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
-			GROUND=GROUND
+FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
+			GROUND = GROUND
 
 	add_path, 'util'
 	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
@@ -241,17 +248,19 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 	; Altitude
 	; For level 1, interpolate linearly between each 0.5 sec measurement.
 	; Get altitude data from text file
-	data_alt=read_ascii('data_2012/36255.txt')
-	time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
-	altitude = data_alt.field01[9,*]
+	if ground eq 0 then begin
+		data_alt=read_ascii('data_2012/36255.txt')
+		time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
+		altitude = data_alt.field01[9,*]
 
-	; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
-	; interpolate the post-flight values.
-	data_struct.altitude = data0.altitude
-	i=where(data_struct.altitude gt 0)
-	if i[0] ne -1 then begin
-		alt_interp = interpol(altitude,time_alt,data_struct.wsmr_time)
-		data_struct[i].altitude = alt_interp[i]
+		; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
+		; interpolate the post-flight values.
+		data_struct.altitude = data0.altitude
+		i=where(data_struct.altitude gt 0)
+		if i[0] ne -1 then begin
+			alt_interp = interpol(altitude,time_alt,data_struct.wsmr_time)
+			data_struct[i].altitude = alt_interp[i]
+		endif
 	endif
 
 	; Last step: check for obvious errors and flag these.
@@ -300,6 +309,11 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR=DETECTOR, STOP=STOP, $
 		data_struct[check].error_flag = data_struct[check].error_flag + 64
 
 	endif
+	
+	; Added as of 2nd flight: only pass through data at 200V, to trim the higher-order
+	; data files.
+	
+	data_struct = data_struct[ where( data_struct.hv eq 200 ) ]
 	
 	if keyword_set(stop) then stop
 

@@ -1,35 +1,35 @@
-FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
-	CALIB_FILE=CALIB_FILE, STOP=STOP, GROUND=GROUND
+FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
+			CALIB_FILE = CALIB_FILE, GROUND = GROUND, STOP = STOP
 
 ;+
 ; This function reads in Level 0 and Level 1 FOXSI data files (*.sav) and processes
-; into Level 2 FOXSI data.  The function is intended for use with the 
-; data from the first flight on 2012 Nov 2, but might work for other
-; data files too.  More documentation is available in the FOXSI
-; data description document.
+; into Level 2 FOXSI data.  The function was originally written for use with the 
+; data from the first flight on 2012 Nov 2, but also works with other data,
+; for example FOXSI-2 flight data and calibration data.  More documentation 
+; is available in the FOXSI data description document.
 ;
-; Inputs:	FILE_DATA0 = Level 0 data file.
-;			FILE_DATA1 = Level 1 data file.
-;			CALIB_FILE:	Calibration file to use. Must be the correct detector!
-;			GROUND:		Data is not flight data.  (Needed or else the routine will
-;						look for an 'inflight' flag)
+; Inputs:	
+;		FILE_DATA0	Level 0 data file.
+;		FILE_DATA1	Level 1 data file.
 ;
+; Keywords:	
+;		DETECTOR	Detector number (0-6).  Each detector data
+;			   		must be processed individually.  Default D0
+;		CALIB_FILE	Calibration file to use. Must be the correct detector!
+;		GROUND		Indicates this is calibration, not flight data.
 ;
-; Keywords:	DETECTOR = Detector number (0-6).  Each detector data
-;			   must be processed individually.  Default D0
-;		STOP = stop before returning, for debugging
-;
-; To process level 1 data into Level 2 IDL structures and save them:
+; Example:
+; 	To process level 1 data into Level 2 IDL structures and save them:
 ;
 ;	file0 = 'data_2012/foxsi_level0_data.sav'
 ;	file1 = 'data_2012/foxsi_level1_data.sav'
-;	cal0 = 'detector_data/peaks_det108.sav'
-;	cal1 = 'detector_data/peaks_det109.sav'
-;	cal2 = 'detector_data/peaks_det102.sav'
-;	cal3 = 'detector_data/peaks_det103.sav'
-;	cal4 = 'detector_data/peaks_det104.sav'
-;	cal5 = 'detector_data/peaks_det105.sav'
-;	cal6 = 'detector_data/peaks_det106.sav'
+;	cal0 = 'calibration_data/peaks_det108.sav'
+;	cal1 = 'calibration_data/peaks_det109.sav'
+;	cal2 = 'calibration_data/peaks_det102.sav'
+;	cal3 = 'calibration_data/peaks_det103.sav'
+;	cal4 = 'calibration_data/peaks_det104.sav'
+;	cal5 = 'calibration_data/peaks_det105.sav'
+;	cal6 = 'calibration_data/peaks_det106.sav'
 ;	data_lvl2_D0 = foxsi_level1_to_level2( file0, file1, det=0, calib=cal0 )
 ;	data_lvl2_D1 = foxsi_level1_to_level2( file0, file1, det=1, calib=cal1 )
 ;	data_lvl2_D2 = foxsi_level1_to_level2( file0, file1, det=2, calib=cal2 )
@@ -41,8 +41,12 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 ;		data_lvl2_D4, data_lvl2_D5, data_lvl2_d6, $
 ;		file = 'data_2012/foxsi_level2_data.sav'
 ;
-; History:	2013 Dec	Linz	Added fix to make it work with calibration data.
-;			Version 1, 2013-Mar-08, Lindsay Glesener
+; History:	
+;			2014-Dec	Linz	Adjustments to work with 2014 data, specifically
+;								allowing for lvl0 and lvl1 data lengths to be
+;								different, as lvl1 now only includes HV=200V data.
+;			2013-Dec	Linz	Added fix to make it work with calibration data.
+;			2013-Mar-08	Linz	Created routine
 ;-
 
 	add_path, 'util'
@@ -74,13 +78,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 	if detector eq 5 then data1 = data_lvl1_D5
 	if detector eq 6 then data1 = data_lvl1_D6
 
-	nEvts = n_elements(data0)
+	nEvts = n_elements(data1)
 	
-	if n_elements(data1) ne nEvts then begin
-		print, 'Level 0 and level 1 data structures do not match.'
-		return, -1
-	endif
-
   	; prepare the data structure and make an array with one element for each frame.
   	print, '  Creating data structure.'
   	data_struct = {foxsi_level2, 	$
@@ -91,6 +90,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
 		livetime:double(0),		$	; Livetime in microsec since previous event
 		hit_energy:fltarr(2), 	$	; Energy value for hit strip, [n,p]
+		hit_xy_det:fltarr(2),		$	; Hit position in detector coordinates [strips]
 		hit_xy_pay:fltarr(2),		$	; Hit position in payload coordinates [arcsec]
 		hit_xy_solar:fltarr(2),		$	; Hit position in heliographic coordinates [arcsec]
 		assoc_energy:fltarr(3,3,2),$	; "associated" energies, including hit.
@@ -106,6 +106,17 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
     }
     	data_struct = replicate(data_struct, nEvts)
 
+	if keyword_set(stop) then stop
+
+	; Because data0 and data1 have different sizes, restrict data0 events to those
+	; with HV=200V. (As of 2014.)
+	tempHV = ishft(data0.HV, -4)/8
+	data0 = data0[ where( tempHV eq 200 ) ]
+	if n_elements(data0) ne nEvts then begin
+		print, 'Level 0 and level 1 data structures do not match.'
+		return, -1
+	endif
+
 	; Fill in values that are identical to previous versions.
 	data_struct.frame_counter = data1.frame_counter
 	data_struct.wsmr_time     = data1.wsmr_time
@@ -117,6 +128,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 	data_struct.inflight      = data1.inflight
 	data_struct.altitude	  = data1.altitude
 	data_struct.error_flag	  = data1.error_flag
+	data_struct.hit_xy_det 	  = data1.hit_xy_det
 	
 	;;;; WHAT DO YOU WANT TO DO ABOUT LIVETIME??? ;;;;
 	
@@ -139,9 +151,9 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
         
         if keyword_set(ground) then begin
     		if data1[evt].hv ne 200 then continue
-    	endif else begin
-	        if data1[evt].inflight ne 1 then continue
-    	endelse
+    	endif ;else begin
+	    ;    if data1[evt].inflight ne 1 then continue
+    	;endelse
         
         if (evt mod 1000) eq 0 then print, 'Calibrating event  ', evt, ' / ', nEvts
 
@@ -179,13 +191,9 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 			endfor
 		endfor
 		
-		if keyword_set(stop) then stop
-		
 		;if data_struct[evt].error_flag eq 0 then stop
 
     endfor
-
-	if keyword_set(stop) then stop
 
 	; Transform all positions to payload coords.
 	; For some reason this was done only for the primary hit in Lvl1 data
@@ -230,6 +238,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR=DETECTOR, $
 		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1]
 	endelse	
 
+	if keyword_set(stop) then stop
+		
 	print, "  Done!"
 
 	return, data_struct
