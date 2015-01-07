@@ -87,7 +87,7 @@ IF keyword_set(PLOT) THEN BEGIN
 	txt = ['Optics', '+Optical Path']
 	oplot, energy_arr, num_modules*eff_area_orig, psym = -4, color = 7
 	oplot, energy_arr, eff_area, psym = -4, color = 6
-    legend, txt, textcolor = [7,6], /right
+    ssw_legend, txt, textcolor = [7,6], /right
     
     ;xyouts, 0.6, 0.8, num2str(det_thick, length = 5) +  " " + textoidl("\mum") + " Si detector", charsize = 1.5, color = 6, /normal
         
