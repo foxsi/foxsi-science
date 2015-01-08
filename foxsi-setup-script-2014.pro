@@ -35,39 +35,56 @@ t_launch = 69060
 ;end 500
 
 ; Right now target times are eyeballed from Jesus's plots.  Later, we'll get the real data.
-offset = 36.		; time offset in WSMR data, for unknown reason.
+offset_t = 36.		; time offset in WSMR data, for unknown reason.
 tlaunch = 69060
-t1_start = 100. + offset
-t1_adj1  = 140. + offset
-t1_adj2  = 165. + offset
-t1_end   = 210. + offset
-t2_start = 220. + offset
-t2_end 	 = 275. + offset
-t3_start = 280. + offset
-t3_adj1	 = 310. + offset
-t3_adj2  = 325. + offset
-t3_end	 = 370. + offset
-t4_start = 370. + offset
-t4_end	 = 470. + offset
-t5_start = 470. + offset
-t5_end	 = 500. + offset
+t1_start = 102. + offset_t
+t1_adj1  = 138. + offset_t
+t1_adj2  = 166.5 + offset_t
+t1_end   = 205. + offset_t
+t2_start = 209. + offset_t
+t2_adj1  = 224. + offset_t
+t2_end 	 = 276.7 + offset_t
+t3_start = 280.6 + offset_t
+t3_adj1	 = 311. + offset_t
+t3_adj2  = 334. + offset_t
+t3_end	 = 369. + offset_t
+t4_start = 373.5. + offset_t
+t_shtr_start= 438 + offset_t	; Conservative time of attenuator insertion
+t_shtr_end = 442 + offset_t		; Conservative time for microphonics to die down
+t4_end	 = 466. + offset_t
+t5_start = 470. + offset_t
+t5_end	 = 505.6 + offset_t
 
 
 date=anytim('2014-dec-11')
 t0 = '11-Dec-2014 19:11:00.000'
 
-cen1 = [   0,-250 ]
-cen2 = [-750,-100]
-cen3 = [ 850,-250]
-cen4 = [ 200, 750]
-cen5 = [   0,-250 ]
+;
+; Positional information
+;
 
-shift6 = [20,40]	; offset for D6, eyeballed.
-shift0 = [ 34.8801, 57.1428 ]	; others shifts are derived by comparing centroids
-shift1 = [  9.2774, 59.4729 ]	; with that of D6.
-shift4 = [ 13.2861, 17.9339 ]
-shift5 = [ 42.6485, 43.9609 ]
+; Our crude alignment offset determined in-flight
+offset_xy = [-360.,+180.]
 
+; SPARCS pointing positions, from Jesus
+cen1 = 		[  -1. ,-251. ] + offset_xy		; 32 sec
+cen1_adj1 = [-361. ,-251. ] + offset_xy		; 25 sec
+cen1_adj2 = [-361. , -71. ] + offset_xy		; 38 sec
+cen2 = 		[-361. ,-101. ] + offset_xy		; 11 sec
+cen2_adj1 = [-750. ,-101. ] + offset_xy		; 53 sec
+cen3 = 		[ 850.5,-251.5] + offset_xy		; 26 sec
+cen3_adj1 = [ 490. ,-251.5] + offset_xy		; 19 sec
+cen3_adj2 = [ 490. , -71. ] + offset_xy		; 35 sec
+cen4 = 		[-160. , 930. ] + offset_xy		; 92 sec
+cen5 = 		[-360. , -71. ] + offset_xy		; 36 sec
+
+; Additional shifts for each detector, from comparison with AIA
+; THIS SHOULD BE REDONE USING RHESSI!
+shift6 = [20.,40.]	; offset for D6, eyeballed.
+shift0 = [ 34.9, 57.1 ]	; others' shifts are derived by comparing centroids
+shift1 = [  9.3, 59.5 ]	; with that of D6.
+shift4 = [ 13.3, 18.0 ]
+shift5 = [ 42.6, 44.0 ]
 
 ; Rotation angles for all detectors
 rot0 = 82.5

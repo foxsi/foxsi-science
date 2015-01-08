@@ -8,6 +8,7 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year
 	
 	default, dt, 10		; default time step is 10 sec
 	default, energy, [4.,15.]
+	default, year, 2014
 
 	; perform cuts.
 	data_mod = data
