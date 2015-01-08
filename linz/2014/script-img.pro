@@ -8,13 +8,14 @@ d4 = data_lvl2_d4[ where(data_lvl2_d4.hv eq 200) ]
 d5 = data_lvl2_d5[ where(data_lvl2_d5.hv eq 200) ]
 d6 = data_lvl2_d6[ where(data_lvl2_d6.hv eq 200) ]
 
-trange=[205,255]
+;trange=[205,255]
 ;trange=[260,310]
 ;trange=[505,600]
 ;trange=[375,460]+36
 ;trange = [t3_adj2+5,t3_end]
 ;trange = [t3_start, t3_adj1]
 ;trange = [t1_adj2, t1_end]
+;trange = [t2_start, t2_end]
 trange = [t4_start, t4_end-5]
 image0 = foxsi_image_det( d0, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
 image1 = foxsi_image_det( d1, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
@@ -35,8 +36,8 @@ image5 = frebin( image5, npix, npix, /tot )
 image6 = frebin( image6, npix, npix, /tot )
 image6a = frebin( image6a, npix, npix, /tot )
 
-xc = cen4[0]
-yc = cen4[1]
+xc = cen1[0]
+yc = cen1[1]
 map0 = rot_map( make_map( image0, dx=7.78*128/npix, dy=7.78*128/npix, xcen=xc, ycen=yc ), rot0 )
 map1 = rot_map( make_map( image1, dx=7.78*128/npix, dy=7.78*128/npix, xcen=xc, ycen=yc ), rot1 )
 map2 = rot_map( make_map( image2, dx=7.78*128/npix, dy=7.78*128/npix, xcen=xc, ycen=yc ), rot2 )
@@ -79,15 +80,27 @@ map.data = map0.data + map1.data+map4.data+map5.data+map6.data
 
 ch=1.5
 !p.multi=[0,3,2]
-;popen, 'targ-5-log', xsi=8, ysi=5, /land
-plot_map, map0, tit='Det 0', /log, dmin=0.1, charsi=ch
-plot_map, map1, tit='Det 1', /log, dmin=0.1, charsi=ch
-;plot_map, map2, tit='Det 2', /log, dmin=0.1, charsi=ch
-;plot_map, map3, tit='Det 3', /log, dmin=0.1, charsi=ch
-plot_map, map4, tit='Det 4', /log, dmin=0.1, charsi=ch
-plot_map, map5, tit='Det 5', /log, dmin=0.1, charsi=ch
-plot_map, map6, tit='Det 6', /log, dmin=0.1, charsi=ch
-;pclose
+popen, 'targ-2-log', xsi=8, ysi=5, /land
+plot_map, map0, tit='Det 0', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+plot_map, map1, tit='Det 1', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+;plot_map, map2, tit='Det 2', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+;plot_map, map3, tit='Det 3', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+plot_map, map4, tit='Det 4', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+plot_map, map5, tit='Det 5', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+plot_map, map6, tit='Det 6', /log, /limb, lcol=255, lth=4, dmin=0.1, charsi=ch
+pclose
+
+ch=1.5
+!p.multi=[0,3,2]
+popen, 'targ-1-lin', xsi=8, ysi=5, /land
+plot_map, map0, tit='Det 0', /limb, lcol=255, lth=4, charsi=ch
+plot_map, map1, tit='Det 1', /limb, lcol=255, lth=4, charsi=ch
+;plot_map, map2, tit='Det 2', /limb, lcol=255, lth=4, charsi=ch
+;plot_map, map3, tit='Det 3', /limb, lcol=255, lth=4, charsi=ch
+plot_map, map4, tit='Det 4', /limb, lcol=255, lth=4, charsi=ch
+plot_map, map5, tit='Det 5', /limb, lcol=255, lth=4, charsi=ch
+plot_map, map6, tit='Det 6', /limb, lcol=255, lth=4, charsi=ch
+pclose
 
 ch=1.5
 !p.multi=[0,3,2]
@@ -216,5 +229,31 @@ plot_map, aia_tot, /over, lev=[0.1], /per
 
 plot_map, aia_tot, /limb, cen=map, fov=20, /log
 plot_map, map, fov=20, /limb                   
+
+
+
+
+; example
+
+; Choose the time range and location.
+trange = [t1_adj2, t1_end]		; time range
+xc = cen1[0]					; coords for Target 1
+yc = cen1[1]
+
+; Basic image production
+image6 = foxsi_image_det( data_lvl2_d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+map6 = make_map( image6, dx=7.78, dy=7.78, xcen=xc, ycen=yc )
+
+; Apply a coarse offset gleaned from comparing images with AIA.
+map6 = shift_map( map6, shift6[0], shift6[1] )
+
+; Rotate the image based on the rotation angle for that specific detector.
+map6 = rot_map( map6, rot6 )
+map6.roll_angle = 0
+map6.roll_center = 0
+
+loadct, 5
+plot_map, map6
+plot_map, map6, /log
 
 
