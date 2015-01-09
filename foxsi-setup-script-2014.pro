@@ -37,23 +37,28 @@ t_launch = 69060
 ; Timing info from Jesus's preliminary report.
 offset_t = 36.		; time offset in WSMR data, for unknown reason.
 tlaunch = 69060
-t1_start = 102. + offset_t
-t1_adj1  = 138. + offset_t
-t1_adj2  = 166.5 + offset_t
-t1_end   = 205. + offset_t
-t2_start = 209. + offset_t
-t2_adj1  = 224. + offset_t
-t2_end 	 = 276.7 + offset_t
-t3_start = 280.6 + offset_t
-t3_adj1	 = 311. + offset_t
-t3_adj2  = 334. + offset_t
-t3_end	 = 369. + offset_t
-t4_start = 373.5. + offset_t
-t_shtr_start= 438 + offset_t	; Conservative time of attenuator insertion
-t_shtr_end = 442 + offset_t		; Conservative time for microphonics to die down
-t4_end	 = 466. + offset_t
-t5_start = 470. + offset_t
-t5_end	 = 505.6 + offset_t
+t1_pos0_start  = 102.0 + offset_t
+t1_pos0_end    = 134.3 + offset_t
+t1_pos1_start  = 138.0 + offset_t
+t1_pos1_end    = 162.6 + offset_t
+t1_pos2_start  = 166.5 + offset_t
+t1_pos2_end    = 205.0 + offset_t
+t2_pos0_start  = 209.0 + offset_t
+t2_pos0_end    = 219.6 + offset_t
+t2_pos1_start  = 224.0 + offset_t
+t2_pos1_end    = 276.7 + offset_t
+t3_pos0_start  = 280.6 + offset_t
+t3_pos0_end	   = 307.2 + offset_t
+t3_pos1_start  = 311.0 + offset_t
+t3_pos1_end    = 330.1 + offset_t
+t3_pos2_start  = 334.0 + offset_t
+t3_pos2_end	   = 369.2 + offset_t
+t4_start       = 373.5 + offset_t
+t_shtr_start   = 438. + offset_t		; Conservative time of attenuator insertion
+t_shtr_end     = 442. + offset_t		; Conservative time for microphonics to die down
+t4_end	 = 466.2 + offset_t
+t5_start = 470.5 + offset_t
+t5_end	 = 503.2 + offset_t
 
 
 date=anytim('2014-dec-11')
@@ -64,17 +69,17 @@ t0 = '11-Dec-2014 19:11:00.000'
 ;
 
 ; Our crude alignment offset determined in-flight
-offset_xy = [-360.,+180.]
+offset_xy = [360.,-180.]
 
 ; SPARCS pointing positions, from Jesus
-cen1 = 		[  -1. ,-251. ] + offset_xy		; 32 sec
-cen1_adj1 = [-361. ,-251. ] + offset_xy		; 25 sec
-cen1_adj2 = [-361. , -71. ] + offset_xy		; 38 sec
-cen2 = 		[-361. ,-101. ] + offset_xy		; 11 sec
-cen2_adj1 = [-750. ,-101. ] + offset_xy		; 53 sec
-cen3 = 		[ 850.5,-251.5] + offset_xy		; 26 sec
-cen3_adj1 = [ 490. ,-251.5] + offset_xy		; 19 sec
-cen3_adj2 = [ 490. , -71. ] + offset_xy		; 35 sec
+cen1_pos0 = [  -1. ,-251. ] + offset_xy		; 32 sec
+cen1_pos1 = [-361. ,-251. ] + offset_xy		; 25 sec
+cen1_pos2 = [-361. , -71. ] + offset_xy		; 38 sec
+cen2_pos0 = [-361. ,-101. ] + offset_xy		; 11 sec
+cen2_pos1 = [-750. ,-101. ] + offset_xy		; 53 sec
+cen3_pos0 = [ 850.5,-251.5] + offset_xy		; 26 sec
+cen3_pos1 = [ 490. ,-251.5] + offset_xy		; 19 sec
+cen3_pos2 = [ 490. , -71. ] + offset_xy		; 35 sec
 cen4 = 		[-160. , 930. ] + offset_xy		; 92 sec
 cen5 = 		[-360. , -71. ] + offset_xy		; 36 sec
 
@@ -85,6 +90,12 @@ shift0 = [ 34.9, 57.1 ]	; others' shifts are derived by comparing centroids
 shift1 = [  9.3, 59.5 ]	; with that of D6.
 shift4 = [ 13.3, 18.0 ]
 shift5 = [ 42.6, 44.0 ]
+
+shift6 += [-10,-26]
+shift0 += [-10,-26]
+shift1 += [-10,-26]
+shift4 += [-10,-26]
+shift5 += [-10,-26]
 
 ; Rotation angles for all detectors
 rot0 = 82.5

@@ -126,7 +126,7 @@ if year eq 2014 then begin
 	t5_start = 442 + offset_t		; Conservative time for microphonics to die down
 	t5_end	 = 466. + offset_t
 	t6_start = 470. + offset_t
-	t6_end	 = 505.6 + offset_t
+	t6_end	 = 503. + offset_t
 endif
 
 
