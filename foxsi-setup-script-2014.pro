@@ -34,7 +34,7 @@ t_launch = 69060
 ;*470
 ;end 500
 
-; Right now target times are eyeballed from Jesus's plots.  Later, we'll get the real data.
+; Timing info from Jesus's preliminary report.
 offset_t = 36.		; time offset in WSMR data, for unknown reason.
 tlaunch = 69060
 t1_start = 102. + offset_t
