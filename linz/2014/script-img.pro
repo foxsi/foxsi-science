@@ -1,30 +1,97 @@
-@foxsi-setup-script-2014
+;@foxsi-setup-script-2014
 
-d0 = data_lvl2_d0[ where(data_lvl2_d0.hv eq 200) ]
-d1 = data_lvl2_d1[ where(data_lvl2_d1.hv eq 200) ]
-d2 = data_lvl2_d2[ where(data_lvl2_d2.hv eq 200) ]
-d3 = data_lvl2_d3[ where(data_lvl2_d3.hv eq 200) ]
-d4 = data_lvl2_d4[ where(data_lvl2_d4.hv eq 200) ]
-d5 = data_lvl2_d5[ where(data_lvl2_d5.hv eq 200) ]
-d6 = data_lvl2_d6[ where(data_lvl2_d6.hv eq 200) ]
+; Shorter version
 
-;trange=[205,255]
-;trange=[260,310]
-;trange=[505,600]
-;trange=[375,460]+36
-;trange = [t3_adj2+5,t3_end]
-;trange = [t3_start, t3_adj1]
-;trange = [t1_adj2, t1_end]
-;trange = [t2_start, t2_end]
-trange = [t4_start, t4_end-5]
-image0 = foxsi_image_det( d0, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image1 = foxsi_image_det( d1, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image2 = foxsi_image_det( d2, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image3 = foxsi_image_det( d3, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image4 = foxsi_image_det( d4, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image5 = foxsi_image_det( d5, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image6 = foxsi_image_det( d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image6a = foxsi_image_det( d6, year=2014, trange=trange, erange=[6,10.], thr_n=4. )
+trange=[t1_start, t1_adj1]
+;trange=[t1_adj1,t1_adj2]
+;trange=[t1_adj2,t1_end]
+;trange=[t2_start,t2_adj1]
+;trange=[t2_adj1,t2_end]
+;trange=[t3_start,t3_adj1]
+;trange=[t3_adj1,t3_adj2]
+;trange=[t3_adj2,t3_end]
+;trange=[t4_start,t_shtr_start]
+;trange=[t_shtr_end,t4_end]
+;trange=[t5_start,t5_end]
+
+cen=cen1
+;cen=cen1_adj1
+;cen=cen1_adj2
+;cen=cen2
+;cen=cen2_adj1
+;cen=cen3
+;cen=cen3_adj1
+;cen=cen3_adj2
+;cen=cen4
+;cen=cen5
+
+image0 = foxsi_image_det( data_lvl2_d0, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image1 = foxsi_image_det( data_lvl2_d1, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image4 = foxsi_image_det( data_lvl2_d4, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image5 = foxsi_image_det( data_lvl2_d5, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image6 = foxsi_image_det( data_lvl2_d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+
+xc = cen[0]
+yc = cen[1]
+map0 = rot_map( make_map( image0, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot0 )
+map1 = rot_map( make_map( image1, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot1 )
+map4 = rot_map( make_map( image4, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot4 )
+map5 = rot_map( make_map( image5, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot5 )
+map6 = rot_map( make_map( image6, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot6 )
+
+map0 = shift_map( map0, shift0[0], shift0[1] )
+map1 = shift_map( map1, shift1[0], shift1[1] )
+map4 = shift_map( map4, shift4[0], shift4[1] )
+map5 = shift_map( map5, shift5[0], shift5[1] )
+map6 = shift_map( map6, shift6[0], shift6[1] )
+
+map0.roll_angle = 0
+map1.roll_angle = 0
+map4.roll_angle = 0
+map5.roll_angle = 0
+map6.roll_angle = 0
+map0.roll_center = 0
+map1.roll_center = 0
+map4.roll_center = 0
+map5.roll_center = 0
+map6.roll_center = 0
+
+map=map0
+map.data = map0.data + map1.data+map4.data+map5.data+map6.data
+
+
+; Longer version
+
+trange=[t1_start, t1_adj1]
+;trange=[t1_adj1,t1_adj2]
+;trange=[t1_adj2,t1_end]
+;trange=[t2_start,t2_adj1]
+;trange=[t2_adj1,t2_end]
+;trange=[t3_start,t3_adj1]
+;trange=[t3_adj1,t3_adj2]
+;trange=[t3_adj2,t3_end]
+;trange=[t4_start,t_shtr_start]
+;trange=[t_shtr_end,t4_end]
+;trange=[t5_start,t5_end]
+
+cen=cen1
+;cen=cen1_adj1
+;cen=cen1_adj2
+;cen=cen2
+;cen=cen2_adj1
+;cen=cen3
+;cen=cen3_adj1
+;cen=cen3_adj2
+;cen=cen4
+;cen=cen5
+
+image0 = foxsi_image_det( data_lvl2_d0, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image1 = foxsi_image_det( data_lvl2_d1, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image2 = foxsi_image_det( data_lvl2_d2, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image3 = foxsi_image_det( data_lvl2_d3, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image4 = foxsi_image_det( data_lvl2_d4, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image5 = foxsi_image_det( data_lvl2_d5, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image6 = foxsi_image_det( data_lvl2_d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
 
 npix = 128
 image0 = frebin( image0, npix, npix, /tot )
@@ -36,8 +103,8 @@ image5 = frebin( image5, npix, npix, /tot )
 image6 = frebin( image6, npix, npix, /tot )
 image6a = frebin( image6a, npix, npix, /tot )
 
-xc = cen1[0]
-yc = cen1[1]
+xc = cen[0]
+yc = cen[1]
 map0 = rot_map( make_map( image0, dx=7.78*128/npix, dy=7.78*128/npix, xcen=xc, ycen=yc ), rot0 )
 map1 = rot_map( make_map( image1, dx=7.78*128/npix, dy=7.78*128/npix, xcen=xc, ycen=yc ), rot1 )
 map2 = rot_map( make_map( image2, dx=7.78*128/npix, dy=7.78*128/npix, xcen=xc, ycen=yc ), rot2 )
@@ -154,7 +221,7 @@ j = fix(findgen(n_elements(result)*12/cadence)*cadence/12)
 log=vso_get( result[j], out_dir=dir, filenames=fnames, /rice ) 
 
 dir = '~/data/aia/20141211/'
-f=file_search(dir+'aia*')
+f=file_search(dir+'AIA*094*')
 .r
 for i=0, n_elements(f)-1 do begin
 aia_prep, f[i], -1, ind, dat, outdir=dir, /do_write_fits
@@ -164,7 +231,7 @@ endfor
 end
 
 
-f=file_search('~/data/aia/20141211/*_0094*')
+f=file_search('~/data/aia/20141211/*_0131*')
 fits2map, f, aia
  
 
@@ -256,4 +323,39 @@ loadct, 5
 plot_map, map6
 plot_map, map6, /log
 
+
+f=file_search('~/data/aia/20141211/*_0131*')
+fits2map, f, aia
+
+loadct, 1
+reverse_ct
+plot_map, aia[43], cen=cen5, fov=20, /log, charsi=1.5, charth=2, xth=5, yth=5
+hsi_linecolors                                                 
+;plot_map, map, /over, lev=[1,5,10,50,90], /per, col=2, thi=5
+plot_map, map, /over, lev=[50,70,90,95], /per, col=2, thi=3
+
+
+loadct, 1
+reverse_ct
+plot_map, aia[43], cen=cen, fov=20, /log, charsi=1.5, charth=2, xth=5, yth=5
+hsi_linecolors                                                 
+plot_map, map, /over, lev=[1,5,10,50,90], /per, col=2, thi=5
+
+
+; starting with map_pos0, map_pos1, map_pos2
+shift0 = map_centroid(map_pos2, thr=3) - map_centroid(map_pos0, thr=10)
+shift1 = map_centroid(map_pos2, thr=3) - map_centroid(map_pos1, thr=10)
+shift_pos0 = shift_map( map_pos0, shift0[0], shift0[1] )
+shift_pos1 = shift_map( map_pos1, shift1[0], shift1[1] )
+
+sub0 = make_submap( shift_pos0, cen=[190,-200], fov=10)
+sub1 = make_submap( shift_pos1, cen=[190,-200], fov=10)
+sub2 = make_submap( map_pos2,   cen=[190,-200], fov=10)
+
+help, sub0.data, sub1.data, sub2.data   
+
+new = sub2
+new.data += sub0.data
+new.data += sub1.data
+plot_map, new
 
