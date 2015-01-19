@@ -24,7 +24,7 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 	default, erange, [4.,15.]
   	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
   	if not keyword_set(thr_n) then thr_n =4.    ; desired n-side ADC threshold
-  	default, year, 2012
+  	default, year, 2014
   	default, trange, [0,420]
 
 	; launch time in seconds of day.

@@ -303,9 +303,9 @@ plot_map, map, fov=20, /limb
 ; example
 
 ; Choose the time range and location.
-trange = [t1_adj2, t1_end]		; time range
-xc = cen1[0]					; coords for Target 1
-yc = cen1[1]
+trange = [t3_pos2_start, t3_pos2_end]
+xc = cen3_pos2[0]
+yc = cen3_pos2[1]
 
 ; Basic image production
 image6 = foxsi_image_det( data_lvl2_d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
@@ -324,7 +324,7 @@ plot_map, map6
 plot_map, map6, /log
 
 
-f=file_search('~/data/aia/20141211/*_0131*')
+f=file_search('~/data/aia/20141211/*_0094*')
 fits2map, f, aia
 
 loadct, 1
@@ -358,4 +358,131 @@ new = sub2
 new.data += sub0.data
 new.data += sub1.data
 plot_map, new
+
+
+; more imaging
+
+; example
+
+; Choose the time range and location.
+trange = [t1_pos2_start, t1_pos2_end]
+xc = cen1_pos2[0]
+yc = cen1_pos2[1]
+
+; Basic image production
+image0 = foxsi_image_det( data_lvl2_d0, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image1 = foxsi_image_det( data_lvl2_d1, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image4 = foxsi_image_det( data_lvl2_d4, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image5 = foxsi_image_det( data_lvl2_d5, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+image6 = foxsi_image_det( data_lvl2_d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+map0 = make_map( image0, dx=7.78, dy=7.78, xcen=xc, ycen=yc )
+map1 = make_map( image1, dx=7.78, dy=7.78, xcen=xc, ycen=yc )
+map4 = make_map( image4, dx=7.78, dy=7.78, xcen=xc, ycen=yc )
+map5 = make_map( image5, dx=7.78, dy=7.78, xcen=xc, ycen=yc )
+map6 = make_map( image6, dx=7.78, dy=7.78, xcen=xc, ycen=yc )
+
+; Apply a coarse offset gleaned from comparing images with AIA.
+map0 = shift_map( map0, shift0[0], shift0[1] )
+map1 = shift_map( map1, shift1[0], shift1[1] )
+map4 = shift_map( map4, shift4[0], shift4[1] )
+map5 = shift_map( map5, shift5[0], shift5[1] )
+map6 = shift_map( map6, shift6[0], shift6[1] )
+
+; Rotate the image based on the rotation angle for that specific detector.
+map0 = rot_map( map0, rot0 )
+map1 = rot_map( map1, rot1 )
+map4 = rot_map( map4, rot4 )
+map5 = rot_map( map5, rot5 )
+map6 = rot_map( map6, rot6 )
+map0.roll_angle = 0
+map1.roll_angle = 0
+map4.roll_angle = 0
+map5.roll_angle = 0
+map6.roll_angle = 0
+map0.roll_center = 0
+map1.roll_center = 0
+map4.roll_center = 0
+map5.roll_center = 0
+map6.roll_center = 0
+
+map = map6
+map.data = map0.data + map1.data + map4.data + map5.data + map6.data
+
+loadct, 5
+plot_map, map6
+plot_map, map6, /log
+
+
+f=file_search('~/data/aia/20141211/*_0131*')
+fits2map, f, aia
+
+loadct, 1
+reverse_ct
+plot_map, aia[43], cen=cen5, fov=20, /log, charsi=1.5, charth=2, xth=5, yth=5
+hsi_linecolors                                                 
+;plot_map, map, /over, lev=[1,5,10,50,90], /per, col=2, thi=5
+plot_map, map, /over, lev=[50,70,90,95], /per, col=2, thi=3
+
+
+; with NuSTAR
+
+; AR
+restore, 'nustar/nustar-obs3-arA.sav', /v
+restore, 'nustar/foxsi-target3-allSi.sav', /v
+
+popen, 'nustar/nustar-foxsi', xsi=7, ysi=7
+loadct, 1
+reverse_ct
+plot_map, nust, /limb, lcol=255, grid=10, gcol=255, lth=4, gth=4, charsi=1.3, $
+	xth=5, yth=5, charth=2, color=255
+hsi_linecolors
+plot_map, map, /over, col=2, thick=10, lev=[10], /per
+xyouts, 0.18, 0.01, 'FOXSI 19:17:10 - 19:17:45 single counts', /norm, charsi=1.5, charth=2, col=2
+pclose
+
+
+; North Pole
+restore, 'nustar/nustar-obs3-npA.sav', /v
+restore, 'nustar/foxsi-target4-allSi.sav', /v
+
+popen, 'nustar/nustar-foxsi', xsi=7, ysi=7
+loadct, 3
+;reverse_ct
+plot_map, nust, /limb, lcol=255, grid=10, gcol=255, lth=4, gth=4, charsi=1.3, $
+	xth=5, yth=5, charth=2;, color=255
+hsi_linecolors
+plot_map, map, /over, col=3, thick=10, lev=[10], /per
+xyouts, 0.18, 0.01, 'FOXSI 19:17:49 - 19:19:22 single counts', /norm, charsi=1.5, charth=2, col=3
+pclose
+
+
+; AIA, for comparison
+
+f=file_search('~/data/aia/20141211/*_0131*')
+fits2map, f, aia131
+f=file_search('~/data/aia/20141211/*_0094*')
+fits2map, f, aia094
+
+popen, 'nustar/aia', xsi=7, ysi=7
+aia_lct, r,g,b, wave=94, /load
+plot_map, aia094[35], /log, cen=[250,950], fov=10, dmax=20, charsi=1.3, $
+	xth=5, yth=5, charth=2, /nodate
+plot_map, aia094[33], /log, cen=[925,-260], fov=11, dmax=80, charsi=1.3, $
+	xth=5, yth=5, charth=2, /nodate
+aia_lct, r,g,b, wave=131, /load
+plot_map, aia131[35], /log, cen=[250,950], fov=10, dmax=500, charsi=1.3, $
+	xth=5, yth=5, charth=2, /nodate
+plot_map, aia131[33], /log, cen=[925,-260], fov=11, dmax=1000, charsi=1.3, $
+	xth=5, yth=5, charth=2, /nodate
+pclose
+	
+
+; deconvolution
+
+dec0 = deconv_foxsi( [1,0,0,0,0,0,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
+dec1 = deconv_foxsi( [0,1,0,0,0,0,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
+dec4 = deconv_foxsi( [0,0,0,0,1,0,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
+dec5 = deconv_foxsi( [0,0,0,0,0,1,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
+dec6 = deconv_foxsi( [0,0,0,0,0,0,1], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
+	
 
