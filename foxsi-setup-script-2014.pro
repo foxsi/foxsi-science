@@ -14,26 +14,6 @@ restore, 'data_2014/foxsi_level2_data.sav', /v
 
 t_launch = 69060
 
-;yaw adjustments are at
-;start 100
-;165
-;210
-;*275
-;325
-;*370
-;*470
-;end 500
-
-;pitch adjustments are at
-;start 100
-;140
-;220
-;*275
-;310
-;*370
-;*470
-;end 500
-
 ; Timing info from Jesus's preliminary report.
 offset_t = 36.		; time offset in WSMR data, for unknown reason.
 tlaunch = 69060
@@ -59,7 +39,6 @@ t_shtr_end     = 442. + offset_t		; Conservative time for microphonics to die do
 t4_end	 = 466.2 + offset_t
 t5_start = 470.5 + offset_t
 t5_end	 = 503.2 + offset_t
-
 
 date=anytim('2014-dec-11')
 t0 = '11-Dec-2014 19:11:00.000'
@@ -97,6 +76,7 @@ shift1 += [-10,-26]
 shift4 += [-10,-26]
 shift5 += [-10,-26]
 
+
 ; Rotation angles for all detectors
 rot0 = 82.5
 rot1 = 75.
@@ -107,4 +87,14 @@ rot5 = 90.
 rot6 = -60.
 
 
-
+; Save the values set here for use by some of the routines.
+; Saving this file each time ensures that updating a value in this setup script
+; propagates through to all routines.
+save, tlaunch, t_launch, offset_t, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
+	t1_pos1_end, t1_pos2_start, t1_pos2_end, t2_pos0_start, t2_pos0_end, $
+	t2_pos1_start, t2_pos1_end, t3_pos0_start, t3_pos0_end, t3_pos1_start, t3_pos1_end, $
+	t3_pos2_start, t3_pos2_end, t4_start, t_shtr_start, t_shtr_end, t4_end, $
+	t5_start, t5_end, date, t0, offset_xy, cen1_pos0, cen1_pos1, cen1_pos2, $
+	cen2_pos0, cen2_pos1, cen3_pos0, cen3_pos1, cen3_pos2, cen4, cen5, $
+	shift0, shift1, shift4, shift5, shift6, rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
+	file = 'data_2014/flight2014-parameters.sav'
