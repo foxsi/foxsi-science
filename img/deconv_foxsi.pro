@@ -5,7 +5,9 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 					   IMG_SMOOTH=IMG_SMOOTH, ROTATION=ROTATION, $
 					   MEASURED_PSF = MEASURED_PSF, STOP = STOP, FIRST = FIRST, $
 					   PSF_map=PSF_map, FIX4=FIX4, iter=iter, $
-					   RECONV_map = reconv_map, CSTAT=cstat
+					   RECONV_map = reconv_map, CSTAT=cstat, year=year
+					   
+					   
  
  	; Detector should be an index array saying which detectors we're using.
  	; Example [0,0,0,0,0,1] for D6.
@@ -27,11 +29,18 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 	print, 'Loading data.'
 	print
 	
-	restore, 'data_2012/foxsi_level2_data.sav'
-	flare = [967,-207]	; from RHESSI flarelist
-
+	if year eq 2012 then restore, 'data_2012/foxsi_level2_data.sav' $
+		else if year eq 2014 then restore, 'data_2014/foxsi_level2_data.sav' $
+		else begin
+			print, 'year should be 2012 or 2014'
+			return, -1
+		endelse
+		
+	if year eq 2012 then flare=[967,-207] $	; from RHESSI flarelist
+		else flare=[0,-200]
+	
 	; usable times	
-	t_launch = 64500
+	if year eq 2012 then t_launch = 64500 else t_launch = 69060
 	t4_start = t_launch + 340		; Target 4 (flare)
 	t4_end = t_launch + 420.		; slightly altered from nominal 421.2
 	t5_start = t_launch + 423.5		; Target 5 (off-pointing)
@@ -55,7 +64,9 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
  
 	 if keyword_set(measured_psf) then begin
 
-		f=file_search('data_2012/45az*.fits')	; file containing measured PSF 7' offaxis
+		if year eq 2012 then $
+			f=file_search('data_2012/45az*.fits') $	; file containing measured PSF 7' offaxis
+		else f=file_search('data_2014/atfocus_1s_10times.fits')
  		fits_read, f, data, ind
  
  		m0 = make_map( float(data[*,*,0]), dx=plate_scale, dy=plate_scale )
@@ -82,7 +93,7 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
  		psf = shift_map( make_submap( m_sum, cen=cen, fov=fov ), -cen[0], -cen[1] )
  		psf = rot_map( psf, rotation )
  		psf = make_map( frebin( psf.data, dim, dim, /total ), dx=pix, dy=pix )
- 		psf.data = psf_smooth(psf.data, smooth)
+ 		psf.data = smooth(psf.data, psf_smooth)
   	
   	endif else begin
 	
@@ -114,27 +125,27 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
  	print, 'Retrieving flare data...'
 	print
  
- 	t0 = time_range - t_launch
-	t1 = time_range - t_launch
+ 	t0 = time_range[0] - t_launch
+	t1 = time_range[1] - t_launch
 	
 	tr = [t0,t1]
 	
 	n_det=n_elements( detector[ where( detector gt 0 ) ] )
 
 	if detector[0] gt 0 then $
-		img0=foxsi_image_det( data_lvl2_d0, erange=erange, trange=tr,thr_n=4.)
+		img0=foxsi_image_det( data_lvl2_d0, erange=erange, trange=tr,thr_n=4., year=year)
 	if detector[1] gt 0 then $
-		img1=foxsi_image_det( data_lvl2_d1, erange=erange, trange=tr,thr_n=4.)
+		img1=foxsi_image_det( data_lvl2_d1, erange=erange, trange=tr,thr_n=4., year=year)
 	if detector[2] gt 0 then $
-		img2=foxsi_image_det( data_lvl2_d2, erange=erange, trange=tr,thr_n=4.)
+		img2=foxsi_image_det( data_lvl2_d2, erange=erange, trange=tr,thr_n=4., year=year)
 	if detector[3] gt 0 then $
-		img3=foxsi_image_det( data_lvl2_d3, erange=erange, trange=tr,thr_n=4.)
+		img3=foxsi_image_det( data_lvl2_d3, erange=erange, trange=tr,thr_n=4., year=year)
 	if detector[4] gt 0 then $
-		img4=foxsi_image_det( data_lvl2_d4, erange=erange, trange=tr,thr_n=4.)
+		img4=foxsi_image_det( data_lvl2_d4, erange=erange, trange=tr,thr_n=4., year=year)
 	if detector[5] gt 0 then $
-		img5=foxsi_image_det( data_lvl2_d5, erange=erange, trange=tr,thr_n=4.)
+		img5=foxsi_image_det( data_lvl2_d5, erange=erange, trange=tr,thr_n=4., year=year)
 	if detector[6] gt 0 then $
-		img6=foxsi_image_det( data_lvl2_d6, erange=erange, trange=tr,thr_n=4.)
+		img6=foxsi_image_det( data_lvl2_d6, erange=erange, trange=tr,thr_n=4., year=year)
  
  	; Rotation angles for all detectors (as designed, no tweaks yet).
 	rot0 = 82.5

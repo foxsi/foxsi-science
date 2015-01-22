@@ -14,59 +14,67 @@ restore, 'data_2014/foxsi_level2_data.sav', /v
 
 t_launch = 69060
 
-;yaw adjustments are at
-;start 100
-;165
-;210
-;*275
-;325
-;*370
-;*470
-;end 500
-
-;pitch adjustments are at
-;start 100
-;140
-;220
-;*275
-;310
-;*370
-;*470
-;end 500
-
-; Right now target times are eyeballed from Jesus's plots.  Later, we'll get the real data.
-offset = 36.		; time offset in WSMR data, for unknown reason.
+; Timing info from Jesus's preliminary report.
+offset_t = 36.		; time offset in WSMR data, for unknown reason.
 tlaunch = 69060
-t1_start = 100. + offset
-t1_adj1  = 140. + offset
-t1_adj2  = 165. + offset
-t1_end   = 210. + offset
-t2_start = 220. + offset
-t2_end 	 = 275. + offset
-t3_start = 280. + offset
-t3_adj1	 = 310. + offset
-t3_adj2  = 325. + offset
-t3_end	 = 370. + offset
-t4_start = 370. + offset
-t4_end	 = 470. + offset
-t5_start = 470. + offset
-t5_end	 = 500. + offset
-
+t1_pos0_start  = 102.0 + offset_t
+t1_pos0_end    = 134.3 + offset_t
+t1_pos1_start  = 138.0 + offset_t
+t1_pos1_end    = 162.6 + offset_t
+t1_pos2_start  = 166.5 + offset_t
+t1_pos2_end    = 205.0 + offset_t
+t2_pos0_start  = 209.0 + offset_t
+t2_pos0_end    = 219.6 + offset_t
+t2_pos1_start  = 224.0 + offset_t
+t2_pos1_end    = 276.7 + offset_t
+t3_pos0_start  = 280.6 + offset_t
+t3_pos0_end	   = 307.2 + offset_t
+t3_pos1_start  = 311.0 + offset_t
+t3_pos1_end    = 330.1 + offset_t
+t3_pos2_start  = 334.0 + offset_t
+t3_pos2_end	   = 369.2 + offset_t
+t4_start       = 373.5 + offset_t
+t_shtr_start   = 438. + offset_t		; Conservative time of attenuator insertion
+t_shtr_end     = 442. + offset_t		; Conservative time for microphonics to die down
+t4_end	 = 466.2 + offset_t
+t5_start = 470.5 + offset_t
+t5_end	 = 503.2 + offset_t
 
 date=anytim('2014-dec-11')
 t0 = '11-Dec-2014 19:11:00.000'
 
-cen1 = [   0,-250 ]
-cen2 = [-750,-100]
-cen3 = [ 850,-250]
-cen4 = [ 200, 750]
-cen5 = [   0,-250 ]
+;
+; Positional information
+;
 
-shift6 = [20,40]	; offset for D6, eyeballed.
-shift0 = [ 34.8801, 57.1428 ]	; others shifts are derived by comparing centroids
-shift1 = [  9.2774, 59.4729 ]	; with that of D6.
-shift4 = [ 13.2861, 17.9339 ]
-shift5 = [ 42.6485, 43.9609 ]
+; Our crude alignment offset determined in-flight
+offset_xy = [360.,-180.]
+
+; SPARCS pointing positions, from Jesus
+cen1_pos0 = [  -1. ,-251. ] + offset_xy		; 32 sec
+cen1_pos1 = [-361. ,-251. ] + offset_xy		; 25 sec
+cen1_pos2 = [-361. , -71. ] + offset_xy		; 38 sec
+cen2_pos0 = [-361. ,-101. ] + offset_xy		; 11 sec
+cen2_pos1 = [-750. ,-101. ] + offset_xy		; 53 sec
+cen3_pos0 = [ 850.5,-251.5] + offset_xy		; 26 sec
+cen3_pos1 = [ 490. ,-251.5] + offset_xy		; 19 sec
+cen3_pos2 = [ 490. , -71. ] + offset_xy		; 35 sec
+cen4 = 		[-160. , 930. ] + offset_xy		; 92 sec
+cen5 = 		[-360. , -71. ] + offset_xy		; 36 sec
+
+; Additional shifts for each detector, from comparison with AIA
+; THIS SHOULD BE REDONE USING RHESSI!
+shift6 = [20.,40.]	; offset for D6, eyeballed.
+shift0 = [ 34.9, 57.1 ]	; others' shifts are derived by comparing centroids
+shift1 = [  9.3, 59.5 ]	; with that of D6.
+shift4 = [ 13.3, 18.0 ]
+shift5 = [ 42.6, 44.0 ]
+
+shift6 += [-10,-26]
+shift0 += [-10,-26]
+shift1 += [-10,-26]
+shift4 += [-10,-26]
+shift5 += [-10,-26]
 
 
 ; Rotation angles for all detectors
@@ -79,4 +87,14 @@ rot5 = 90.
 rot6 = -60.
 
 
-
+; Save the values set here for use by some of the routines.
+; Saving this file each time ensures that updating a value in this setup script
+; propagates through to all routines.
+save, tlaunch, t_launch, offset_t, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
+	t1_pos1_end, t1_pos2_start, t1_pos2_end, t2_pos0_start, t2_pos0_end, $
+	t2_pos1_start, t2_pos1_end, t3_pos0_start, t3_pos0_end, t3_pos1_start, t3_pos1_end, $
+	t3_pos2_start, t3_pos2_end, t4_start, t_shtr_start, t_shtr_end, t4_end, $
+	t5_start, t5_end, date, t0, offset_xy, cen1_pos0, cen1_pos1, cen1_pos2, $
+	cen2_pos0, cen2_pos1, cen3_pos0, cen3_pos1, cen3_pos2, cen4, cen5, $
+	shift0, shift1, shift4, shift5, shift6, rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
+	file = 'data_2014/flight2014-parameters.sav'
