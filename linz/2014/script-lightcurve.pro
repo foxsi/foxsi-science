@@ -70,3 +70,17 @@ IDL> ptim, wsmrt
 11-Dec-2014 19:12:45.797
 
 ; This should be '12:12:10', so we have a 36 second offset.
+
+;
+; Lightcurves at different energies
+;
+
+lca=foxsi_lc(data_lvl2_d6,dt=4,energy=[4,6]);, /good)
+lcb=foxsi_lc(data_lvl2_d6,dt=4,energy=[6,8]);, /good)
+lcc=foxsi_lc(data_lvl2_d6,dt=4,energy=[8,11]);, /good)
+
+hsi_linecolors
+utplot, anytim(lca.time,/yo), lca.persec, timer='2014-12-11 19:'+['19','20'], psym=10, /nodata
+outplot, anytim(lca.time,/yo), lca.persec, col=6, thick=4, psym=10
+outplot, anytim(lcb.time,/yo), lcb.persec, col=7, thick=4, psym=10
+outplot, anytim(lcc.time,/yo), lcc.persec, col=1, thick=4, psym=10

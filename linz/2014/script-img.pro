@@ -207,11 +207,11 @@ t1 = '2014-12-11 19:11:00'
 t2 = '2014-12-11 19:20:00'
 dir = '~/data/aia/20141211/'
 
-result = vso_search( t1, t2, inst='AIA', wave='94' )
+result = vso_search( t1, t2, inst='AIA', wave='193' )
 log=vso_get( result, out_dir=dir, filenames=fnames, /rice ) 
-result = vso_search( t1, t2, inst='AIA', wave='131' )
+result = vso_search( t1, t2, inst='AIA', wave='211' )
 log=vso_get( result, out_dir=dir, filenames=fnames, /rice ) 
-result = vso_search( t1, t2, inst='AIA', wave='171' )
+result = vso_search( t1, t2, inst='AIA', wave='335' )
 log=vso_get( result, out_dir=dir, filenames=fnames, /rice ) 
 
 
@@ -221,10 +221,11 @@ j = fix(findgen(n_elements(result)*12/cadence)*cadence/12)
 log=vso_get( result[j], out_dir=dir, filenames=fnames, /rice ) 
 
 dir = '~/data/aia/20141211/'
-f=file_search(dir+'AIA*094*')
+f=file_search(dir+'aia*335*')
 .r
 for i=0, n_elements(f)-1 do begin
 aia_prep, f[i], -1, ind, dat, outdir=dir, /do_write_fits
+spawn, 'rm '+f[i]
 undefine, ind
 undefine, dat
 endfor
@@ -232,7 +233,8 @@ end
 
 
 f=file_search('~/data/aia/20141211/*_0131*')
-fits2map, f, aia
+fits2map, f, m0131
+save, m0131, file='aia-131.sav'
  
 
 plot_map, aia[0], /log, fov=16
