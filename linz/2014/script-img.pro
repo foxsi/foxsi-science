@@ -488,3 +488,30 @@ dec5 = deconv_foxsi( [0,0,0,0,0,1,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=
 dec6 = deconv_foxsi( [0,0,0,0,0,0,1], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
 	
 
+; using the new "map" routine
+; imaging spectroscopy of last target, D6.
+
+trange=[t5_start, t5_end]
+m6a = foxsi_image_map( data_lvl2_d6, cen5, erange=[4,6], trange=trange, thr_n=4., smooth=2, /xycorr )
+m6b = foxsi_image_map( data_lvl2_d6, cen5, erange=[6,8], trange=trange, thr_n=4., smooth=2, /xycorr )
+m6c = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=trange, thr_n=4., smooth=2, /xycorr )
+
+popen, 'imspex-targ5', xsi=7, ysi=7
+loadct, 3
+plot_map, m6a, cen=[-80,0], fov=2
+hsi_linecolors
+plot_map, m6a, /over, col=6, lev=[30,50,70,90], /per, thick=6
+plot_map, m6b, /over, col=12, lev=[30,50,70,90], /per, thick=6
+plot_map, m6c, /over, col=1, lev=[30,50,70,90], /per, thick=6
+xyouts, -130, 50, '4-6 keV (630 cts)', charsi=1.5, col=6
+xyouts, -130, 43, '6-8 keV (311 cts)', charsi=1.5, col=12
+xyouts, -130, 36, '8-11 keV (47 cts)', charsi=1.5, col=1
+pclose
+
+; explore over time.
+t1=t5_start
+m6a = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[0,10], thr_n=4., smooth=2, /xycorr )
+m6b = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[10,20], thr_n=4., smooth=2, /xycorr )
+m6c = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[20,30], thr_n=4., smooth=2, /xycorr )
+
+

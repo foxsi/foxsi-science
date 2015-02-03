@@ -6,7 +6,7 @@
 ; data description doc.
 ;
 ; Inputs:	FILENAME	File to process.  Must be a WSMR .log file.
-;			   			Default is the 2012 Nov 2 flight data file.
+;			   			Default is the 2014 Dec 11 flight data file.
 ;
 ; Keywords:	DETECTOR	Detector number (0-6).  Each detector data
 ;						must be processed individually.  Default D0
@@ -28,6 +28,7 @@
 ;		file = 'data_2012/foxsi_level0_data.sav'
 ;
 ; History:	
+;		2015-feb-2	Linz	Changed default to 2014 flight.
 ;		2015-Dec	Linz	Updated to work for 2014 data too.
 ;		2013-Feb-13	Linz	Fixed altitude glitch and shifted "inflight" flag to 70 seconds later.
 ;		2013-Feb-07	Linz	Updated structure name and added altitude data
@@ -37,8 +38,9 @@
 FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 
 	add_path, 'util/'
-	default, year, 2012
-	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+	default, year, 2014
+;	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+	if not keyword_set(filename) then filename = 'data_2014/36.36_295_Krucker_FLIGHT_HOT_TM2.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
 
