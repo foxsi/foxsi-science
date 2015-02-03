@@ -70,3 +70,54 @@ IDL> ptim, wsmrt
 11-Dec-2014 19:12:45.797
 
 ; This should be '12:12:10', so we have a 36 second offset.
+
+;
+; Lightcurves at different energies
+;
+
+lca=foxsi_lc(data_lvl2_d6,dt=4,energy=[4,6]);, /good)
+lcb=foxsi_lc(data_lvl2_d6,dt=4,energy=[6,8]);, /good)
+lcc=foxsi_lc(data_lvl2_d6,dt=4,energy=[8,11]);, /good)
+
+hsi_linecolors
+utplot, anytim(lca.time,/yo), lca.persec, timer='2014-12-11 19:'+['19','20'], psym=10, /nodata
+outplot, anytim(lca.time,/yo), lca.persec, col=6, thick=4, psym=10
+outplot, anytim(lcb.time,/yo), lcb.persec, col=7, thick=4, psym=10
+outplot, anytim(lcc.time,/yo), lcc.persec, col=1, thick=4, psym=10
+
+;
+; Make a spectrogram.
+;
+
+; Set these parameters.
+start = t1_pos0_start+tlaunch	; Start time.
+finish = t5_end+tlaunch		; End time
+dt = 3.					; Time bin width
+eBin = 0.4				; Energy bin width
+
+d6 = time_cut( data_lvl2_d6, start, start+10. )
+spec6 = make_spectrum( d6, binwidth=eBin )
+
+duration = finish - start
+nTime = duration/dt
+time = anytim('2014-dec-11') + start + findgen(nTime)*dt
+gram = fltarr( nTime, n_elements(spec6.energy_kev) )
+
+.run
+for i=0, nTime-1 do begin
+	d0 = time_cut( data_lvl2_d0, start+i*dt, start+dt+i*dt, /good )
+	d4 = time_cut( data_lvl2_d4, start+i*dt, start+dt+i*dt, /good )
+	d5 = time_cut( data_lvl2_d5, start+i*dt, start+dt+i*dt, /good )
+	d6 = time_cut( data_lvl2_d6, start+i*dt, start+dt+i*dt, /good )
+	spec = make_spectrum( [d0,d4,d5,d6], binwidth=eBin )
+	gram[i,*] = spec.spec_p*eBin
+endfor
+end
+
+;popen, 'spectrogram', xsi=8, ysi=4, /land
+loadct,5
+spectro_plot, gram, time, spec.energy_kev, yr=[0,15], /cbar, charsi=1.5, xth=5, yth=5, $
+;	ytit='Energy [keV]', xr='2014-dec-11 '+['19:13:00','19:20:00']
+	ytit='Energy [keV]', xr='2014-dec-11 '+['19:13:00','19:17:00']
+; add time bars.
+;pclose

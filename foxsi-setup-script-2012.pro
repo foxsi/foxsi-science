@@ -51,6 +51,9 @@ shift4 = [ 48.2700,     -95.3080 ]
 shift5 = [ 49.5500,     -120.276 ]
 shift6 = [ 63.4500,     -106.360 ]
 
+; overall offset
+offset_xy = [0.,0.]
+
 ; Rotation angles for all detectors (as designed, no tweaks).
 rot0 = 82.5
 rot1 = 75.

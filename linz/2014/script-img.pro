@@ -207,11 +207,11 @@ t1 = '2014-12-11 19:11:00'
 t2 = '2014-12-11 19:20:00'
 dir = '~/data/aia/20141211/'
 
-result = vso_search( t1, t2, inst='AIA', wave='94' )
+result = vso_search( t1, t2, inst='AIA', wave='193' )
 log=vso_get( result, out_dir=dir, filenames=fnames, /rice ) 
-result = vso_search( t1, t2, inst='AIA', wave='131' )
+result = vso_search( t1, t2, inst='AIA', wave='211' )
 log=vso_get( result, out_dir=dir, filenames=fnames, /rice ) 
-result = vso_search( t1, t2, inst='AIA', wave='171' )
+result = vso_search( t1, t2, inst='AIA', wave='335' )
 log=vso_get( result, out_dir=dir, filenames=fnames, /rice ) 
 
 
@@ -221,10 +221,11 @@ j = fix(findgen(n_elements(result)*12/cadence)*cadence/12)
 log=vso_get( result[j], out_dir=dir, filenames=fnames, /rice ) 
 
 dir = '~/data/aia/20141211/'
-f=file_search(dir+'AIA*094*')
+f=file_search(dir+'aia*335*')
 .r
 for i=0, n_elements(f)-1 do begin
 aia_prep, f[i], -1, ind, dat, outdir=dir, /do_write_fits
+spawn, 'rm '+f[i]
 undefine, ind
 undefine, dat
 endfor
@@ -232,7 +233,8 @@ end
 
 
 f=file_search('~/data/aia/20141211/*_0131*')
-fits2map, f, aia
+fits2map, f, m0131
+save, m0131, file='aia-131.sav'
  
 
 plot_map, aia[0], /log, fov=16
@@ -485,4 +487,31 @@ dec4 = deconv_foxsi( [0,0,0,0,1,0,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=
 dec5 = deconv_foxsi( [0,0,0,0,0,1,0], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
 dec6 = deconv_foxsi( [0,0,0,0,0,0,1], [t1_pos2_start,t1_pos2_end]+tlaunch, year=2014, /meas)
 	
+
+; using the new "map" routine
+; imaging spectroscopy of last target, D6.
+
+trange=[t5_start, t5_end]
+m6a = foxsi_image_map( data_lvl2_d6, cen5, erange=[4,6], trange=trange, thr_n=4., smooth=2, /xycorr )
+m6b = foxsi_image_map( data_lvl2_d6, cen5, erange=[6,8], trange=trange, thr_n=4., smooth=2, /xycorr )
+m6c = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=trange, thr_n=4., smooth=2, /xycorr )
+
+popen, 'imspex-targ5', xsi=7, ysi=7
+loadct, 3
+plot_map, m6a, cen=[-80,0], fov=2
+hsi_linecolors
+plot_map, m6a, /over, col=6, lev=[30,50,70,90], /per, thick=6
+plot_map, m6b, /over, col=12, lev=[30,50,70,90], /per, thick=6
+plot_map, m6c, /over, col=1, lev=[30,50,70,90], /per, thick=6
+xyouts, -130, 50, '4-6 keV (630 cts)', charsi=1.5, col=6
+xyouts, -130, 43, '6-8 keV (311 cts)', charsi=1.5, col=12
+xyouts, -130, 36, '8-11 keV (47 cts)', charsi=1.5, col=1
+pclose
+
+; explore over time.
+t1=t5_start
+m6a = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[0,10], thr_n=4., smooth=2, /xycorr )
+m6b = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[10,20], thr_n=4., smooth=2, /xycorr )
+m6c = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[20,30], thr_n=4., smooth=2, /xycorr )
+
 
