@@ -1,5 +1,5 @@
 FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
-			CALIB_FILE = CALIB_FILE, GROUND = GROUND, STOP = STOP
+			CALIB_FILE = CALIB_FILE, GROUND = GROUND, YEAR = YEAR, STOP = STOP
 
 ;+
 ; This function reads in Level 0 and Level 1 FOXSI data files (*.sav) and processes
@@ -17,6 +17,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;			   		must be processed individually.  Default D0
 ;		CALIB_FILE	Calibration file to use. Must be the correct detector!
 ;		GROUND		Indicates this is calibration, not flight data.
+;		YEAR			Specify 2012 or 2014.  Default 2014
 ;
 ; Example:
 ; 	To process level 1 data into Level 2 IDL structures and save them:
@@ -42,6 +43,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;		file = 'data_2012/foxsi_level2_data.sav'
 ;
 ; History:	
+;			2015-Feb-2	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Adjustments to work with 2014 data, specifically
 ;								allowing for lvl0 and lvl1 data lengths to be
 ;								different, as lvl1 now only includes HV=200V data.
@@ -49,7 +51,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;			2013-Mar-08	Linz	Created routine
 ;-
 
-	add_path, 'util'
+	default, year, 2014
 	
 	if not keyword_set(calib_file) then begin
 		print, 'No calibration file given.'
@@ -108,13 +110,15 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 
 	if keyword_set(stop) then stop
 
-	; Because data0 and data1 have different sizes, restrict data0 events to those
-	; with HV=200V. (As of 2014.)
-	tempHV = ishft(data0.HV, -4)/8
-	data0 = data0[ where( tempHV eq 200 ) ]
-	if n_elements(data0) ne nEvts then begin
-		print, 'Level 0 and level 1 data structures do not match.'
-		return, -1
+	if year eq 2014 then begin
+		; Because data0 and data1 have different sizes, restrict data0 events to those
+		; with HV=200V. (As of 2014.)
+		tempHV = ishft(data0.HV, -4)/8
+		data0 = data0[ where( tempHV eq 200 ) ]
+		if n_elements(data0) ne nEvts then begin
+			print, 'Level 0 and level 1 data structures do not match.'
+			return, -1
+		endif
 	endif
 
 	; Fill in values that are identical to previous versions.
