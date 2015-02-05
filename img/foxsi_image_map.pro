@@ -26,6 +26,7 @@
 ;	plot_map, map6, /log, /cbar
 ;
 ; History:	
+;		2015 feb 05	Linz	Fixed strip size bug.  Was 60um default, now 75um unless CdTe.
 ;		2015 Jan 19	Linz	Created routine.
 ;-
 
@@ -62,7 +63,7 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 		keepall=keepall, year=year, thr_n=thr_n )
 
 	if year eq 2014 and ( detnum eq 2 or detnum eq 3) then $
-		stripsize = 7.7349 else stripsize = 6.1879
+		stripsize = 6.1879 else stripsize = 7.7349
 		
 	if keyword_set( smooth ) then image = smooth( image, smooth )
 
