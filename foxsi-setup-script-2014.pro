@@ -15,30 +15,29 @@ restore, 'data_2014/foxsi_level2_data.sav', /v
 t_launch = 69060
 
 ; Timing info from Jesus's preliminary report.
-offset_t = 36.		; time offset in WSMR data, for unknown reason.
 tlaunch = 69060
-t1_pos0_start  = 102.0 + offset_t
-t1_pos0_end    = 134.3 + offset_t
-t1_pos1_start  = 138.0 + offset_t
-t1_pos1_end    = 162.6 + offset_t
-t1_pos2_start  = 166.5 + offset_t
-t1_pos2_end    = 205.0 + offset_t
-t2_pos0_start  = 209.0 + offset_t
-t2_pos0_end    = 219.6 + offset_t
-t2_pos1_start  = 224.0 + offset_t
-t2_pos1_end    = 276.7 + offset_t
-t3_pos0_start  = 280.6 + offset_t
-t3_pos0_end	   = 307.2 + offset_t
-t3_pos1_start  = 311.0 + offset_t
-t3_pos1_end    = 330.1 + offset_t
-t3_pos2_start  = 334.0 + offset_t
-t3_pos2_end	   = 369.2 + offset_t
-t4_start       = 373.5 + offset_t
-t_shtr_start   = 438. + offset_t		; Conservative time of attenuator insertion
-t_shtr_end     = 442. + offset_t		; Conservative time for microphonics to die down
-t4_end	 = 466.2 + offset_t
-t5_start = 470.5 + offset_t
-t5_end	 = 503.2 + offset_t
+t1_pos0_start  = 102.0
+t1_pos0_end    = 134.3
+t1_pos1_start  = 138.0
+t1_pos1_end    = 162.6
+t1_pos2_start  = 166.5
+t1_pos2_end    = 205.0
+t2_pos0_start  = 209.0
+t2_pos0_end    = 219.6
+t2_pos1_start  = 224.0
+t2_pos1_end    = 276.7
+t3_pos0_start  = 280.6
+t3_pos0_end	   = 307.2
+t3_pos1_start  = 311.0
+t3_pos1_end    = 330.1
+t3_pos2_start  = 334.0
+t3_pos2_end	   = 369.2
+t4_start       = 373.5
+t_shtr_start   = 438. 		; Conservative time of attenuator insertion
+t_shtr_end     = 442. 		; Conservative time for microphonics to die down
+t4_end	 = 466.2
+t5_start = 470.5
+t5_end	 = 503.2
 
 date=anytim('2014-dec-11')
 t0 = '11-Dec-2014 19:11:00.000'
@@ -90,7 +89,7 @@ rot6 = -60.
 ; Save the values set here for use by some of the routines.
 ; Saving this file each time ensures that updating a value in this setup script
 ; propagates through to all routines.
-save, tlaunch, t_launch, offset_t, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
+save, tlaunch, t_launch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 	t1_pos1_end, t1_pos2_start, t1_pos2_end, t2_pos0_start, t2_pos0_end, $
 	t2_pos1_start, t2_pos1_end, t3_pos0_start, t3_pos0_end, t3_pos1_start, t3_pos1_end, $
 	t3_pos2_start, t3_pos2_end, t4_start, t_shtr_start, t_shtr_end, t4_end, $

@@ -32,6 +32,7 @@
 ;		file = 'data_2014/foxsi_level1_data.sav'
 ;
 ; History:	
+;			2015-Feb-02	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Updated to work with 2014 data --
 ;								Eliminated events with HV ne 200V.
 ;			2013-Dec	Linz	Added fix to make it work with calibration data.	
@@ -39,9 +40,9 @@
 ;-
 
 FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
-			GROUND = GROUND
+			GROUND = GROUND, YEAR = YEAR
 
-	add_path, 'util'
+	default, year, 2014
 	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
 
 	restore, filename, /v
@@ -248,7 +249,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	; Altitude
 	; For level 1, interpolate linearly between each 0.5 sec measurement.
 	; Get altitude data from text file
-	if ground eq 0 then begin
+	if not keyword_set(ground) then begin
 		data_alt=read_ascii('data_2012/36255.txt')
 		time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
 		altitude = data_alt.field01[9,*]
@@ -313,7 +314,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	; Added as of 2nd flight: only pass through data at 200V, to trim the higher-order
 	; data files.
 	
-	data_struct = data_struct[ where( data_struct.hv eq 200 ) ]
+	if year eq 2014 then data_struct = data_struct[ where( data_struct.hv eq 200 ) ]
 	
 	if keyword_set(stop) then stop
 

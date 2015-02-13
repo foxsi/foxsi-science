@@ -113,20 +113,19 @@ endif
 
 if year eq 2014 then begin
 	; Timing info from Jesus's preliminary report.
-	offset_t = 36.		; time offset in WSMR data, for unknown reason.
 	t_launch = 69060
-	t1_start = 166.5 + offset_t
-	t1_end   = 205. + offset_t
-	t2_start = 224. + offset_t
-	t2_end 	 = 276.7 + offset_t
-	t3_start = 334. + offset_t
-	t3_end	 = 369. + offset_t
-	t4_start = 373.5 + offset_t
-	t4_end   = 438 + offset_t		; Conservative time of attenuator insertion
-	t5_start = 442 + offset_t		; Conservative time for microphonics to die down
-	t5_end	 = 466. + offset_t
-	t6_start = 470. + offset_t
-	t6_end	 = 503. + offset_t
+	t1_start = 166.5
+	t1_end   = 205.
+	t2_start = 224.
+	t2_end 	 = 276.7
+	t3_start = 334.
+	t3_end	 = 369.
+	t4_start = 373.5
+	t4_end   = 438		; Conservative time of attenuator insertion
+	t5_start = 442		; Conservative time for microphonics to die down
+	t5_end	 = 466.
+	t6_start = 470.
+	t6_end	 = 503.
 endif
 
 

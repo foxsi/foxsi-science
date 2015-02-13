@@ -6,7 +6,7 @@
 ; data description doc.
 ;
 ; Inputs:	FILENAME	File to process.  Must be a WSMR .log file.
-;			   			Default is the 2012 Nov 2 flight data file.
+;			   			Default is the 2014 Dec 11 flight data file.
 ;
 ; Keywords:	DETECTOR	Detector number (0-6).  Each detector data
 ;						must be processed individually.  Default D0
@@ -28,6 +28,8 @@
 ;		file = 'data_2012/foxsi_level0_data.sav'
 ;
 ; History:	
+;		2015-feb-2	Linz	Changed default to 2014 flight, and fixed a bug in the wsmr_time tag
+;											that was interpreting milliseconds incorrectly.
 ;		2015-Dec	Linz	Updated to work for 2014 data too.
 ;		2013-Feb-13	Linz	Fixed altitude glitch and shifted "inflight" flag to 70 seconds later.
 ;		2013-Feb-07	Linz	Updated structure name and added altitude data
@@ -37,8 +39,9 @@
 FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 
 	add_path, 'util/'
-	default, year, 2012
-	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+	default, year, 2014
+;	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+	if not keyword_set(filename) then filename = 'data_2014/36.36_295_Krucker_FLIGHT_HOT_TM2.log'
 
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
 
@@ -58,7 +61,7 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
   	print, '  Creating data structure.'
   	data_struct = {foxsi_level0, $
 		frame_counter:ulong(0),	$	; formatter frame counter value, 32 bits
-               	wsmr_time:double(0.),  	$	; WSMR ground station time, to milliseconds
+    wsmr_time:double(0.),  	$	; WSMR ground station time, to milliseconds
 		frame_time:ulong64(0), 	$	; formatter frame time, 64 bits
 		det_num:uint(0),	$	; same for all frames; from input keyword
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
@@ -89,8 +92,9 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 	; completeness.
 	frame = ulong64(frame)
 	seconds = reform( frame[1,*] + ishft(ishft(frame[2,*],-15),16) )
-	mil = ishft(ishft(frame[2,*],6),-6)/double(1000.)
-	data_struct.wsmr_time = double(seconds)+mil
+	mil = frame[2,*] mod 2^10
+	mic = frame[3,*] mod 2^10
+	data_struct.wsmr_time = double(seconds) + mil/1.d3 + mic/1.d6
 
 	; temporary arrays to grab data during loops
 	adc_array = uintarr(4,3,nFrames)

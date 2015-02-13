@@ -26,18 +26,19 @@
 ;	plot_map, map6, /log, /cbar
 ;
 ; History:	
+;		2015 feb 05	Linz	Fixed strip size bug.  Was 60um default, now 75um unless CdTe.
 ;		2015 Jan 19	Linz	Created routine.
 ;-
 
 FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
-                          THR_N = THR_N, KEEPALL = KEEPALL, $
+                          THR_N = THR_N, KEEPALL = KEEPALL, SMOOTH = SMOOTH, $
                           YEAR=YEAR, XYCORR=XYCORR, STOP = STOP
 
 	default, erange, [4.,15.]
 	default, thr_n, 4.		; n-side keV threshold
-  	default, year, 2014
-  	default, trange, [0,500]
-  	default, year, 2014
+  default, year, 2014
+  default, trange, [0,500]
+  default, year, 2014
 
 	case year of
 		2012:	restore, 'data_2012/flight2012-parameters.sav'
@@ -62,7 +63,9 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 		keepall=keepall, year=year, thr_n=thr_n )
 
 	if year eq 2014 and ( detnum eq 2 or detnum eq 3) then $
-		stripsize = 7.7349 else stripsize = 6.1879
+		stripsize = 6.1879 else stripsize = 7.7349
+		
+	if keyword_set( smooth ) then image = smooth( image, smooth )
 
 	map = make_map( image, dx=stripsize, dy=stripsize, xcen=xc, ycen=yc, $
 		time=time, id='Det'+strtrim(detnum,2) )
