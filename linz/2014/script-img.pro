@@ -514,4 +514,128 @@ m6a = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[0,10], thr_
 m6b = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[10,20], thr_n=4., smooth=2, /xycorr )
 m6c = foxsi_image_map( data_lvl2_d6, cen5, erange=[8,11], trange=t1+[20,30], thr_n=4., smooth=2, /xycorr )
 
+;
+; AR2
+;
+
+trange=[t4_start, t_shtr_start]
+cen = cen4
+en = [4.,12.]
+m0 = foxsi_image_map( data_lvl2_d0, cen, erange=en, trange=trange, thr_n=4., /xycorr )
+m1 = foxsi_image_map( data_lvl2_d1, cen, erange=en, trange=trange, thr_n=4., /xycorr )
+m4 = foxsi_image_map( data_lvl2_d4, cen, erange=en, trange=trange, thr_n=4., /xycorr )
+m5 = foxsi_image_map( data_lvl2_d5, cen, erange=en, trange=trange, thr_n=4., /xycorr )
+m6 = foxsi_image_map( data_lvl2_d6, cen, erange=en, trange=trange, thr_n=4., /xycorr )
+
+m = m6
+m.data = m0.data + m1.data + m4.data + m5.data + m6.data
+
+m2 = shift_map( m, 30, 30)
+
+loadct,1
+reverse_ct
+plot_map, aia[36], /log, cen=cen4, fov=20
+hsi_linecolors
+plot_map, m2, /over, col=2, lev=[10,30,50,70,90], /per, thick=3
+
+mask = m2
+mask.data[ where(m2.data gt 0.1) ] = 0.
+plot_map, mask
+
+;
+; AR1 and ARX plots on AIA, again.  Also RHESSI, for comparison.
+;
+
+f1=file_search('~/data/aia/20121102/*.94A*')
+f2=file_search('~/data/aia/20141211/*_0094*')
+;fits2map, f1, aia1
+fits2map, f2, aia2
+
+;aia_lct,r,g,b, wave=94, /load
+
+; Set up an unrotated FOV on the targets:
+x = [0,0,127,127,0]
+y = [0,127,127,0,0]
+coords = get_payload_coords( transpose([[x],[y]]), 5 )
+
+loadct, 1
+reverse_ct
+popen, xsi=7, ysi=7
+
+restore, 'data_2012/flight2012-parameters.sav'
+plot_map, aia1[20], dmin=0., dmax=50, thick=5, xth=5,yth=5,charth=2, charsi=1.3, fov=50
+oplot, coords[0,*]+cen1[0], coords[1,*]+cen1[1], thick=5, col=255
+oplot, coords[0,*]+cen2[0], coords[1,*]+cen2[1], thick=5, col=255
+oplot, coords[0,*]+cen3[0], coords[1,*]+cen3[1], thick=5, col=255
+oplot, coords[0,*]+cen4[0], coords[1,*]+cen4[1], thick=5, col=255
+
+restore, 'data_2014/flight2014-parameters.sav'
+plot_map, aia2[10], dmin=0., dmax=50, thick=5, xth=5,yth=5,charth=2, charsi=1.3, fov=50
+oplot, coords[0,*]+cen1_pos2[0], coords[1,*]+cen1_pos2[1], thick=5, col=255
+oplot, coords[0,*]+cen2_pos1[0], coords[1,*]+cen2_pos1[1], thick=5, col=255
+oplot, coords[0,*]+cen3_pos2[0], coords[1,*]+cen3_pos2[1], thick=5, col=255
+oplot, coords[0,*]+cen4[0], coords[1,*]+cen4[1], thick=5, col=255
+
+pclose
+
+
+
+trange=[t1_pos2_start, t1_pos2_end]
+cen = cen1_pos2
+en = [4.,10.]
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=en, trange=trange, thr_n=4., /xycorr )
+m1.id = 'FOXSI Det6 4-10 keV'
+
+popen, xsi=7, ysi=7
+loadct, 3
+reverse_ct                                                            
+plot_map, hsi, cen=[10,-100], fov=12, charsi=1.5, /nodate, charth=2, xth=5, yth=5, $
+	dmin=0., col=255
+xyouts, 140, 170, '50 sec', charsi=3, col=255
+loadct, 7
+reverse_ct
+plot_map, m1, cen=[10,-100], fov=12, charsi=1.5, /nodate, charth=2, xth=5, yth=5, $
+	;title='FOXSI Det6 19:14 39 sec', 
+	col=255
+xyouts, 140, 170, '39 sec', charsi=3, col=255
+pclose
+
+plot_map, aia2[10], cen=cen1_pos2, fov=16, /log
+plot_map, m1, /over, thick=3
+
+;
+; Imspex, ARX
+;
+
+trange=[t5_start, t5_end]
+cen = cen5
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8.,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+plot_map, m1, cen=[-100,100], fov=3
+
+ratio = m1
+ratio.data = m2.data / m1.data 
+ratio.data[ where(m2.data lt 1.) ] = 0.
+ratio.data[ where(m1.data lt 1.) ] = 0.
+plot_map, ratio, /log, cen=[-100,100], fov=3, /cbar
+plot_map, m1, /over
+
+plot_map, aia2[40], cen=[-90,80], fov=2, /log
+plot_map, m1, /over
+dmap = make_dmap(aia2[40], ref_map=aia2[10] )
+plot_map, dmap, cen=[-90,80], fov=2, /log
+plot_map, m1, /over
+
+smap = make_submap( aia2, cen=[-90,80], fov=3)
+
+dmap = make_dmap(smap[15:44], ref_map=smap[10] )
+
+ratio2 = m1
+ratio2.data = m3.data / m2.data 
+ratio2.data[ where(m3.data lt 0.3) ] = 0.
+ratio2.data[ where(m2.data lt 1.) ] = 0.
+plot_map, ratio2, /log, cen=[-100,100], fov=3, /cbar
+plot_map, m1, /over
 

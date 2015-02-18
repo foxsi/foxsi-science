@@ -212,12 +212,15 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 	
 	; Get SPARCS pointing data and put in solar coords.
 	if not keyword_set(ground) then begin
+	
+		if year eq 2014 then liss_dir = 'data_2014/' else if year eq 2012 then liss_dir = 'data_2012/'
+		if year eq 2014 then t_launch = 69060 else if year eq 2012 then t_launch = 64500
 
-		pitch_struct = read_ascii( 'data_2012/LISS_pitch.txt' )
+		pitch_struct = read_ascii( liss_dir+'LISS_pitch.txt' )
 		pitch_time = pitch_struct.field1[0,*]
 		pitch = pitch_struct.field1[1,*]
 
-		yaw_struct = read_ascii( 'data_2012/LISS_yaw.txt' )
+		yaw_struct = read_ascii( liss_dir+'LISS_yaw.txt' )
 		yaw_time = yaw_struct.field1[0,*]
 		yaw = yaw_struct.field1[1,*]
 		
@@ -225,10 +228,10 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 			if data_struct[i].inflight eq 0 then continue
 			if i mod 100 eq 0 then print, 'i=', i
 			j = where(pitch_time gt 0)	; skip the NaN values
-			evt = closest( pitch_time[j] + 64500, data_struct[i].wsmr_time )
+			evt = closest( pitch_time[j] + t_launch, data_struct[i].wsmr_time )
 			data_struct[i].pitch = pitch[j[evt]]
 			j = where(yaw_time gt 0)	; skip the NaN values
-			evt = closest( yaw_time[j] + 64500, data_struct[i].wsmr_time )
+			evt = closest( yaw_time[j] + t_launch, data_struct[i].wsmr_time )
 			data_struct[i].yaw = yaw[j[evt]]
 		endfor
 		

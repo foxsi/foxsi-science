@@ -69,11 +69,11 @@ shift1 = [  9.3, 59.5 ]	; with that of D6.
 shift4 = [ 13.3, 18.0 ]
 shift5 = [ 42.6, 44.0 ]
 
-shift6 += [-10,-26]
-shift0 += [-10,-26]
-shift1 += [-10,-26]
-shift4 += [-10,-26]
-shift5 += [-10,-26]
+;shift6 += [-10,-26]
+;shift0 += [-10,-26]
+;shift1 += [-10,-26]
+;shift4 += [-10,-26]
+;shift5 += [-10,-26]
 
 
 ; Rotation angles for all detectors
