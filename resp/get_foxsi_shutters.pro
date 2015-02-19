@@ -22,11 +22,15 @@ FUNCTION get_foxsi_shutters, ENERGY_ARR = energy_arr, PLOT = plot, $
 
 default, data_dir, './'
 
-; These defaults are the nominal blanket material thicknesses in microns, according to Paul.
-; They should be rechecked once payload is entirely disassembled.
-default, mylar_um, 82.55
-default, al_um, 2.6
-default, kapton_um, 203.2
+; New defaults for FOXSI-2:
+default, mylar_um, 63.5
+default, al_um, 2
+default, kapton_um, 50.8
+
+; Old defaults
+;default, mylar_um, 82.55
+;default, al_um, 2.6
+;default, kapton_um, 203.2
 default, be_um, 0.0
 default, th_um, [0.0, 0.0, 0.0, 0.0]
 

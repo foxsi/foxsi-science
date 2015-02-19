@@ -1,8 +1,8 @@
 FUNCTION	INVERSE_RESP, ENERGY, PER_MODULE = per_module, $
 	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
-	TYPE = type, FOXSI2 = FOXSI2, NOPATH = nopath, LET_FILE = let_file, $
+	TYPE = type, NOPATH = nopath, LET_FILE = let_file, $
 	DATA_DIR = data_dir, OFFAXIS_ANGLE = offaxis_angle, N_BLANKETS = N_BLANKETS, $
-	OFFSET = OFFSET, _EXTRA = _extra
+	OFFSET = OFFSET, MODULE = module, FOXSI1 = foxsi1, _EXTRA = _extra
 
 ;	This routine takes in an energy array and performs the count-to-photon conversion 
 ;	using the inverse response.  No off-diagonal elements are included,
@@ -24,14 +24,12 @@ FUNCTION	INVERSE_RESP, ENERGY, PER_MODULE = per_module, $
 	default, data_dir, 'calibration_data/'
 	default, offaxis_angle, 0
 	default, n_blankets, 1
-	default, foxsi2, 0
 	default, let_file, 'efficiency_averaged.sav'
-	default, per_module, 0
 
 	en = energy
 
 	area = get_foxsi_effarea( energy=en, data_dir=data_dir, let_file=let_file , $
-							  offaxis_angle=offaxis, foxsi2=foxsi2, per=per )
+							  offaxis_angle=offaxis, module=module, foxsi1=foxsi1, _extra=_extra )
 	
 	; Multiply that area by extra blanketing attenuation.
 	; Since one set of blankets was already included in the previous call,

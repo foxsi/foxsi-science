@@ -1,24 +1,29 @@
 FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_number, $
-	OFFAXIS_ANGLE = offaxis_angle, PLOT = plot, _EXTRA = _extra
+	OFFAXIS_ANGLE = offaxis_angle, DATA_DIR = data_dir, PLOT = plot, _EXTRA = _extra
 
 ;PURPOSE: Get the FOXSI optics effective area in cm^2 as a function of energy
 ;           and off-axis angle.
 ;
-;KEYWORD:   MODULE_NUMBER - the module number (0 through 6)
+;KEYWORD:   MODULE_NUMBER - the module number (0 through 6).  Detector convention is used.
 ;			PLOT - plot to the current device
 ;			OFFAXIS_ANGLE - off-axis angle. if array then [pan, tilt] in arcmin
 ;
 ;WRITTEN: Steven Christe (21-Jan-15)
+;	modified:	LG	2015 Feb	Switched X0->D6 and X6->D0
 
-default, data_dir, '../calibration_data/'
+default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
 default, module_number, 0
 
 IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
     ELSE angle = offaxis_angle
 
-files = data_dir + 'FOXSI2_' + ['Module_X-' + num2str(module_number) + '_EA_pan.txt', $
-         'Module_X-' + num2str(module_number) + '_EA_tilt.txt']
+; Switch X0->D6 and X6->D0
+if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
+		else MODULE = MODULE_NUMBER
+		
+files = data_dir + 'FOXSI2_' + ['Module_X-' + num2str(module) + '_EA_pan.txt', $
+         'Module_X-' + num2str(module) + '_EA_tilt.txt']
 
 ; todo: these need to be provided by the data files themselves
 angles = [-9, -7, -5, -3, -1, 0, 1, 3, 5, 7, 9]
