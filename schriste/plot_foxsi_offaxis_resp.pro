@@ -1,6 +1,6 @@
 PRO plot_foxsi_offaxis_resp, OUTPS = outps
 
-scale = 1
+scale = 5
 num_pixels = 128 / scale
 plate_scale = 7.5 * scale
 
@@ -23,8 +23,9 @@ result = fltarr(n_elements(energy_arr), num_pixels, num_pixels)
 eff_area = fltarr(n_elements(energy_arr), num_pixels)
 ; one energy
 
-popen, 'plot_foxsi_offaxis_resp'
-r = get_foxsi_optics_effarea(module_number = 1, offaxis_angle = 0, /plot)
+IF keyword_set(OUTPS) THEN popen, 'plot_foxsi_offaxis_resp'
+
+r = get_foxsi_optics_effarea(module_number = 1, offaxis_angle = 0, /plot, orig_data = orig_data)
 
 FOR i = 0, num_pixels-1 DO BEGIN
     FOR j = 0, num_pixels-1 DO BEGIN
@@ -47,7 +48,7 @@ FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
     plot_map, m, dmin = 15, dmax = 0, /cont, /noerase, levels = [25, 50, 75], /percent, title = ''
     plot_circle, 0, 0, radius = 100, /over, linestyle = 2
     oplot, [-1000, 1000], [0, 0], linestyle = 2
-    oplot, [0, 0], [-1000, 1000], linestyle = 2
+    oplot, [0, 0], [-1000, 1000], linestyle = 2    
 ENDFOR
 
 FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
@@ -57,9 +58,21 @@ FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
     plot_circle, 0, 0, radius = 100, /over, linestyle = 2
     oplot, [-1000, 1000], [0, 0], linestyle = 2
     oplot, [0, 0], [-1000, 1000], linestyle = 2
+    
+    !P.MULTI = [0, 1, 2]
+    plot, angle_array[0, *, 0], m.data[floor(num_pixels/2), *], $
+        title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV', $
+        xtitle = 'Angle [arcmin]', ytitle = 'Effective area [cm!U2!N]', psym = -4, yrange = [0, 15], /ystyle
+    oplot, orig_data.angles, orig_data.data[0, *, i], psym = 5, color = 100
+    plot, angle_array[1, 0, *], m.data[*, floor(num_pixels/2)], $
+        title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV', $
+        xtitle = 'Angle [arcmin]', ytitle = 'Effective area [cm!U2!N]', psym = -4, yrange = [0, 15], /ystyle
+    oplot, orig_data.angles, orig_data.data[0, *, i], psym = 5, color = 100
+
+    !P.MULTI = 0    
 ENDFOR
 
-pclose
+IF keyword_set(OUTPS) THEN pclose
 
 END
 
