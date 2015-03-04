@@ -32,6 +32,7 @@
 ;		file = 'data_2014/foxsi_level1_data.sav'
 ;
 ; History:	
+;			2015-Mar-03	Linz	Added CdTe keyword for different error flag determination.
 ;			2015-Feb-02	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Updated to work with 2014 data --
 ;								Eliminated events with HV ne 200V.
@@ -40,7 +41,7 @@
 ;-
 
 FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
-			GROUND = GROUND, YEAR = YEAR
+			GROUND = GROUND, YEAR = YEAR, CDTE = CDTE
 
 	default, year, 2014
 	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
@@ -302,9 +303,12 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 					  data_struct.hit_cm[1] gt data_struct.hit_adc[1])
 		data_struct[check].error_flag = data_struct[check].error_flag + 16
 	
-		check = where(data_struct.hit_xy_det[0] lt 3 or data_struct.hit_xy_det[0] gt 124 or $
-					  data_struct.hit_xy_det[1] lt 3 or data_struct.hit_xy_det[1] gt 124)
-		data_struct[check].error_flag = data_struct[check].error_flag + 32
+		; different geometry for CdTe detectors.
+		if not keyword_set( CDTE ) then begin
+			check = where(data_struct.hit_xy_det[0] lt 3 or data_struct.hit_xy_det[0] gt 124 or $
+					  	data_struct.hit_xy_det[1] lt 3 or data_struct.hit_xy_det[1] gt 124)
+			data_struct[check].error_flag = data_struct[check].error_flag + 32
+		endif
 	
 		check = where(data_struct.livetime gt 2000. or data_struct.livetime lt 1.)
 		data_struct[check].error_flag = data_struct[check].error_flag + 64
