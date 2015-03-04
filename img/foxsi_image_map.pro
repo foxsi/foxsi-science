@@ -17,6 +17,7 @@
 ;		YEAR	2012 or 2014 flight.  Default 2014.
 ;		KEEPALL	Keep all events, not just the "good" ones (i.e. those w/no error flags)
 ;		XYCORR	If set, use the position offset for that detector.
+;		CDTE	Signifies CdTe detector.  Use alternate imaging routine.
 ;
 ;
 ; Example:
@@ -26,13 +27,14 @@
 ;	plot_map, map6, /log, /cbar
 ;
 ; History:	
+;		2015 mar 3	Linz	Added functionality to include CdTe geometry from Ishikawa.
 ;		2015 feb 05	Linz	Fixed strip size bug.  Was 60um default, now 75um unless CdTe.
 ;		2015 Jan 19	Linz	Created routine.
 ;-
 
 FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, SMOOTH = SMOOTH, $
-                          YEAR=YEAR, XYCORR=XYCORR, STOP = STOP
+                          YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, STOP = STOP
 
 	default, erange, [4.,15.]
 	default, thr_n, 4.		; n-side keV threshold
@@ -59,11 +61,14 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 	time = anytim( time, /yo )
 
 	; Basic image production
-	image = foxsi_image_det( data, trange=trange, erange=erange, $
-		keepall=keepall, year=year, thr_n=thr_n )
+	if keyword_set( CDTE ) then $
+		image = foxsi_image_det_cdte( data, trange=trange, erange=erange, $
+						keepall=keepall, year=year, thr_n=thr_n )	$
+		else $
+		image = foxsi_image_det( data, trange=trange, erange=erange, $
+						keepall=keepall, year=year, thr_n=thr_n )
 
-	if year eq 2014 and ( detnum eq 2 or detnum eq 3) then $
-		stripsize = 6.1879 else stripsize = 7.7349
+	if keyword_set( CDTE ) then stripsize = 6.1879 else stripsize = 7.7349
 		
 	if keyword_set( smooth ) then image = smooth( image, smooth )
 

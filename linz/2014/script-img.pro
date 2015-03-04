@@ -609,19 +609,25 @@ plot_map, m1, /over, thick=3
 
 trange=[t5_start, t5_end]
 cen = cen5
-m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=2 )
-m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=2 )
-m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8.,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=3 )
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=3 )
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8.,11.], trange=trange, thr_n=4., /xycorr, smooth=3 )
+
+m1=shift_map(m1,0,-5)
+m2=shift_map(m2,0,-5)
+m3=shift_map(m3,0,-5)
 
 plot_map, m1, cen=[-100,100], fov=3
 
 ratio = m1
 ratio.data = m2.data / m1.data 
-ratio.data[ where(m2.data lt 1.) ] = 0.
-ratio.data[ where(m1.data lt 1.) ] = 0.
+ratio.data[ where(m2.data lt 1.1) ] = 0.
+ratio.data[ where(m1.data lt 1.1) ] = 0.
 plot_map, ratio, /log, cen=[-100,100], fov=3, /cbar
 plot_map, m1, /over
 
+f=file_search('~/data/aia/20141211/*_0094*')
+fits2map, f, aia2
 plot_map, aia2[40], cen=[-90,80], fov=2, /log
 plot_map, m1, /over
 dmap = make_dmap(aia2[40], ref_map=aia2[10] )
@@ -629,8 +635,9 @@ plot_map, dmap, cen=[-90,80], fov=2, /log
 plot_map, m1, /over
 
 smap = make_submap( aia2, cen=[-90,80], fov=3)
-
 dmap = make_dmap(smap[15:44], ref_map=smap[10] )
+plot_map, dmap, cen=[-90,80], fov=2, /log
+plot_map, m1, /over
 
 ratio2 = m1
 ratio2.data = m3.data / m2.data 
@@ -638,4 +645,36 @@ ratio2.data[ where(m3.data lt 0.3) ] = 0.
 ratio2.data[ where(m2.data lt 1.) ] = 0.
 plot_map, ratio2, /log, cen=[-100,100], fov=3, /cbar
 plot_map, m1, /over
+
+m1.id = 'FOXSI Det6'
+smap.id = 'AIA 94A'
+dmap.id = 'AIA 94A'
+
+popen, xsi=5, ysi=5
+loadct, 5
+;plot_map, m1, charsi=1.3, charth=2, xth=5, yth=5, /nodata, cen=[-90,80], fov=2.5, col=255, /nodate
+plot_map, m1, charsi=1.4, charth=2, xth=5, yth=5, cen=[-90,80], fov=2.5, dmax=-0.1, /nodate
+hsi_linecolors
+plot_map, m1, /over, thick=8, col=6, lev=[10,50,90], /per
+plot_map, m2, /over, thick=8, col=7, lev=[30,70,90], /per
+plot_map, m3, /over, thick=8, col=12, lev=[50,90], /per
+xyouts, -160,140, '4-6 keV', col=6, charsi=1.6
+xyouts, -160,125, '6-8 keV', col=7, charsi=1.6
+xyouts, -160,110, '8-11 keV', col=12, charsi=1.6
+
+loadct, 1
+reverse_ct
+plot_map, smap[40], charsi=1.4, charth=2, xth=5, yth=5, cen=[-90,80], fov=2.5, col=255, /nodate
+
+loadct, 5
+plot_map, ratio, charsi=1.4, charth=2, xth=5, yth=5, cen=[-90,80], fov=2.5, /nodate
+
+loadct, 1
+reverse_ct
+plot_map, dmap[29], charsi=1.4, charth=2, xth=5, yth=5, cen=[-90,80], fov=2.5, col=255, dmin=-1, dmax=50 , /nodate
+hsi_linecolors
+plot_map, ratio, /over, thick=8, lev=[10,30], /per, col=255
+
+pclose
+
 

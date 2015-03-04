@@ -197,7 +197,7 @@ spec_d6 = make_spectrum( d6, bin=bin, /correct )
 ; 2- make a chisq map using the EM constraint.
 ; 3- choose the map index with the best TOTAL chisq, including both.
 
-nbla = findgen(60)/10.+2.
+nbla = findgen(60)/10.+0.5
 off  = findgen(50)/200.
 nnbla = n_elements(nbla)
 noff = n_elements(off)
