@@ -7,8 +7,10 @@ Directory info:
 
 Files:
 
-	FOXSI Data Description	Description of all FOXSI data.
 	README.md				This file
+	foxsi-setup-script-2012.pro		Setup for the 2012 data
+	foxsi-setup-script-2014.pro		Setup for the 2014 data
+	
 
 Directories:
 
@@ -41,3 +43,9 @@ Detailed directory listing:
 		formatter_data_to_level0.pro	Process CAL data (formatter-style) into FOXSI Level 0 data.
 		usb_data_to_level0.pro			Process CAL data (USB-style) into FOXSI Level 0 data.
 
+
+For a complete information about FOXSI data and FOXSI analisys procedures read:
+
+	/help/:
+		FOXSI Data Description V4.0.docx
+		FOXSI Analysis Guide.docx
