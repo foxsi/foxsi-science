@@ -609,6 +609,20 @@ plot_map, m1, /over, thick=3
 
 trange=[t5_start, t5_end]
 cen = cen5
+
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr )
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr )
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8.,11.], trange=trange, thr_n=4., /xycorr )
+
+loadct, 1
+reverse_ct
+popen, xsi=5, ysi=7
+ch=1.4
+plot_map, m1, cen=[-100,100], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 4-6 keV', col=255
+plot_map, m2, cen=[-100,100], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 6-8 keV', col=255
+plot_map, m3, cen=[-100,100], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 8-11 keV', col=255
+pclose
+
 m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=3 )
 m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=3 )
 m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8.,11.], trange=trange, thr_n=4., /xycorr, smooth=3 )
@@ -676,5 +690,17 @@ hsi_linecolors
 plot_map, ratio, /over, thick=8, lev=[10,30], /per, col=255
 
 pclose
+
+
+
+;
+; CdTe
+;
+
+@foxsi-setup-script-2014
+trange=[t1_pos2_start, t1_pos2_end]
+cen = cen1_pos2
+m3 = foxsi_image_map( data_lvl2_d3, cen, trange=trange, thr_n=2.2, /cdte, er=[3.,100])
+plot_map, m3, /cbar, /log
 
 
