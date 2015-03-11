@@ -40,23 +40,17 @@ if year eq 2012 then begin
 endif
 
 if year eq 2014 then begin
-; Right now target times are eyeballed from Jesus's plots.  Later, we'll get the real data.
-	offset = 36.		; time offset in WSMR data, for unknown reason.
-	t_launch = 69060
-	t1_start = 100. + offset + t_launch
-	t1_adj1  = 140. + offset + t_launch
-	t1_adj2  = 165. + offset + t_launch
-	t1_end   = 210. + offset + t_launch
-	t2_start = 220. + offset + t_launch
-	t2_end 	 = 275. + offset + t_launch
-	t3_start = 280. + offset + t_launch
-	t3_adj1	 = 310. + offset + t_launch
-	t3_adj2  = 325. + offset + t_launch
-	t3_end	 = 370. + offset + t_launch
-	t4_start = 370. + offset + t_launch
-	t4_end	 = 470. + offset + t_launch
-	t5_start = 470. + offset + t_launch
-	t5_end	 = 500. + offset + t_launch
+	restore,'data_2014/flight2014-parameters.sav'
+	t1_start = t1_pos2_start + t_launch
+	t1_end   = t1_pos2_end + t_launch
+	t2_start = t2_pos1_start + t_launch
+	t2_end   = t2_pos1_end + t_launch
+	t3_start = t3_pos2_start + t_launch
+	t3_end   = t3_pos2_end + t_launch
+	t4_start = t4_start + t_launch
+	t4_end   = t_shtr_start + t_launch
+	t5_start = t5_start + t_launch
+	t5_end   = t5_end + t_launch
 endif
 
 case target of

@@ -16,8 +16,8 @@ save, data_lvl0_D0, data_lvl0_D1, data_lvl0_D2, data_lvl0_D3, data_lvl0_D4, $
 filename = 'data_2014/foxsi_level0_data.sav'
 data_lvl1_D0 = foxsi_level0_to_level1( filename, det=0, ground=0 )
 data_lvl1_D1 = foxsi_level0_to_level1( filename, det=1, ground=0 )
-data_lvl1_D2 = foxsi_level0_to_level1( filename, det=2, ground=0 )
-data_lvl1_D3 = foxsi_level0_to_level1( filename, det=3, ground=0 )
+data_lvl1_D2 = foxsi_level0_to_level1( filename, det=2, ground=0, /cdte )
+data_lvl1_D3 = foxsi_level0_to_level1( filename, det=3, ground=0, /cdte )
 data_lvl1_D4 = foxsi_level0_to_level1( filename, det=4, ground=0 )
 data_lvl1_D5 = foxsi_level0_to_level1( filename, det=5, ground=0 )
 data_lvl1_D6 = foxsi_level0_to_level1( filename, det=6, ground=0 )
