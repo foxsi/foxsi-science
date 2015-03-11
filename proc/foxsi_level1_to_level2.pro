@@ -170,6 +170,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 			adc  = data0[evt].hit_adc[side]
         	data_struct[evt].hit_energy[side] = $
         		spline( peaks[*,chan,asic,0],peaks[*,chan,asic,1],adc - cmn[side,evt] )
+;        		spline( peaks[2:9,chan,asic,0],peaks[2:9,chan,asic,1],adc - cmn[side,evt] )
 		endfor
 
 		; Then repeat for all the "associated" values.
@@ -183,6 +184,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 				adc  = data0[evt].adc[asic,strip]
         		energy = $
         			spline( peaks[*,chan,asic,0],peaks[*,chan,asic,1],adc - cmn[side,evt] )
+;        			spline( peaks[2:9,chan,asic,0],peaks[2:9,chan,asic,1],adc - cmn[side,evt] )
 				if side eq 0 then begin
 					data_struct[evt].assoc_energy[strip,0,0] = energy
 					data_struct[evt].assoc_energy[strip,1,0] = energy
