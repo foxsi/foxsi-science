@@ -1,10 +1,10 @@
 @foxsi-setup-script-2014
 
-spec1 = get_target_spectra( 1, /good, year=2014 )
-spec2 = get_target_spectra( 2, /good, year=2014 )
-spec3 = get_target_spectra( 3, /good, year=2014 )
-spec4 = get_target_spectra( 4, /good, year=2014 )
-spec5 = get_target_spectra( 5, /good, year=2014 )
+spec1 = get_target_spectra( 1, year=2014, /good )
+spec2 = get_target_spectra( 2, year=2014, /good )
+spec3 = get_target_spectra( 3, year=2014, /good )
+spec4 = get_target_spectra( 4, year=2014, /good )
+spec5 = get_target_spectra( 5, year=2014, /good )
 
 popen, 'plots/foxsi2/spectra', xsi=7, ysi=5
 spec=spec1

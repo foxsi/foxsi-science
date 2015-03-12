@@ -1,10 +1,17 @@
-FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year
+FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, $
+					start_time=start_time, end_time=end_time
+					
 
 	;	produces a FOXSI lightcurve given a FOXSI level2 data structure.
 	;	DT is the time interval.  Constant for entire curve.
 	
 	; sample call:
 	; get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, /good 
+	
+	; history:
+	;		Created routine sometime in 2014!  LG
+	;		Jan 2015  Updated for FOXSI-2 flight.
+	;		March 12 2015	LG	Added START_TIME and END_TIME keywords so that array sizes can be controlled.
 	
 	default, dt, 10		; default time step is 10 sec
 	default, energy, [4.,15.]
@@ -14,15 +21,22 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year
 	data_mod = data
 	if keyword_set(good) then data_mod = data_mod[ where( data_mod.error_flag eq 0 ) ]
 	if keyword_set(energy) then $
-		data_mod = data_mod[ where( data_mod.hit_energy[1] gt energy[0] and $
+		data_mod = data_mod[ where( data_mod.hit_energy[1] ge energy[0] and $
 									data_mod.hit_energy[1] lt energy[1] ) ]
 	
 	nEvts = n_elements(data_mod)
+	
+	if year eq 2014 then restore,'data_2014/flight2014-parameters.sav' $
+			else restore, 'data_2012/flight2012-parameters.sav'
 	
 	; determine time range
 	times = data_mod.wsmr_time
 	t1 = times[0]
 	t2 = times[nEvts-1]
+	
+	; If start and end times are set, use those instead.
+	if keyword_set( start_time ) then t1 = start_time + t_launch
+	if keyword_set( end_time )   then t2 = end_time   + t_launch	
 	
 	nInt = fix( (t2 - t1) / dt )
 	if nInt eq 0 then begin
