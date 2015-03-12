@@ -44,7 +44,8 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, 
 		dt = t2-t1
 	endif
 	
-	time_array = times[0] + dt*findgen(nInt+1)
+	;time_array = times[0] + dt*findgen(nInt+1)
+	time_array = t1 + dt*findgen(nInt+1)
 	lc = fltarr( nInt )
 
 	for i=0, nInt-1 do begin
