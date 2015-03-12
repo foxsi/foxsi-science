@@ -9,14 +9,6 @@ lc4 = foxsi_lc( data_lvl2_d4, year=2014, dt=dt)
 lc5 = foxsi_lc( data_lvl2_d5, year=2014, dt=dt)
 lc6 = foxsi_lc( data_lvl2_d6, year=2014, dt=dt)
 
-lc0.time -= 36
-lc1.time -= 36
-lc2.time -= 36
-lc3.time -= 36
-lc4.time -= 36
-lc5.time -= 36
-lc6.time -= 36
-
 loadct,5
 hsi_linecolors
 ;popen, 'foxsi2-lightcurves', xsi=7, ysi=5
@@ -75,15 +67,23 @@ IDL> ptim, wsmrt
 ; Lightcurves at different energies
 ;
 
-lca=foxsi_lc(data_lvl2_d6,dt=4,energy=[4,6]);, /good)
-lcb=foxsi_lc(data_lvl2_d6,dt=4,energy=[6,8]);, /good)
-lcc=foxsi_lc(data_lvl2_d6,dt=4,energy=[8,11]);, /good)
+@foxsi-setup-script-2014
+
+lca=foxsi_lc(data_lvl2_d6,dt=4,energy=[4,7], /good)
+lcb=foxsi_lc(data_lvl2_d6,dt=4,energy=[7,15], /good)
+lcc=foxsi_lc(data_lvl2_d6,dt=4);, /good)
+
+maxN = min([n_elements(lca),n_elements(lcb),n_elements(lcc)])
+lcadd = lcc
+lcadd[0:maxn-1].persec = lca[0:maxn-1].persec + lcb[0:maxn-1].persec
 
 hsi_linecolors
-utplot, anytim(lca.time,/yo), lca.persec, timer='2014-12-11 19:'+['19','20'], psym=10, /nodata
-outplot, anytim(lca.time,/yo), lca.persec, col=6, thick=4, psym=10
-outplot, anytim(lcb.time,/yo), lcb.persec, col=7, thick=4, psym=10
-outplot, anytim(lcc.time,/yo), lcc.persec, col=1, thick=4, psym=10
+utplot, anytim(lcc.time,/yo), lcc.persec, timer='2014-12-11 19:'+['12','20'], psym=10, /nodata
+;outplot, anytim(lca.time,/yo), lca.persec, col=2, thick=4, psym=10
+;outplot, anytim(lcb.time,/yo), lcb.persec, col=3, thick=4, psym=10
+outplot, anytim(lcc.time,/yo), lcc.persec, col=6, thick=4, psym=10
+outplot, anytim(lcadd.time,/yo), lcadd.persec, col=7, thick=4, psym=10
+
 
 ;
 ; Make a spectrogram.
