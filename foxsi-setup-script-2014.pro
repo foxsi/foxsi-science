@@ -66,14 +66,16 @@ cen5 = 		[-360. , -71. ] + offset_xy		; 36 sec
 shift6 = [20.,40.]	; offset for D6, eyeballed.
 shift0 = [ 34.9, 57.1 ]	; others' shifts are derived by comparing centroids
 shift1 = [  9.3, 59.5 ]	; with that of D6.
+shift2 = [0.,0.]
+shift3 = [0.,0.]
 shift4 = [ 13.3, 18.0 ]
 shift5 = [ 42.6, 44.0 ]
 
-shift6 += [-10,-26]
-shift0 += [-10,-26]
-shift1 += [-10,-26]
-shift4 += [-10,-26]
-shift5 += [-10,-26]
+;shift6 += [-10,-26]
+;shift0 += [-10,-26]
+;shift1 += [-10,-26]
+;shift4 += [-10,-26]
+;shift5 += [-10,-26]
 
 
 ; Rotation angles for all detectors
@@ -95,5 +97,5 @@ save, tlaunch, t_launch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 	t3_pos2_start, t3_pos2_end, t4_start, t_shtr_start, t_shtr_end, t4_end, $
 	t5_start, t5_end, date, t0, offset_xy, cen1_pos0, cen1_pos1, cen1_pos2, $
 	cen2_pos0, cen2_pos1, cen3_pos0, cen3_pos1, cen3_pos2, cen4, cen5, $
-	shift0, shift1, shift4, shift5, shift6, rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
-	file = 'data_2014/flight2014-parameters.sav'
+	shift0, shift1, shift2, shift3, shift4, shift5, shift6, rot0, rot1, rot2, rot3, $
+	rot4, rot5, rot6, file = 'data_2014/flight2014-parameters.sav'
