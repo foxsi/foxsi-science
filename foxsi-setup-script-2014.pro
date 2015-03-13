@@ -1,13 +1,16 @@
 ; setup script to analyze FOXSI data, now for 2014 launch.  (FOXSI-2)
 
+; Set Path where foxsi-science is
+CD, Current=fs_location
+
 ; add directory paths
-add_path, '~/foxsi/flight-analysis/foxsi-science/fermi'
-add_path, '~/foxsi/flight-analysis/foxsi-science/img'
-add_path, '~/foxsi/flight-analysis/foxsi-science/resp'
-add_path, '~/foxsi/flight-analysis/foxsi-science/psf'
-add_path, '~/foxsi/flight-analysis/foxsi-science/proc'
-add_path, '~/foxsi/flight-analysis/foxsi-science/spec'
-add_path, '~/foxsi/flight-analysis/foxsi-science/util'
+add_path, fs_location+'/fermi'
+add_path, fs_location+'/img'
+add_path, fs_location+'/resp'
+add_path, fs_location+'/psf'
+add_path, fs_location+'/proc'
+add_path, fs_location+'/spec'
+add_path, fs_location+'/util'
 
 ; load the Level 2 data.
 restore, 'data_2014/foxsi_level2_data.sav', /v
@@ -15,7 +18,7 @@ restore, 'data_2014/foxsi_level2_data.sav', /v
 t_launch = 69060
 
 ; Timing info from Jesus's preliminary report.
-tlaunch = 69060
+tlaunch        = 69060
 t1_pos0_start  = 102.0
 t1_pos0_end    = 134.3
 t1_pos1_start  = 138.0
@@ -27,17 +30,17 @@ t2_pos0_end    = 219.6
 t2_pos1_start  = 224.0
 t2_pos1_end    = 276.7
 t3_pos0_start  = 280.6
-t3_pos0_end	   = 307.2
+t3_pos0_end    = 307.2
 t3_pos1_start  = 311.0
 t3_pos1_end    = 330.1
 t3_pos2_start  = 334.0
-t3_pos2_end	   = 369.2
+t3_pos2_end    = 369.2
 t4_start       = 373.5
-t_shtr_start   = 438. 		; Conservative time of attenuator insertion
-t_shtr_end     = 442. 		; Conservative time for microphonics to die down
-t4_end	 = 466.2
-t5_start = 470.5
-t5_end	 = 503.2
+t_shtr_start   = 438.0 		; Conservative time of attenuator insertion
+t_shtr_end     = 442.0 		; Conservative time for microphonics to die down
+t4_end	       = 466.2
+t5_start       = 470.5
+t5_end	       = 503.2
 
 date=anytim('2014-dec-11')
 t0 = '11-Dec-2014 19:11:00.000'
