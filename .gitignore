@@ -14,3 +14,7 @@ Thumbs.db
 ##################
 data_2012/
 data_2014/
+
+# Postscript files and plots
+*.ps
+*.pdf
