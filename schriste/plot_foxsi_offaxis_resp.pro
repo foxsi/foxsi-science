@@ -12,20 +12,14 @@ angle_array = fltarr(2, num_pixels, num_pixels)
 
 phi_array = fltarr(num_pixels, num_pixels)
 
-min_energy = 5
-de = 5
-max_energy = 20
-energy_arr = findgen(max_energy / de) * de + min_energy
-energy_arr = [4.5,  5.5,  6.5,  7.5,  8.5,  9.5, 11. , 13. , 15. , 17. , 19. , 22.5, 27.5]
-
-result = fltarr(n_elements(energy_arr), num_pixels, num_pixels)
-
-eff_area = fltarr(n_elements(energy_arr), num_pixels)
-; one energy
 
 IF keyword_set(OUTPS) THEN popen, 'plot_foxsi_offaxis_resp'
 
 r = get_foxsi_optics_effarea(module_number = 1, offaxis_angle = 0, /plot, orig_data = orig_data)
+
+energy_arr = r.energy_kev
+eff_area = fltarr(n_elements(energy_arr), num_pixels)
+result = fltarr(n_elements(energy_arr), num_pixels, num_pixels)
 
 FOR i = 0, num_pixels-1 DO BEGIN
     FOR j = 0, num_pixels-1 DO BEGIN
@@ -50,6 +44,8 @@ FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
     oplot, [-1000, 1000], [0, 0], linestyle = 2
     oplot, [0, 0], [-1000, 1000], linestyle = 2    
 ENDFOR
+
+stop
 
 FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
     m = make_map(reform(result[i, *, *]), dx = plate_scale, dy = plate_scale, xc = 0, yc = 0, title = 'Energy = ' + num2str(energy_arr[i]))
