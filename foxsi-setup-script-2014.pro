@@ -1,16 +1,20 @@
 ; setup script to analyze FOXSI data, now for 2014 launch.  (FOXSI-2)
 
-; add directory paths
-add_path, '~/foxsi/flight-analysis/foxsi-science/fermi'
-add_path, '~/foxsi/flight-analysis/foxsi-science/img'
-add_path, '~/foxsi/flight-analysis/foxsi-science/resp'
-add_path, '~/foxsi/flight-analysis/foxsi-science/psf'
-add_path, '~/foxsi/flight-analysis/foxsi-science/proc'
-add_path, '~/foxsi/flight-analysis/foxsi-science/spec'
-add_path, '~/foxsi/flight-analysis/foxsi-science/util'
+foxsilib_root_path = '~/foxsi/flight-analysis/foxsi-science/'
 
-; load the Level 2 data.
-restore, 'data_2014/foxsi_level2_data.sav', /v
+; add directory paths
+add_path, foxsilib_root_path + 'fermi'
+add_path, foxsilib_root_path + 'img'
+add_path, foxsilib_root_path + 'resp'
+add_path, foxsilib_root_path + 'psf'
+add_path, foxsilib_root_path + 'proc'
+add_path, foxsilib_root_path + 'spec'
+add_path, foxsilib_root_path + 'util'
+
+calibration_data_path = foxsilib_root_path + 'calibration/'
+
+user_name = strsplit(expand_tilde('~'), '/', /extract)
+add_path, '~/foxsi/flight-analysis/foxsi-science/' + user_name[-1]
 
 t_launch = 69060
 
@@ -39,9 +43,24 @@ t4_end	 = 466.2
 t5_start = 470.5
 t5_end	 = 503.2
 
+COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs, flight_data
+
+; launch time and date
 date=anytim('2014-dec-11')
 t0 = '11-Dec-2014 19:11:00.000'
+data_dir = 'data_2014/'
+data_file = data_dir + 'foxsi_level2_data.sav'
+name = 'FOXSI-2'
+; now load the sparcs data
+sparcs = load_sparcs_data()
+; load the Level 2 data.
+restore, data_file, /v
 
+level2 = create_struct('det0', DATA_LVL2_D0, 'det1', DATA_LVL2_D1, 'det2', DATA_LVL2_D2, $
+                        'det3', DATA_LVL2_D3, 'det4', DATA_LVL2_D4, 'det5', DATA_LVL2_D5, $
+                        'det6', DATA_LVL2_D6)
+
+flight_data = create_struct('level0', '', 'level1', '', 'level2', level2)
 ;
 ; Positional information
 ;
