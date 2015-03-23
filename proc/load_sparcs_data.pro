@@ -8,33 +8,33 @@ FUNCTION load_sparcs_data, PLOT = plot
 ;
 ;RETURNS: Structure
 ;
-;WRITTEN: Steven Christe (9-mar-2012)
+;WRITTEN: Steven Christe ( 9-Mar-2012)
+;UPDATED: Steven Christe (22-Mar-2014)
 
-launch_time = '2012/11/02 11:55:00'
+COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs
 
-dir = './data_2012/'
-pitch_fname = dir + 'LISS_pitch.txt'
-yaw_fname = dir + 'LISS_yaw.txt'
+pitch_fname = data_dir + 'LISS_pitch.txt'
+yaw_fname = data_dir + 'LISS_yaw.txt'
 
-r = read_ascii(pitch_fname, delimiter = ',', data_start = 1)
+r = read_ascii(pitch_fname, delimiter = ' ', data_start = 1)
 time = r.field1[0,*]
 pitch_asec = r.field1[1,*]
 
-r = read_ascii(yaw_fname, delimiter = ',', data_start = 1)
+r = read_ascii(yaw_fname, delimiter = ' ', data_start = 1)
 yaw_asec = r.field1[1,*]
 
-time = anytim(anytim(launch_time) + double(time), /yoh)
+time = anytim(anytim(t0) + double(time), /yoh)
 
 IF keyword_set(PLOT) THEN BEGIN
     utplot, time, pitch_asec, /nodata, xtitle = 'Time (s)', ytitle = 'LISS offset [arcsec]', $
-        title = '36.255/Krucker 2012 Flight'
+        title = name
     outplot, time, pitch_asec, linestyle = 1
     outplot, time, yaw_asec, linestyle = 2
     ssw_legend, ['pitch axis', 'yaw axis'], linestyle = [1,2]
 ENDIF
 
-result = create_struct('time', time, 'pitch_asec', pitch_asec, 'yaw_asec', yaw_asec)
-stop
+result = create_struct('time', reform(anytim(time)), 'pitch_asec', reform(pitch_asec), 'yaw_asec', reform(yaw_asec))
+
 RETURN, result
 
 END
