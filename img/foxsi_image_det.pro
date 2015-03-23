@@ -35,6 +35,8 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, $
                           YEAR=YEAR, STOP = STOP
 
+
+
 	default, erange, [4.,15.]
 ;  	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
 	default, thr_n, 4.		; n-side keV threshold
@@ -67,22 +69,12 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 		istart = i_times[0]
 		iend = i_times[n_elements(i_times)-1]
 
-  	img = fltarr( 128, 128 )
+    img = hist_2d(data2.hit_xy_det[0], data2.hit_xy_det[1], bin1=1, bin2=1, min1=0, min2=0, max1=127, max2=127)
 
-  	for i=istart, iend-1 do begin
-
-	; Note: values are pinned to a pixel corner in data structure.
-	; Change this to the pixel center.
-;    err = get_payload_coords([64,64],detector) - xyerr
-    position = data2[i].hit_xy_det
-    xpix = (long(position))[0]
-    ypix = (long(position))[1]
-    img[xpix, ypix] += 1
-          
-  endfor
+    result = reverse(img, 2)
   
 	if keyword_set(stop) then stop
-
-return, reverse( img, 2 )
+	
+RETURN, result
 
 END
