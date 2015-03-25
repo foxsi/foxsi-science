@@ -51,7 +51,9 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;			2013-Mar-08	Linz	Created routine
 ;-
 
-	default, year, 2014
+COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs
+
+default, year, 2014
 	
 	if not keyword_set(calib_file) then begin
 		print, 'No calibration file given.'
@@ -213,6 +215,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 	; Get SPARCS pointing data and put in solar coords.
 	if not keyword_set(ground) then begin
 	
+	    
 		if year eq 2014 then liss_dir = 'data_2014/' else if year eq 2012 then liss_dir = 'data_2012/'
 		if year eq 2014 then t_launch = 69060 else if year eq 2012 then t_launch = 64500
 
@@ -235,6 +238,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 			data_struct[i].yaw = yaw[j[evt]]
 		endfor
 		
+		sparcs_pointing = get_sparcs_pointing(data_struct.wsmr_time)
+		stop
 		; Combine pitch and yaw with hit position.
 		; Don't forget yaw has sign reversed.
 		data_struct.hit_xy_solar[0] = data_struct.hit_xy_pay[0] + data_struct.pitch
