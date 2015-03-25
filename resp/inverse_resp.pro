@@ -2,7 +2,8 @@ FUNCTION	INVERSE_RESP, ENERGY, PER_MODULE = per_module, $
 	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
 	TYPE = type, NOPATH = nopath, LET_FILE = let_file, $
 	DATA_DIR = data_dir, OFFAXIS_ANGLE = offaxis_angle, N_BLANKETS = N_BLANKETS, $
-	OFFSET = OFFSET, MODULE = module, FOXSI1 = foxsi1, _EXTRA = _extra
+	OFFSET = OFFSET, MODULE = module, FOXSI1 = foxsi1, _EXTRA = _extra, $
+	STOP = STOP
 
 ;	This routine takes in an energy array and performs the count-to-photon conversion 
 ;	using the inverse response.  No off-diagonal elements are included,
@@ -38,6 +39,8 @@ FUNCTION	INVERSE_RESP, ENERGY, PER_MODULE = per_module, $
 		atten = get_blanket_atten( energy=en, factor=n_blankets-1 )
 		area.eff_area_cm2 = area.eff_area_cm2 * (offset + (1-offset)*atten.shut_eff)
 	endif
+	
+	if keyword_set(stop) then stop
 
 	return, create_struct("energy_keV", en, "per_cm2", 1./area.eff_area_cm2)
 
