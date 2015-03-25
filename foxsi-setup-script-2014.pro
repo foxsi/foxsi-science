@@ -11,8 +11,6 @@ add_path, foxsilib_root_path + 'proc'
 add_path, foxsilib_root_path + 'spec'
 add_path, foxsilib_root_path + 'util'
 
-calibration_data_path = foxsilib_root_path + 'calibration/'
-
 user_name = strsplit(expand_tilde('~'), '/', /extract)
 add_path, '~/foxsi/flight-analysis/foxsi-science/' + user_name[-1]
 
@@ -43,7 +41,8 @@ t4_end	 = 466.2
 t5_start = 470.5
 t5_end	 = 503.2
 
-COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs, flight_data
+COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs, flight_data, $
+    optic_effarea 
 
 ; launch time and date
 date=anytim('2014-dec-11')
@@ -55,6 +54,19 @@ name = 'FOXSI-2'
 sparcs = load_sparcs_data()
 ; load the Level 2 data.
 restore, data_file, /v
+
+calibration_data_path = foxsilib_root_path + 'calibration_data/'
+
+module0 = load_foxsi_optics_effarea(0)
+module1 = load_foxsi_optics_effarea(1)
+module2 = load_foxsi_optics_effarea(2)
+module3 = load_foxsi_optics_effarea(3)
+module4 = load_foxsi_optics_effarea(4)
+module5 = load_foxsi_optics_effarea(5)
+;module6 = load_foxsi_optics_effarea(6)
+optic_effarea = create_struct('module0', module0, 'module1', module1, 'module2', module2, $
+                                'module3', module3, 'module4', module4, 'module5', module5, $
+                                'module6', '')
 
 level2 = create_struct('det0', DATA_LVL2_D0, 'det1', DATA_LVL2_D1, 'det2', DATA_LVL2_D2, $
                         'det3', DATA_LVL2_D3, 'det4', DATA_LVL2_D4, 'det5', DATA_LVL2_D5, $

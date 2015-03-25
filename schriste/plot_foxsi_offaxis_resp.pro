@@ -30,19 +30,24 @@ FOR i = 0, num_pixels-1 DO BEGIN
         res = get_foxsi_optics_effarea(module_number = 1, offaxis_angle = [pan, tilt])
         result[*, i, j] = res.eff_area_cm2
         rnorm = sqrt(pan ^ 2 + tilt ^ 2)
-        phi_array[i, j] = acos(pan / rnorm)
+        phi_array[i, j] = atan(abs(tilt), abs(pan))
     ENDFOR
 ENDFOR
 
 loadct, 5
 
 FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
-    m = make_map(reform(result[i, *, *]), dx = plate_scale, dy = plate_scale, xc = 0, yc = 0, title = 'Energy = ' + num2str(energy_arr[i]))
-    plot_map, m, title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV norm', dmin = 15, dmax = 0, /cbar
-    plot_map, m, dmin = 15, dmax = 0, /cont, /noerase, levels = [25, 50, 75], /percent, title = ''
-    plot_circle, 0, 0, radius = 100, /over, linestyle = 2
-    oplot, [-1000, 1000], [0, 0], linestyle = 2
-    oplot, [0, 0], [-1000, 1000], linestyle = 2    
+    data = reform(result[i, *, *])
+    IF max(data) GT 0.0 THEN BEGIN
+        m = make_map(data, dx = plate_scale, dy = plate_scale, xc = 0, yc = 0, title = 'Energy = ' + num2str(energy_arr[i]))
+        plot_map, m, title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV norm', dmin = 15, dmax = 0, /cbar
+        plot_map, m, dmin = 15, dmax = 0, /cont, /noerase, levels = [25, 50, 75], /percent, title = ''
+        plot_circle, 0, 0, radius = 100, /over, linestyle = 2
+        oplot, [-1000, 1000], [0, 0], linestyle = 2
+        oplot, [0, 0], [-1000, 1000], linestyle = 2
+        stop
+
+    ENDIF
 ENDFOR
 
 stop
