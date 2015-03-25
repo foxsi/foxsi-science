@@ -38,7 +38,6 @@ nenergies = n_elements(effective_area.energy)
 IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
     ELSE angle = offaxis_angle		
 
-; insert energy resampling code here
 energies = effective_area.energy
 IF int_factor NE 1 THEN BEGIN
     nenergies = floor(nenergies / int_factor) * int_factor
@@ -46,7 +45,7 @@ IF int_factor NE 1 THEN BEGIN
 
     ;chop the size of the energy bins to accomodate int_factor
     interpol_pan = effective_area.pan[*, 0:nenergies-1]
-    interpol_tilt = effective_area.pan[*, 0:nenergies-1]
+    interpol_tilt = effective_area.tilt[*, 0:nenergies-1]
     interpol_pan_err = effective_area.pan_error[*, 0:nenergies-1]
     interpol_tilt_err = effective_area.tilt_error[*, 0:nenergies-1]
 
@@ -84,12 +83,13 @@ IF keyword_set(energy_arr) THEN BEGIN
 ENDIF ELSE energy_arr = energies
 
 rnorm = sqrt(angle[0] ^ 2 + angle[1] ^ 2)
-;sign = angle / abs(angle)
 IF rnorm EQ 0 THEN BEGIN 
     rnorm = 1
     phi = !PI/4
+    sign = [1, 1]
 ENDIF ELSE BEGIN
     phi = atan(abs(angle[1]), abs(angle[0]))
+    sign = (abs(angle)+1) / abs(abs(angle)+1)
 ENDELSE
 
 pan = fltarr(nenergies)
@@ -99,10 +99,10 @@ tilt_err = fltarr(nenergies)
 
 ; now interpolate into the correct angle
 FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
-    pan[i] = interpol(interpol_pan[*, i], angles, rnorm)
-    tilt[i] = interpol(interpol_tilt[*, i], angles, rnorm)
-    pan_err[i] = interpol(interpol_pan_err[*, i], angles, rnorm)
-    tilt_err[i] = interpol(interpol_tilt_err[*, i], angles, rnorm)
+    pan[i] = interpol(interpol_pan[*, i], angles, sign[0] * rnorm)
+    tilt[i] = interpol(interpol_tilt[*, i], angles, sign[1] * rnorm)
+    pan_err[i] = interpol(interpol_pan_err[*, i], angles, sign[0] * rnorm)
+    tilt_err[i] = interpol(interpol_tilt_err[*, i], angles, sign[1] * rnorm)
 ENDFOR
 
 ; now interpolate between pan and tilt

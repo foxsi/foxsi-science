@@ -1,6 +1,6 @@
 PRO plot_foxsi_offaxis_resp, OUTPS = outps
 
-scale = 5
+scale = 2
 num_pixels = 128 / scale
 plate_scale = 7.5 * scale
 
@@ -27,10 +27,11 @@ FOR i = 0, num_pixels-1 DO BEGIN
         angle_array[1, i, j] = arcsec_to_arcmin * (j - num_pixels / 2.) * plate_scale
         pan = angle_array[0, i, j]
         tilt = angle_array[1, i, j]
-        res = get_foxsi_optics_effarea(module_number = 1, offaxis_angle = [pan, tilt])
+        res = get_foxsi_optics_effarea(module_number = 2, offaxis_angle = [pan, tilt])
         result[*, i, j] = res.eff_area_cm2
         rnorm = sqrt(pan ^ 2 + tilt ^ 2)
         phi_array[i, j] = atan(abs(tilt), abs(pan))
+        
     ENDFOR
 ENDFOR
 
@@ -46,7 +47,6 @@ FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
         oplot, [-1000, 1000], [0, 0], linestyle = 2
         oplot, [0, 0], [-1000, 1000], linestyle = 2
         stop
-
     ENDIF
 ENDFOR
 
