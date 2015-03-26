@@ -123,7 +123,7 @@ module2 = load_foxsi_optics_effarea(2)
 module3 = load_foxsi_optics_effarea(3)
 module4 = load_foxsi_optics_effarea(4)
 module5 = load_foxsi_optics_effarea(5)
-;module6 = load_foxsi_optics_effarea(6)
+module6 = load_foxsi_optics_effarea(6)
 
 optic_effarea = create_struct('module0', module0, 'module1', module1, 'module2', module2, $
                                 'module3', module3, 'module4', module4, 'module5', module5, $
