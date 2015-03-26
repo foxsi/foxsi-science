@@ -50,28 +50,28 @@ FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
     ENDIF
 ENDFOR
 
-stop
 
-FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
-    m = make_map(reform(result[i, *, *]), dx = plate_scale, dy = plate_scale, xc = 0, yc = 0, title = 'Energy = ' + num2str(energy_arr[i]))
-    plot_map, m, title = 'Energy = ' + num2str(energy_arr[i], length = 4)  + ' keV', /cbar
-    plot_map, m, /cont, /noerase, levels = [25, 50, 75], /percent, title = ''
-    plot_circle, 0, 0, radius = 100, /over, linestyle = 2
-    oplot, [-1000, 1000], [0, 0], linestyle = 2
-    oplot, [0, 0], [-1000, 1000], linestyle = 2
+
+;FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
+;    m = make_map(reform(result[i, *, *]), dx = plate_scale, dy = plate_scale, xc = 0, yc = 0, title = 'Energy = ' + num2str(energy_arr[i]))
+;    plot_map, m, title = 'Energy = ' + num2str(energy_arr[i], length = 4)  + ' keV', /cbar
+;    plot_map, m, /cont, /noerase, levels = [25, 50, 75], /percent, title = ''
+;    plot_circle, 0, 0, radius = 100, /over, linestyle = 2
+;    oplot, [-1000, 1000], [0, 0], linestyle = 2
+;    oplot, [0, 0], [-1000, 1000], linestyle = 2
     
-    !P.MULTI = [0, 1, 2]
-    plot, angle_array[0, *, 0], m.data[floor(num_pixels/2), *], $
-        title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV', $
-        xtitle = 'Angle [arcmin]', ytitle = 'Effective area [cm!U2!N]', psym = -4, yrange = [0, 15], /ystyle
-    oplot, orig_data.angles, orig_data.data[0, *, i], psym = 5, color = 100
-    plot, angle_array[1, 0, *], m.data[*, floor(num_pixels/2)], $
-        title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV', $
-        xtitle = 'Angle [arcmin]', ytitle = 'Effective area [cm!U2!N]', psym = -4, yrange = [0, 15], /ystyle
-    oplot, orig_data.angles, orig_data.data[0, *, i], psym = 5, color = 100
+;    !P.MULTI = [0, 1, 2]
+;    plot, angle_array[0, *, 0], m.data[floor(num_pixels/2), *], $
+;        title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV', $
+;        xtitle = 'Angle [arcmin]', ytitle = 'Effective area [cm!U2!N]', psym = -4, yrange = [0, 15], /ystyle
+;    oplot, orig_data.angles, orig_data.data[0, *, i], psym = 5, color = 100
+;    plot, angle_array[1, 0, *], m.data[*, floor(num_pixels/2)], $
+;        title = 'Energy = ' + num2str(energy_arr[i], length = 4) + ' keV', $
+;        xtitle = 'Angle [arcmin]', ytitle = 'Effective area [cm!U2!N]', psym = -4, yrange = [0, 15], /ystyle
+;    oplot, orig_data.angles, orig_data.data[0, *, i], psym = 5, color = 100
 
-    !P.MULTI = 0    
-ENDFOR
+;    !P.MULTI = 0    
+;ENDFOR
 
 IF keyword_set(OUTPS) THEN pclose
 
