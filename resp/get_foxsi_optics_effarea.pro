@@ -17,7 +17,7 @@ COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs
     optic_effarea
 
 default, offaxis_angle, [0.0, 0.0]
-default, module_number, 1
+default, module_number, 0
 ; this factor controls how the data is integrated to decrease the error bars
 default, int_factor, 4     
 
