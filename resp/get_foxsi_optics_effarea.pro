@@ -8,10 +8,11 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ;			PLOT - plot to the current device
 ;			OFFAXIS_ANGLE - off-axis angle. if array then [pan, tilt] in arcmin
 ;           ORIG_DATA - return the original data structure
+;           INT_FACTOR - the number of data points to bin over to reduce the errors
 ;
 ;WRITTEN: Steven Christe (21-Jan-15)
 ;	modified:	LG	2015 Feb	Switched X0->D6 and X6->D0
-;   
+;   modified:   SDC 2015 March
 
 COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs, flight_data, $
     optic_effarea
@@ -59,8 +60,9 @@ IF int_factor NE 1 THEN BEGIN
     interpol_tilt_err = fltarr(nangles, ndim)
     FOR angle_index = 0, nangles-1 DO BEGIN
         FOR i = 0, ndim-2 DO BEGIN
-            interpol_pan_err[i] = sqrt(total(effective_area.pan_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
-            interpol_tilt_err[i] = sqrt(total(effective_area.tilt_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
+            print, (i*int_factor), (i+1)*int_factor, sqrt(total(effective_area.pan_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
+            interpol_pan_err[angle_index, i] = sqrt(total(effective_area.pan_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
+            interpol_tilt_err[angle_index, i] = sqrt(total(effective_area.tilt_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
         ENDFOR
     ENDFOR
     nenergies = ndim
@@ -80,7 +82,11 @@ IF keyword_set(energy_arr) THEN BEGIN
             interpol_tilt[i, *] = interpol(interpol_tilt[i, *], energies, energy_arr)
             interpol_tilt_error[i, *] = interpol(interpol_tilt_err[i, *], energies, energy_arr)
     ENDFOR
-ENDIF ELSE energy_arr = energies
+ENDIF ELSE BEGIN
+    energy_arr = energies
+    interpol_pan_error = interpol_pan_err
+    interpol_tilt_error = interpol_tilt_err
+ENDELSE
 
 rnorm = sqrt(angle[0] ^ 2 + angle[1] ^ 2)
 IF rnorm EQ 0 THEN BEGIN 
@@ -98,7 +104,7 @@ pan_err = fltarr(nenergies)
 tilt_err = fltarr(nenergies)
 
 ; now interpolate into the correct angle
-FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
+FOR i = 0, n_elements(energies)-1 DO BEGIN
     pan[i] = interpol(interpol_pan[*, i], angles, sign[0] * rnorm)
     tilt[i] = interpol(interpol_tilt[*, i], angles, sign[1] * rnorm)
     pan_err[i] = interpol(interpol_pan_err[*, i], angles, sign[0] * rnorm)
@@ -121,11 +127,11 @@ IF keyword_set(PLOT) THEN BEGIN
 	oplot, energy_arr, reform(r), psym = -4
 	oploterr, energy_arr, reform(r), reform(err), psym = -4
 	ssw_legend, 'pan, tilt = [' + num2str(angle[0]) + ',' + num2str(angle[1]) + ']'
+	stop
 ENDIF
 
 data = effective_area
 result = create_struct("energy_keV", energy_arr, "eff_area_cm2", reform(r), "eff_area_cm2_error", reform(err))
 
 RETURN, result
-
 END
