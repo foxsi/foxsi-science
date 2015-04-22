@@ -40,7 +40,6 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 	default, thr_n, 4.		; n-side keV threshold
   	default, year, 2014
   	default, trange, [0,500]
-  	default, year, 2014
 
 	case year of
 		2012:	restore, 'data_2012/flight2012-parameters.sav'

@@ -63,19 +63,19 @@ cen5 = 		[-360. , -71. ] + offset_xy		; 36 sec
 
 ; Additional shifts for each detector, from comparison with AIA
 ; THIS SHOULD BE REDONE USING RHESSI!
-shift6 = [20.,40.]	; offset for D6, eyeballed.
-shift0 = [ 34.9, 57.1 ]	; others' shifts are derived by comparing centroids
-shift1 = [  9.3, 59.5 ]	; with that of D6.
+;shift6 = [20.,40.]	; offset for D6, eyeballed.
+;shift0 = [ 34.9, 57.1 ]	; others' shifts are derived by comparing centroids
+;shift1 = [  9.3, 59.5 ]	; with that of D6.
 shift2 = [0.,0.]
 shift3 = [0.,0.]
-shift4 = [ 13.3, 18.0 ]
-shift5 = [ 42.6, 44.0 ]
+;shift4 = [ 13.3, 18.0 ]
+;shift5 = [ 42.6, 44.0 ]
 
-;shift6 += [-10,-26]
-;shift0 += [-10,-26]
-;shift1 += [-10,-26]
-;shift4 += [-10,-26]
-;shift5 += [-10,-26]
+shift6 = [43.5, 41.7]		; new offset, 2014-mar-19, from comparing last flare w/RHESSI.
+shift0 = [10.,14.] + shift6
+shift1 = [-13.,17.] + shift6
+shift4 = [-6.,-28.] + shift6
+shift5 = [20.,-2.] + shift6
 
 
 ; Rotation angles for all detectors

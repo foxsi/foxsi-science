@@ -1,4 +1,5 @@
-PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, _EXTRA=_EXTRA
+PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, YEAR=YEAR, $
+							  SHIFT=SHIFT, _EXTRA=_EXTRA
 
 ; This procedure draws the detector FOV on a previously plotted FOXSI map.
 ; DET keyword can take two forms:
@@ -9,10 +10,17 @@ PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, _EXTRA=_
 ; Other keywords (shortcuts):
 ;	ALL:	same as setting DET=[1,1,1,1,1,1,1]
 ;	GOOD:	same as setting DET=[1,0,1,0,1,1,1]
+;	SHIFT: additional X,Y shift to apply to the FOV box.
 ;
 ; The TARGET keyword can take the values 1-6 and refers to a numbered target during
 ; the FOXSI flight.  The first target is Target 1.  The flare is on Targets 4 and 6.
 ; ***If the TARGET keyword is not set, the values are returned in PAYLOAD COORDINATES***
+;
+;	2015 march 31		Linz		Updating to work with FOXSI-2 data.  Still needs cleanup
+;
+
+
+	default, year, 2014
 
 ; figure out which det(s) we're dealing with
 det_arr = bytarr(7)
@@ -51,6 +59,18 @@ if keyword_set(xycor) then yerr=$
 	else yerr = [0.,0.,0.,0.,0.,0.,0.]
 
 target_centers = [[-480,-350], [-850,150], [600,400], [700,-600], [1000,-900], [700,-600]]
+
+	if year eq 2014 then begin 
+		restore, 'data_2014/flight2014-parameters.sav'
+		target_centers = [ [cen1_pos2], [cen2_pos1], [cen3_pos2], [cen4], [cen5] ]
+		if keyword_set( xycor ) then xerr[*] = -offset_xy[0]
+		if keyword_set( xycor ) then yerr[*] = -offset_xy[1]		
+	endif
+
+	if keyword_set( SHIFT ) then begin
+		xerr -= shift[0]
+		yerr -= shift[1]
+	endif			
 
 for i=0, 6 do begin
 	if det_arr[i] eq 0 then continue

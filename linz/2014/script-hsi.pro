@@ -1,3 +1,98 @@
+;
+; Using Säm's RHESSI image.
+;
+
+restore,'sam/rhsi_xrt_last_foxsi_target.dat'
+loadct2,3
+;popen
+!p.multi=[0,2,1]
+this_fov=3
+this_center=[20,-70]
+this_center=[-65,90]
+this_level=[50,70,90]
+this_xrt=gxmap23
+this_shift=[23,24]
+this_xrt.xc=this_xrt.xc+this_shift(0)
+this_xrt.yc=this_xrt.yc+this_shift(1)
+
+plot_map,this_xrt,fov=this_fov,center=this_center,bot=9,dmax=-1700,dmin=-2500
+plot_map,h_arx,/over,/per,levels=this_level,color=2,thick=4
+xyouts,-147,19,'RHESSI 4-8 keV',charsize=1.4,color=2
+xyouts,-147,7,'19:18:50-19:19:14UT',charsize=1.4,color=2
+
+this_xrt2=gxmap24
+this_xrt2.xc=this_xrt2.xc+this_shift(0)
+this_xrt2.yc=this_xrt2.yc+this_shift(1)
+plot_map,this_xrt2,fov=this_fov,center=this_center,bot=9,dmax=-1700,dmin=-3200
+plot_map,h_arx,/over,/per,levels=this_level,color=2,thick=4
+xyouts,-147,19,'RHESSI 4-8 keV',charsize=1.4,color=2
+xyouts,-147,7,'19:18:50-19:19:14UT',charsize=1.4,color=2
+;pclose
+
+;
+; end Säm's script.
+;
+
+; Adding on the FOXSI image too.
+
+trange=[t5_start, t5_end]
+cen = cen5
+en = [4.,8.]
+m = foxsi_image_map( data_lvl2_d6, cen, erange=en, trange=trange, /XYCORR, thr_n=4., smooth=2 )
+m.id = 'FOXSI Det6 4-8 keV'
+
+loadct, 5
+plot_map, m, cen=this_center, fov=3
+
+sub_fox = make_submap( m, cen=this_center, fov=3)
+sub_hsi = make_submap( h_arx, cen=this_center, fov=3)
+print, map_centroid(sub_fox, thr=1.)
+print, map_centroid(sub_hsi, thr=0.0)
+IDL> print, map_centroid(sub_fox, thr=1.)
+      -108.09132       47.718691
+IDL> print, map_centroid(sub_hsi, thr=0.004)
+      -65.583088       89.430286
+print, map_centroid(sub_hsi, thr=0.004) - map_centroid(sub_fox, thr=1.)
+IDL> print, map_centroid(sub_hsi, thr=0.004) - map_centroid(sub_fox, thr=1.)
+       42.508237       41.711595
+;;;;; UPDATING THESE NUMBERS IN SETUP FILE ;;;;;
+
+
+trange=[t5_start, t5_end]
+cen = cen5
+
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+ma = foxsi_image_map( data_lvl2_d0, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+mb = foxsi_image_map( data_lvl2_d1, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+mc = foxsi_image_map( data_lvl2_d4, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+md = foxsi_image_map( data_lvl2_d5, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+me = foxsi_image_map( data_lvl2_d6, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+m4 = ma
+m4.data = ma.data+mb.data+mc.data+md.data+me.data
+
+
+plot_map, m3, cen=this_center, fov=2
+
+ratio = m1
+ratio.data = m2.data / m1.data 
+ratio.data[ where(m2.data lt 1.1) ] = 0.
+ratio.data[ where(m1.data lt 1.1) ] = 0.
+plot_map, ratio, /log, cen=[-100,100], fov=3, /cbar
+plot_map, m1, /over
+
+
+
+
+
+
+
+; Other work.
+
+
 t1 = '11-Dec-2014 ' + ['19:00:00','19:30:00']
 
 obs_obj = hsi_obs_summary( obs_time_interval=t1 )

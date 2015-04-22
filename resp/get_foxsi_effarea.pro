@@ -9,7 +9,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 ;KEYWORD: PER_MODULE - get the area for each module
 ;			NODET - do not include loss of area due to detector efficiency
 ;			DET_THICK - set the detector thickness (DEFAULT = 500 um)
-;			NOSHUT - do not include a (Be) shutter
+;			NOSHUT - do not include a (Be) shutter  (KEYWORD CURRENTLY DISABLED!!!)
 ;			NOPATH - do not include material in optical path
 ;			PLOT - plot to the current device
 ;			BE_UM - set the thickness of a Be shutter
@@ -33,7 +33,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 default, type, 'si'
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, 0.0
-default, let_file, 'efficiency_averaged.sav'
+;default, let_file, 'efficiency_averaged.sav'
 
 IF NOT keyword_set(DET_THICK) THEN det_thick = 500.0
 IF NOT keyword_set(BE_UM) THEN be_um = 0.0
@@ -89,11 +89,54 @@ ENDIF ELSE BEGIN
 	eff_area_orig = eff_area
 ENDELSE
 
+;
+; Detector efficiency, including low-energy cutoff curve
+;
+
 IF NOT keyword_set(nodet) THEN BEGIN
+
+	if not keyword_set( LET_FILE ) then begin
+		if not keyword_set(module) then begin
+			print, 'No low-energy threshold file specified, using FOXSI-1 average.'
+			let_file = 'efficiency_averaged.sav'
+		endif else begin
+			if keyword_set( FOXSI1 ) then begin
+				; 2012 flight
+				case module of
+					0:  let_file = 'efficiency_det108_avg.sav'
+					1:  let_file = 'efficiency_det109_avg.sav'
+					2:  let_file = 'efficiency_det102_avg.sav'
+					3:  let_file = 'efficiency_det103_avg.sav'
+					4:  let_file = 'efficiency_det104_avg.sav'
+					5:  let_file = 'efficiency_det105_avg.sav'
+					6:  let_file = 'efficiency_det106_avg.sav'
+				endcase
+			endif else begin
+				; 2014 flight
+				case module of
+					0:  let_file = 'efficiency_det108_avg.sav'
+					1:  let_file = 'efficiency_det101_avg.sav'
+					2:  let_file = 'efficiency_averaged.sav'
+					3:  let_file = 'efficiency_averaged.sav'
+					4:  let_file = 'efficiency_det104_avg.sav'
+					5:  let_file = 'efficiency_det105_avg.sav'
+					6:  let_file = 'efficiency_det102_avg.sav'
+				endcase
+			endelse
+			if not keyword_set( FOXSI1 ) and (module eq 2 or module eq 3) then $
+				print, 'Warning: efficiency curve for CdTe dets not done yet!'
+		endelse
+	endif
+			
     det_eff = get_foxsi_deteff(energy_arr = energy_arr, _EXTRA = _EXTRA, $
     		  det_thick = det_thick, type = type, data_dir = data_dir, let_file = let_file)
     eff_area = eff_area*det_eff.det_eff
+
 ENDIF
+
+;
+; Blanketing transmission
+;
 
 ;add in the various materials already in the optical path
 IF NOT keyword_set(nopath) THEN BEGIN
@@ -101,10 +144,10 @@ IF NOT keyword_set(nopath) THEN BEGIN
 	eff_area = eff_area*optical_path.shut_eff
 ENDIF
 
-IF NOT keyword_set(noshut) THEN BEGIN
-    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd, data_dir = data_dir, _EXTRA = _EXTRA)    
-    eff_area = eff_area*shut_eff.shut_eff
-ENDIF
+;IF NOT keyword_set(noshut) THEN BEGIN
+;    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd, data_dir = data_dir, _EXTRA = _EXTRA)    
+;    eff_area = eff_area*shut_eff.shut_eff
+;ENDIF
 
 IF keyword_set(PLOT) THEN BEGIN
 
