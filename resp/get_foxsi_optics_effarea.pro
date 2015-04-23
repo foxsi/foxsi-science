@@ -1,5 +1,5 @@
 FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_number, $
-	OFFAXIS_ANGLE = offaxis_angle, DATA_DIR = data_dir, PLOT = plot, _EXTRA = _extra
+    OFFAXIS_ANGLE = offaxis_angle, PLOT = plot, _EXTRA = _extra, INT_FACTOR = int_factor
 
 ;PURPOSE: Get the FOXSI optics effective area in cm^2 as a function of energy
 ;           and off-axis angle.
@@ -7,82 +7,131 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ;KEYWORD:   MODULE_NUMBER - the module number (0 through 6).  Detector convention is used.
 ;			PLOT - plot to the current device
 ;			OFFAXIS_ANGLE - off-axis angle. if array then [pan, tilt] in arcmin
+;           ORIG_DATA - return the original data structure
+;           INT_FACTOR - the number of data points to bin over to reduce the errors
 ;
 ;WRITTEN: Steven Christe (21-Jan-15)
 ;	modified:	LG	2015 Feb	Switched X0->D6 and X6->D0
+;   modified:   SDC 2015 March
 
-default, data_dir, 'calibration_data/'
+COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs, flight_data, $
+    optic_effarea
+
 default, offaxis_angle, [0.0, 0.0]
 default, module_number, 0
+; this factor controls how the data is integrated to decrease the error bars
+default, int_factor, 4     
+
+CASE module_number of
+    0: effective_area = optic_effarea.module0
+    1: effective_area = optic_effarea.module1
+    2: effective_area = optic_effarea.module2
+    3: effective_area = optic_effarea.module3
+    4: effective_area = optic_effarea.module4
+    5: effective_area = optic_effarea.module5
+    6: effective_area = optic_effarea.module6
+ENDCASE
+
+angles = effective_area.angles
+nangles = n_elements(angles)
+nenergies = n_elements(effective_area.energy)
 
 IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
-    ELSE angle = offaxis_angle
+    ELSE angle = offaxis_angle		
 
-; Switch X0->D6 and X6->D0
-if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
-		else MODULE = MODULE_NUMBER
-		
-files = data_dir + 'FOXSI2_' + ['Module_X-' + num2str(module) + '_EA_pan.txt', $
-         'Module_X-' + num2str(module) + '_EA_tilt.txt']
+energies = effective_area.energy
+IF int_factor NE 1 THEN BEGIN
+    nenergies = floor(nenergies / int_factor) * int_factor
+    ndim = nenergies / int_factor
 
-; todo: these need to be provided by the data files themselves
-angles = [-9, -7, -5, -3, -1, 0, 1, 3, 5, 7, 9]
-energy = [4.5,  5.5,  6.5,  7.5,  8.5,  9.5, 11. , 13. , 15. , 17. , 19. , 22.5, 27.5]
+    ;chop the size of the energy bins to accomodate int_factor
+    interpol_pan = effective_area.pan[*, 0:nenergies-1]
+    interpol_tilt = effective_area.tilt[*, 0:nenergies-1]
+    interpol_pan_err = effective_area.pan_error[*, 0:nenergies-1]
+    interpol_tilt_err = effective_area.tilt_error[*, 0:nenergies-1]
 
-FOR i = 0, n_elements(files)-1 DO BEGIN
-    ; the following code is dumb, need something that detects num of columns
-    readcol, files[i], d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, skipline = 4, /silent
-    IF i EQ 0 THEN data = fltarr(2, n_elements(angles), n_elements(d0))
-    data[i, 0, *] = d0
-    data[i, 1, *] = d1
-    data[i, 2, *] = d2
-    data[i, 3, *] = d3
-    data[i, 4, *] = d4
-    data[i, 5, *] = d5
-    data[i, 6, *] = d6
-    data[i, 7, *] = d7
-    data[i, 8, *] = d8
-    data[i, 9, *] = d9
-    data[i, 10, *] = d10
-ENDFOR
+    ;now rebin which averages the entries
+    energies = rebin(energies[0:nenergies-1], ndim)
 
-IF keyword_set(energy_arr) THEN BEGIN
-    interpol_data = fltarr(2, n_elements(data[0, *, 0]), n_elements(energy_arr))
-    ; interpolate data on new energies    
-    FOR j = 0, 2 - 1 DO BEGIN
-        FOR i = 0, n_elements(angles)-1 DO BEGIN
-            eff_area = data[j, i, *]
-            interpol_data[j, i, *] = interpol(eff_area, energy, energy_arr)
+    interpol_pan = rebin(interpol_pan, nangles, ndim)
+    interpol_tilt = rebin(interpol_tilt, nangles, ndim)
+    ; now rebin the errors
+    interpol_pan_err = fltarr(nangles, ndim)
+    interpol_tilt_err = fltarr(nangles, ndim)
+    FOR angle_index = 0, nangles-1 DO BEGIN
+        FOR i = 0, ndim-2 DO BEGIN
+            print, (i*int_factor), (i+1)*int_factor, sqrt(total(effective_area.pan_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
+            interpol_pan_err[angle_index, i] = sqrt(total(effective_area.pan_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
+            interpol_tilt_err[angle_index, i] = sqrt(total(effective_area.tilt_error[angle_index, (i*int_factor):(i+1)*int_factor]^2))/float(int_factor)
         ENDFOR
     ENDFOR
-ENDIF ELSE BEGIN 
-    interpol_data = data
-	energy_arr = energy
+    nenergies = ndim
+ENDIF ELSE BEGIN
+    interpol_pan = effective_area.pan
+    interpol_tilt = effective_area.pan
+    interpol_pan_err = effective_area.pan_error
+    interpol_tilt_err = effective_area.tilt_error
+    energies = effective_area.energy
+ENDELSE
+
+IF keyword_set(energy_arr) THEN BEGIN
+    ; interpolate data on new energies    
+    FOR i = 0, nangles-1 DO BEGIN
+            interpol_pan[i, *] = interpol(interpol_pan[i, *], energies, energy_arr)
+            interpol_pan_error[i, *] = interpol(interpol_pan_err[i, *], energies, energy_arr)
+            interpol_tilt[i, *] = interpol(interpol_tilt[i, *], energies, energy_arr)
+            interpol_tilt_error[i, *] = interpol(interpol_tilt_err[i, *], energies, energy_arr)
+    ENDFOR
+ENDIF ELSE BEGIN
+    energy_arr = energies
+    interpol_pan_error = interpol_pan_err
+    interpol_tilt_error = interpol_tilt_err
 ENDELSE
 
 rnorm = sqrt(angle[0] ^ 2 + angle[1] ^ 2)
-IF rnorm EQ 0 THEN phi = 0 ELSE phi = atan(abs(angle[1] / angle[0]) )
+IF rnorm EQ 0 THEN BEGIN 
+    rnorm = 1
+    phi = !PI/4
+    sign = [1, 1]
+ENDIF ELSE BEGIN
+    phi = atan(abs(angle[1]), abs(angle[0]))
+    sign = (abs(angle)+1) / abs(abs(angle)+1)
+ENDELSE
 
-; now interpolate to the requested off-axis angle
-eff_area = fltarr(2, n_elements(energy_arr))
-FOR j = 0, 2 - 1 DO FOR i = 0, n_elements(energy_arr)-1 DO BEGIN
-    eff_area[j, i] = interpol(interpol_data[j, *, i], angles, rnorm)
+pan = fltarr(nenergies)
+tilt = fltarr(nenergies)
+pan_err = fltarr(nenergies)
+tilt_err = fltarr(nenergies)
+
+; now interpolate into the correct angle
+FOR i = 0, n_elements(energies)-1 DO BEGIN
+    pan[i] = interpol(interpol_pan[*, i], angles, sign[0] * rnorm)
+    tilt[i] = interpol(interpol_tilt[*, i], angles, sign[1] * rnorm)
+    pan_err[i] = interpol(interpol_pan_err[*, i], angles, sign[0] * rnorm)
+    tilt_err[i] = interpol(interpol_tilt_err[*, i], angles, sign[1] * rnorm)
 ENDFOR
 
 ; now interpolate between pan and tilt
-m = (eff_area[1, *] - eff_area[0, *]) / !pi/2. 
-result = eff_area[0, *] + m * phi
-eff_area = result
+r = pan + (tilt - pan) / !pi/2. * phi
+
+; this is definitely wrong!
+err = pan_err + (tilt_err - pan_err) / !pi/2. * phi
+
+; something is wrong with the errors :(
 
 IF keyword_set(PLOT) THEN BEGIN
-	plot, energy_arr, reform(eff_area), psym = -4, $
-		xtitle = "Energy [keV]", ytitle = "Effective Area [cm!U2!N]", charsize = 1.5, /xstyle, xrange = [min(energy_arr), max(energy_arr)], _EXTRA = _EXTRA, /nodata
-	oplot, energy_arr, reform(eff_area), psym = -4
+	plot, energy_arr, reform(r), psym = -4, $
+		xtitle = "Energy [keV]", ytitle = "Effective Area [cm!U2!N]", $
+		charsize = 1.5, /xstyle, xrange = [min(energy_arr), max(energy_arr)], $
+		_EXTRA = _EXTRA, /nodata
+	oplot, energy_arr, reform(r), psym = -4
+	oploterr, energy_arr, reform(r), reform(err), psym = -4
 	ssw_legend, 'pan, tilt = [' + num2str(angle[0]) + ',' + num2str(angle[1]) + ']'
+	stop
 ENDIF
 
-result = create_struct("energy_keV", energy_arr, "eff_area_cm2", eff_area)
+data = effective_area
+result = create_struct("energy_keV", energy_arr, "eff_area_cm2", reform(r), "eff_area_cm2_error", reform(err))
 
 RETURN, result
-
 END

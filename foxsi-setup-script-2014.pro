@@ -1,19 +1,36 @@
 ; setup script to analyze FOXSI data, now for 2014 launch.  (FOXSI-2)
+COMMON foxsi, t0, data, data_dir, calibration_data_path, data_file, name, sparcs, flight_data, $
+    optic_effarea 
 
 ; Set Path where foxsi-science is
 CD, Current=fs_location
 
+foxsilib_root_path = fs_location
 ; add directory paths
-add_path, fs_location+'/fermi'
-add_path, fs_location+'/img'
-add_path, fs_location+'/resp'
-add_path, fs_location+'/psf'
-add_path, fs_location+'/proc'
-add_path, fs_location+'/spec'
-add_path, fs_location+'/util'
+add_path, foxsilib_root_path+'/fermi'
+add_path, foxsilib_root_path+'/img'
+add_path, foxsilib_root_path+'/resp'
+add_path, foxsilib_root_path+'/psf'
+add_path, foxsilib_root_path+'/proc'
+add_path, foxsilib_root_path+'/spec'
+add_path, foxsilib_root_path+'/util'
+calibration_data_path = foxsilib_root_path + '/calibration_data/'
+
+user_name = strsplit(expand_tilde('~'), '/', /extract)
+add_path, foxsilib_root_path + user_name[-1]
+
+; launch time and date
+date=anytim('2014-dec-11')
+t0 = '11-Dec-2014 19:11:00.000'
+data_dir = 'data_2014/'
+data_file = data_dir + 'foxsi_level2_data.sav'
+name = 'FOXSI-2'
 
 ; load the Level 2 data.
-restore, 'data_2014/foxsi_level2_data.sav', /v
+restore, data_file, /v
+
+; now load the sparcs data
+sparcs = load_sparcs_data()
 
 t_launch = 69060
 
@@ -41,9 +58,6 @@ t_shtr_end     = 442.0 		; Conservative time for microphonics to die down
 t4_end	       = 466.2
 t5_start       = 470.5
 t5_end	       = 503.2
-
-date=anytim('2014-dec-11')
-t0 = '11-Dec-2014 19:11:00.000'
 
 ;
 ; Positional information
@@ -90,7 +104,6 @@ rot4 = 97.5
 rot5 = 90.
 rot6 = -60.
 
-
 ; Save the values set here for use by some of the routines.
 ; Saving this file each time ensures that updating a value in this setup script
 ; propagates through to all routines.
@@ -101,4 +114,23 @@ save, tlaunch, t_launch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 	t5_start, t5_end, date, t0, offset_xy, cen1_pos0, cen1_pos1, cen1_pos2, $
 	cen2_pos0, cen2_pos1, cen3_pos0, cen3_pos1, cen3_pos2, cen4, cen5, $
 	shift0, shift1, shift2, shift3, shift4, shift5, shift6, rot0, rot1, rot2, rot3, $
-	rot4, rot5, rot6, file = 'data_2014/flight2014-parameters.sav'
+	rot4, rot5, rot6, file = data_dir + 'flight2014-parameters.sav'
+
+
+module0 = load_foxsi_optics_effarea(0)
+module1 = load_foxsi_optics_effarea(1)
+module2 = load_foxsi_optics_effarea(2)
+module3 = load_foxsi_optics_effarea(3)
+module4 = load_foxsi_optics_effarea(4)
+module5 = load_foxsi_optics_effarea(5)
+module6 = load_foxsi_optics_effarea(6)
+
+optic_effarea = create_struct('module0', module0, 'module1', module1, 'module2', module2, $
+                                'module3', module3, 'module4', module4, 'module5', module5, $
+                                'module6', '')
+
+level2 = create_struct('det0', DATA_LVL2_D0, 'det1', DATA_LVL2_D1, 'det2', DATA_LVL2_D2, $
+                        'det3', DATA_LVL2_D3, 'det4', DATA_LVL2_D4, 'det5', DATA_LVL2_D5, $
+                        'det6', DATA_LVL2_D6)
+
+flight_data = create_struct('level0', '', 'level1', '', 'level2', level2)
