@@ -6,6 +6,8 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 
 ;PURPOSE: Get the FOXSI effective area 
 ;
+; Note:  this needs modification to get the right "nominal" blanketing for FOXSI-1.
+;
 ;KEYWORD: PER_MODULE - get the area for each module
 ;			NODET - do not include loss of area due to detector efficiency
 ;			DET_THICK - set the detector thickness (DEFAULT = 500 um)
@@ -96,13 +98,13 @@ ENDELSE
 IF NOT keyword_set(nodet) THEN BEGIN
 
 	if not keyword_set( LET_FILE ) then begin
-		if not keyword_set(module) then begin
+		if not keyword_set(module_number) then begin
 			print, 'No low-energy threshold file specified, using FOXSI-1 average.'
 			let_file = 'efficiency_averaged.sav'
 		endif else begin
 			if keyword_set( FOXSI1 ) then begin
 				; 2012 flight
-				case module of
+				case module_number of
 					0:  let_file = 'efficiency_det108_avg.sav'
 					1:  let_file = 'efficiency_det109_avg.sav'
 					2:  let_file = 'efficiency_det102_avg.sav'
@@ -113,7 +115,7 @@ IF NOT keyword_set(nodet) THEN BEGIN
 				endcase
 			endif else begin
 				; 2014 flight
-				case module of
+				case module_number of
 					0:  let_file = 'efficiency_det108_avg.sav'
 					1:  let_file = 'efficiency_det101_avg.sav'
 					2:  let_file = 'efficiency_averaged.sav'
@@ -123,7 +125,7 @@ IF NOT keyword_set(nodet) THEN BEGIN
 					6:  let_file = 'efficiency_det102_avg.sav'
 				endcase
 			endelse
-			if not keyword_set( FOXSI1 ) and (module eq 2 or module eq 3) then $
+			if not keyword_set( FOXSI1 ) and (module_number eq 2 or module_number eq 3) then $
 				print, 'Warning: efficiency curve for CdTe dets not done yet!'
 		endelse
 	endif

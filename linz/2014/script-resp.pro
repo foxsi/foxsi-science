@@ -134,3 +134,54 @@ for i=0, 199 do begin &$
 	dev[i] = sqrt(total((array-average(array))^2)/(n-1)) &$
 endfor
 
+;
+; Revamping INVERSE_RESP routine to get all the factors.
+;
+
+; Need to include optics effective area, blanketing transmission, detector LET,
+; detector material efficiency, and livetime.
+
+; Update: turns out I already upgraded inverse_resp, so that's done!
+
+; Still need to make sure blanketing parameters are correct.  Work on that.
+; Also have not livetime correction yet.  Optics and detectors are done.
+
+@foxsi-setup-script-2014
+
+spec_targ1 = get_target_spectra( 1, year=2014, /good )
+spec_targ2 = get_target_spectra( 2, year=2014, /good )
+spec_targ3 = get_target_spectra( 3, year=2014, /good )
+spec_targ4 = get_target_spectra( 4, year=2014, /good )
+spec_targ5 = get_target_spectra( 5, year=2014, /good )
+
+en_array = spec_targ1[6].energy_kev
+
+inv0 = inverse_resp( en_array, module=0 )
+inv1 = inverse_resp( en_array, module=1 )
+inv4 = inverse_resp( en_array, module=4 )
+inv5 = inverse_resp( en_array, module=5 )
+inv6 = inverse_resp( en_array, module=6 )
+
+phot0 = spec_targ1[0].spec_p * inv0.per_cm2
+phot1 = spec_targ1[1].spec_p * inv1.per_cm2
+phot4 = spec_targ1[4].spec_p * inv4.per_cm2
+phot5 = spec_targ1[5].spec_p * inv5.per_cm2
+phot6 = spec_targ1[6].spec_p * inv6.per_cm2
+
+;popen, 'plots/foxsi2/photon-spex', xsi=7, ysi=5
+hsi_linecolors
+plot, spec1[6].energy_kev, phot6, /xlo, /ylo, /nodata, $
+	xr=[3.,15.], yr=[1.e-3,1.e2], charsi=1.2, charth=2, xth=5, yth=5, /xsty, $
+	xtit='Energy [keV]', ytit='Photons cm!U-2!N s!U-1!N keV!U-1!N', $
+	title='Target 1 photon spectra'
+oplot, spec1[0].energy_kev, phot0, thick=5, psym=10, col=6
+oplot, spec1[1].energy_kev, phot1, thick=5, psym=10, col=7
+oplot, spec1[4].energy_kev, phot4, thick=5, psym=10, col=10
+oplot, spec1[5].energy_kev, phot5, thick=5, psym=10, col=12
+oplot, spec1[6].energy_kev, phot6, thick=5, psym=10, col=2
+al_legend, ['D0','D1','D4','D5','D6'], line=0, col=[6,7,10,12,2], thick=5, /rig, box=0
+oplot, [4.,4.], [1.e-3,1.e2], line=1, thick=3
+;pclose
+
+; Note: are we sure this is adequately taking into account blanketing?  Try plotting
+; the same thing for all the parts of the response just to make sure.
