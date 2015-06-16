@@ -1,4 +1,4 @@
-@foxsi-setup-script
+@foxsi-setup-script-2012
 
 iter=[1,5,10,20,40,60,80,100,150,200]
 iter=findgen(12)*5+5
@@ -9,7 +9,7 @@ deconv2 = deconv_foxsi( [0,0,1,0,0,0,0], first=raw2, pix=pix, iter=iter  )
 deconv3 = deconv_foxsi( [0,0,0,1,0,0,0], first=raw3, pix=pix, iter=iter  )
 deconv4 = deconv_foxsi( [0,0,0,0,1,0,0], first=raw4, pix=pix, iter=iter, /fix4  )
 deconv5 = deconv_foxsi( [0,0,0,0,0,1,0], first=raw5, pix=pix, iter=iter  )
-deconv6 = deconv_foxsi( [0,0,0,0,0,0,1], first=raw6, pix=pix, iter=iter  )
+deconv6 = deconv_foxsi( [0,0,0,0,0,0,1], pix=pix, iter=iter, year=2012 )
 deconv_all3 = deconv_foxsi( [0,0,0,0,1,1,1], first=raw_all3, pix=pix, iter=iter, /fix4, fov=5 )
 deconv_all6 = deconv_foxsi( [1,1,0,1,1,1,1], first=raw_all6, pix=pix, iter=iter, /fix4, fov=4, psf_map=psf, $
 	reconv_map=reconv_all6, cstat=cstat, img_smooth=9 )
@@ -92,12 +92,15 @@ pclose
 ; Step 6: Try the deconvolution.
 ; Step 7: Compare results.
 
-psf = foxsi_psf(fov=3)
+fov=3
+psf = foxsi_psf(fov=fov)
+smallpsf = make_submap( psf, cen=[0.,0.], fov=fov-2 )
 size = size(psf.data)
 
 ; First, a single circular Gaussian.
 
-source = make_map( psf_gaussian( npixel=size[1:2], fwhm=[15,30], cen=[90,110] ) )
+source = make_map( psf_gaussian( npixel=size[1:2], fwhm=[30,30], cen=[90.3,110.4] ) )
+source = make_map( psf_gaussian( npixel=size[1:2], fwhm=[30,30], cen=[90,90] ) )
 ; Get the desired number of counts.
 nData = 6000.
 source.data = source.data / total(source.data) * nData
@@ -105,8 +108,9 @@ source.data = source.data / total(source.data) * nData
 ; convolve with the PSF.
 conv = make_map( convolve( source.data, psf.data ) )
 
-; Bin to 7.78 arcsec pixels.
-pitch = 7.78
+; Bin to 7.735 arcsec pixels.
+pitch = 7.735
+pitch = 8.
 dim = fix(size[1]/pitch)
 rebin = make_map( frebin( conv.data, dim, dim, /total ), dx=pitch, dy=pitch )
 
@@ -119,15 +123,16 @@ smear.data[ where(smear.data lt 0.) ] = 0.
 
 ; Now starts the recovery process.  Start by binning to 1" pixels.
 pix = 1.
-newdim = fix(dim*pitch/pix)
+;newdim = fix(dim*pitch/pix)
+newdim=size[1]
 rebin2 = make_map( frebin( smear.data, newdim, newdim, /total ), dx=pix, dy=pix )
 
 ; Smooth the image.
 raw = rebin2
-raw.data = smooth( raw.data, 10 )
+;raw.data = smooth( raw.data, 10 )
 
 ; Move it off in the corner to avoid the usual problem...
-raw.data = shift( raw.data, [40,20] )
+raw.data = shift( raw.data, [3,3] )
 
 ; Try the deconvolution!
 iter = [1,5,10,20,30,40,50,60,80,100]
@@ -139,25 +144,30 @@ reconv_map = replicate( raw, niter )
 for j=0, niter-1 do begin
 	undefine, deconv
   	print, j, iter[j]
-  	for i=0, iter[j] do max_likelihood, raw.data, psf.data, deconv, reconv
+  	for i=0, iter[j] do begin
+  		stopflag = 0
+	  	;if j eq 0 and i eq iter[j] then stopflag=1 else stopflag=0			
+  		max_likelihood2, raw.data, smallpsf.data, deconv, reconv, stop=stopflag
+  	endfor
   	deconv_map[j].data = deconv
   	reconv_map[j].data = reconv
   	deconv_map[j].id=strtrim(iter[j],2)+' iter'
  endfor
 end
+;plot_map, make_map( deconv ), /cbar
 
-;movie_map, deconv_map, /nosc
-print, fullwid_halfmax( deconv_map[6].data )
+movie_map, deconv_map, /nosc
+;print, fullwid_halfmax( deconv_map[6].data )
 
-popen, 'fig/simulation', xsi=8, ysi=4
+;popen, 'fig/simulation', xsi=8, ysi=4
 !p.multi=[0,4,2]
 !X.MARGIN=[2,2]
 !Y.MARGIN=[2,2] 
 ch=1.2
 plot_map, source, cen=map_centroid(source), fov=2, charsi=ch, tit='Simulated source', $
 	xtit='', ytit=''
-fwhm = strtrim(string(fullwid_halfmax(source.data),format='(f8.2)'),2)
-xyouts, -55, -30, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
+;fwhm = strtrim(string(fullwid_halfmax(source.data),format='(f8.2)'),2)
+;xyouts, -55, -30, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
 plot_map, psf, cen=map_centroid(psf), fov=2, charsi=ch, tit='PSF', $
 	xtit='', ytit=''
 plot_map, conv, cen=map_centroid(conv), fov=2, charsi=ch, tit='PSF*Source', $
@@ -166,18 +176,18 @@ plot_map, rebin, cen=map_centroid(rebin), fov=2, charsi=ch, tit='Binned', $
 	xtit='', ytit=''
 plot_map, smear, cen=map_centroid(smear), fov=2, charsi=ch, tit='Smeared', $
 	xtit='', ytit=''
-fwhm = strtrim(string(pitch*fullwid_halfmax(smear.data),format='(f8.2)'),2)
-xyouts, -55, -35, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
+;fwhm = strtrim(string(pitch*fullwid_halfmax(smear.data),format='(f8.2)'),2)
+;xyouts, -55, -35, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
 plot_map, rebin2, cen=map_centroid(rebin2), fov=2, charsi=ch, tit='Rebinned', $
 	xtit='', ytit=''
 plot_map, raw, cen=map_centroid(raw, thr=1.), fov=2, charsi=ch, tit='Smoothed', $
 	xtit='', ytit=''
-fwhm = strtrim(string(fullwid_halfmax(raw.data),format='(f8.2)'),2)
-xyouts, -15, -10, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
+;fwhm = strtrim(string(fullwid_halfmax(raw.data),format='(f8.2)'),2)
+;xyouts, -15, -10, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
 plot_map, deconv_map[6], cen=map_centroid(deconv_map[6],thr=1.), fov=2, charsi=ch, $
 	tit='Deconvolved 50 iter', xtit='', ytit=''
-fwhm = strtrim(string(fullwid_halfmax(deconv_map[6].data),format='(f8.2)'),2)
-xyouts, -17, -15, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
+;fwhm = strtrim(string(fullwid_halfmax(deconv_map[6].data),format='(f8.2)'),2)
+;xyouts, -17, -15, 'FWHM '+fwhm[0]+' '+fwhm[1]+' arcsec', size=0.8, col=255
 pclose
 !X.MARGIN=[10,3]
 !Y.MARGIN=[4,2] 

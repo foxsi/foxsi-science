@@ -47,6 +47,7 @@
 ;
 ;
 ; History:	
+;		2015-April	Linz	Fixed timing info.
 ;		2014-Jan-08	Linz	Updated to work for 2014 data.
 ;		Sometime in 2013	created routine.
 ;-
@@ -85,15 +86,8 @@ endif else begin
 endelse
 
 ;
-; Timing information 
+; Timing information, same values as used in foxsi_setup_script.pro
 ;
-; Right now, this is all hardcoded here in an identical fashion to the text in
-; foxsi_setup_script.  An improvement would be to store the timing info in a
-; file that can be looked up by any routine, to ensure that any changes to the
-; timing info propagate throughout the entire software.
-;
-; Times of target windows are from RLG on or target stable to new 
-; target received or RLG off), except for pointing adjustments (only target stable used).
 
 if year eq 2012 then begin
 	t_launch = 64500
@@ -112,20 +106,17 @@ if year eq 2012 then begin
 endif
 
 if year eq 2014 then begin
-	; Timing info from Jesus's preliminary report.
-	t_launch = 69060
-	t1_start = 166.5
-	t1_end   = 205.
-	t2_start = 224.
-	t2_end 	 = 276.7
-	t3_start = 334.
-	t3_end	 = 369.
-	t4_start = 373.5
-	t4_end   = 438		; Conservative time of attenuator insertion
-	t5_start = 442		; Conservative time for microphonics to die down
-	t5_end	 = 466.
-	t6_start = 470.
-	t6_end	 = 503.
+	restore,'data_2014/flight2014-parameters.sav'
+	t1_start = t1_pos2_start
+	t1_end   = t1_pos2_end
+	t2_start = t2_pos1_start
+	t2_end   = t2_pos1_end
+	t3_start = t3_pos2_start
+	t3_end   = t3_pos2_end
+	t4_start = t4_start
+	t4_end   = t_shtr_start
+	t5_start = t5_start
+	t5_end   = t5_end
 endif
 
 

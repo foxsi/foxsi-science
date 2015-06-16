@@ -46,9 +46,9 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 
 	energy = findgen(100/binwidth)*binwidth
 
-	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy), $
-						min=min(energy), max=max(energy) )
-	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy), $
+	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy)-1, $
+						min=min(energy), max=max(energy), omin=omin, omax=omax )
+	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy)-1, $
 						min=min(energy), max=max(energy) )
 
 	if keyword_set(stop) then stop

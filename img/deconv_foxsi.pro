@@ -164,32 +164,32 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 		i = where( detector ne 0 )
 		case i of
 			0: begin
-				img0 = foxsi_image_det( data_lvl2_d0, erange=erange, trange=tr, thr_n=4.)
+				img0 = foxsi_image_det( data_lvl2_d0, erange=erange, trange=tr, thr_n=4., year=2012)
 				map  = rot_map( make_map( img0, dx=7.78, dy=7.78 ), rot0 )
 			  	end
 			1: begin
-				img1 = foxsi_image_det( data_lvl2_d1, erange=erange, trange=tr, thr_n=4.)
+				img1 = foxsi_image_det( data_lvl2_d1, erange=erange, trange=tr, thr_n=4., year=2012)
 				map  = rot_map( make_map( img1, dx=7.78, dy=7.78 ), rot1 )
 			  	end
 			2: begin
-				img2 = foxsi_image_det( data_lvl2_d2, erange=erange, trange=tr, thr_n=4.)
+				img2 = foxsi_image_det( data_lvl2_d2, erange=erange, trange=tr, thr_n=4., year=2012)
 				map  = rot_map( make_map( img2, dx=7.78, dy=7.78 ), rot2 )
 			  	end
 			3: begin
-				img3 = foxsi_image_det( data_lvl2_d3, erange=erange, trange=tr, thr_n=4.)
+				img3 = foxsi_image_det( data_lvl2_d3, erange=erange, trange=tr, thr_n=4., year=2012)
 				map  = rot_map( make_map( img3, dx=7.78, dy=7.78 ), rot3 )
 			  	end
 			4: begin
-				img4 = foxsi_image_det( data_lvl2_d4, erange=erange, trange=tr, thr_n=4.)
+				img4 = foxsi_image_det( data_lvl2_d4, erange=erange, trange=tr, thr_n=4., year=2012)
 				if keyword_set( fix4 ) then img4[18,*] = (img4[17,*] + img4[19,*])/2.
 				map  = rot_map( make_map( img4, dx=7.78, dy=7.78 ), rot4 )
 			  	end
 			5: begin
-				img5 = foxsi_image_det( data_lvl2_d5, erange=erange, trange=tr, thr_n=4.)
+				img5 = foxsi_image_det( data_lvl2_d5, erange=erange, trange=tr, thr_n=4., year=2012)
 				map  = rot_map( make_map( img5, dx=7.78, dy=7.78 ), rot5 )
 			  	end
 			6: begin
-				img6 = foxsi_image_det( data_lvl2_d6, erange=erange, trange=tr, thr_n=4.)
+				img6 = foxsi_image_det( data_lvl2_d6, erange=erange, trange=tr, thr_n=4., year=2012)
 				map  = rot_map( make_map( img6, dx=7.78, dy=7.78 ), rot6 )
 			  	end
 		endcase
@@ -322,7 +322,7 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 ;		raw.dx = pix
 ;		raw.dy = pix
 		
-		raw.data = smooth( raw.data, img_smooth/pix )	
+		;raw.data = smooth( raw.data, img_smooth/pix )	
 		raw = make_submap( raw, cen=[0.,0.], fov=fov )
 
 	endelse  

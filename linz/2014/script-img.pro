@@ -750,6 +750,10 @@ trange=[t1_pos2_start, t1_pos2_end]
 cen = cen1_pos2
 m3 = foxsi_image_map( data_lvl2_d3, cen, trange=trange, thr_n=2.2, /cdte, er=[3.,100])
 plot_map, m3, /cbar, /log
+plot_map, m3, /cbar, cen=[50,-250], fov=2 
+
+m6 = foxsi_image_map( data_lvl2_d6, cen, trange=trange, thr_n=4., er=[4.,15])
+plot_map, m6, /cbar, /log
 
 
 ;
@@ -876,3 +880,70 @@ xyouts, -200, -450, 'VLA 1.44 GHz 19:15 1 sec', col=5, charth=2, charsi=ch
 plot_map, m6, /over, col=8, thick=4, lev=[10,35,60,90], /per
 xyouts, -200, -500, 'FOXSI D6 19:13:46-19:14:24', col=8, charth=2, charsi=ch
 pclose
+
+; FOXSI
+trange=[t5_start, t5_end]
+cen = cen5
+m6 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+
+;
+; All FOXSI maps
+;
+
+trange=[t1_pos2_start, t1_pos2_end]
+cen = cen1_pos2
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t2_pos1_start, t2_pos1_end]
+cen = cen2_pos1
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t3_pos2_start, t3_pos2_end]
+cen = cen3_pos2
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t4_start, t4_end]
+cen = cen4
+m4 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t5_start, t5_end]
+cen = cen5
+m5 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+f=file_search('~/data/aia/20141211/*_0094*')
+fits2map, f[20], aia
+
+popen, xsi=5, ysi=5
+loadct,1
+reverse_ct
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+hsi_linecolors
+plot_map, m1, /over, col=2, lev=[2,5,10],/per, th=6
+plot_map, m2, /over, col=2, lev=[2,5,10],/per, th=6
+;plot_map, m3, /over, col=2, lev=[2,5,10],/per, th=6
+;plot_map, m4, /over, col=2, lev=[2,5,10],/per, th=6
+plot_map, m5, /over, col=2, lev=[2,5,10],/per, th=6
+;draw_fov, det=5, thick=2, target=1, col=255
+;draw_fov, det=5, thick=2, target=2, col=255
+;draw_fov, det=5, thick=2, target=3, col=255
+;draw_fov, det=5, thick=2, target=4, col=255
+;draw_fov, det=5, thick=2, target=5, col=255
+pclose
+
+
+popen, xsi=7, ysi=7
+loadct,1
+reverse_ct
+plot_map, aia, dmin=0, dmax=50, fov=3, cen=flare1, col=255, xth=5, yth=5
+hsi_linecolors
+plot_map, m1, /over, thick=12, col=2, lev=[10,30,50,70,90], /per
+
+loadct,1
+reverse_ct
+plot_map, aia, dmin=0, dmax=50, fov=3, cen=flare2, col=255, xth=5, yth=5
+hsi_linecolors
+plot_map, shift_map(m5,-10,-10), /over, thick=12, col=2, lev=[10,30,50,70,90], /per
+pclose
+
+

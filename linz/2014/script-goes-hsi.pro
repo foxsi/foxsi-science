@@ -1,13 +1,17 @@
-restore, '~/idlsave_goes.sav',/v
+restore, 'idlsave_goes.sav',/v
 
 utplot, tarray, yclean[*,0],timerange='2014-dec-11 19:'+['00','25']
 
 goes_flux = yclean[0:799,0]
+goes_flux2 = yclean[0:799,1]
 goes_time = tarray[0:799]+utbase
 
 goes_title = 'GOES flux 1.8 keV'
 
 utplot, anytim(goes_time,/yo), goes_flux, timerange='2014-dec-11 19:'+['12','19'], $
+	yrange=[6.5e-7, 7.5e-7], charsi=1.2, title=goes_title
+
+utplot, anytim(goes_time,/yo), goes_flux2, timerange='2014-dec-11 19:'+['12','19'];, $
 	yrange=[6.5e-7, 7.5e-7], charsi=1.2, title=goes_title
 
 save, goes_time, goes_flux, goes_title, file='goes-lc.sav'

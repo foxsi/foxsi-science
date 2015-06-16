@@ -77,6 +77,10 @@ shift1 = [-13.,17.] + shift6
 shift4 = [-6.,-28.] + shift6
 shift5 = [20.,-2.] + shift6
 
+; Flare locations
+flare1 = [30,-220]
+flare2 = [-70,90]
+
 
 ; Rotation angles for all detectors
 rot0 = 82.5

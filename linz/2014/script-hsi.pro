@@ -93,27 +93,29 @@ plot_map, m1, /over
 ; Other work.
 
 
-t1 = '11-Dec-2014 ' + ['19:00:00','19:30:00']
+t1 = '11-Dec-2014 ' + ['19:10:00','20:10:00']
 
 obs_obj = hsi_obs_summary( obs_time_interval=t1 )
 obs_obj->plotman, /ylog
+
+; Note: for this event, don't use 2, 4, or 5!
 
 ;
 ; SPEX
 ;
 
-t_int = '11-Dec-2014 ' + ['19:00:00','19:30:00']
+t_int = '11-Dec-2014 ' + ['19:10:00','20:10:00']
 
 obs_obj = hsi_obs_summary()
 obs_obj-> set, obs_time_interval= t_int
-obs_obj-> plotman, /ylog
+;obs_obj-> plotman, /ylog
 
 obj = hsi_spectrum()
 obj-> set, obs_time_interval= t_int
 obj-> set, decimation_correct= 1                                                             
 obj-> set, rear_decimation_correct= 0                                                        
 obj-> set, pileup_correct= 0                                                                 
-obj-> set, seg_index_mask= [1B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, $
+obj-> set, seg_index_mask= [1B, 0B, 1B, 0B, 0B, 1B, 0B, 1B, 1B, $
 							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
 obj-> set, sp_chan_binning= 0
 obj-> set, sp_chan_max= 0
@@ -132,26 +134,63 @@ data = obj->getdata()    ; retrieve the spectrum data
 ;obj-> plot, /pl_time     ; plot the time history
 ;obj-> plotman, pl_time   ; plot the time history in plotman
 
-specfile = 'linz/hsi_spec_20121102_30sec_D1.fits'
-srmfile = 'linz/hsi_srm_20121102_30sec_D1.fits'
+specfile = 'linz/hsi_spec_20141211.fits'
+srmfile = 'linz/hsi_srm_20141211.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+
+obj-> set, seg_index_mask= [1B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D1.fits'
+srmfile = 'linz/hsi_srm_20141211_D1.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 1B, 0B, 0B, 0B, 0B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D3.fits'
+srmfile = 'linz/hsi_srm_20141211_D3.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 1B, 0B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D6.fits'
+srmfile = 'linz/hsi_srm_20141211_D6.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 0B, 1B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D7.fits'
+srmfile = 'linz/hsi_srm_20141211_D7.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 0B, 0B, 1B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D8.fits'
+srmfile = 'linz/hsi_srm_20141211_D8.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 1B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D9.fits'
+srmfile = 'linz/hsi_srm_20141211_D9.fits'
 obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
 
 
 
 obj = ospex()
-obj-> set, spex_specfile= 'linz/hsi_spec_20121102_30sec_D1.fits'
-obj-> set, spex_drmfile= 'linz/hsi_srm_20121102_30sec_D1.fits'
-obj-> set, spex_bk_time_interval=[' 2-Nov-2012 17:50:30.000', ' 2-Nov-2012 17:53:00.000']
-obj-> set, spex_fit_time_interval= [[' 2-Nov-2012 18:01:30.000', ' 2-Nov-2012 18:02:00.000']]
-
-; 0.00753, 0.732
-; 0.00588, 0.751
-; 0.00400, 0.827
-
-; 0.00671391, 0.745797
-; 
-
-obj-> set, spex_erange = [6.,100.]
+obj-> set, spex_specfile= 'linz/hsi_spec_20141211.fits'
+obj-> set, spex_drmfile= 'linz/hsi_srm_20141211.fits'
+obj-> set, spex_bk_time_interval=[' 11-Dec-2014 20:00:00.000', ' 11-Dec-2014 20:10:00.000']
+obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:10:00.000', $                       
+ '11-Dec-2014 19:10:30.000'], ['11-Dec-2014 19:10:30.000', '11-Dec-2014 19:11:00.000'], $
+ ['11-Dec-2014 19:11:00.000', '11-Dec-2014 19:11:30.000'], ['11-Dec-2014 19:11:30.000', $
+ '11-Dec-2014 19:12:00.000'], ['11-Dec-2014 19:12:00.000', '11-Dec-2014 19:12:30.000'], $
+ ['11-Dec-2014 19:12:30.000', '11-Dec-2014 19:13:00.000'], ['11-Dec-2014 19:13:00.000', $
+ '11-Dec-2014 19:13:30.000'], ['11-Dec-2014 19:13:30.000', '11-Dec-2014 19:14:00.000'], $
+ ['11-Dec-2014 19:14:00.000', '11-Dec-2014 19:14:30.000'], ['11-Dec-2014 19:14:30.000', $
+ '11-Dec-2014 19:15:00.000'], ['11-Dec-2014 19:15:00.000', '11-Dec-2014 19:15:30.000'], $
+ ['11-Dec-2014 19:15:30.000', '11-Dec-2014 19:16:00.000'], ['11-Dec-2014 19:16:00.000', $
+ '11-Dec-2014 19:16:30.000'], ['11-Dec-2014 19:16:30.000', '11-Dec-2014 19:17:00.000'], $
+ ['11-Dec-2014 19:17:00.000', '11-Dec-2014 19:17:30.000'], ['11-Dec-2014 19:17:30.000', $
+ '11-Dec-2014 19:18:00.000'], ['11-Dec-2014 19:18:00.000', '11-Dec-2014 19:18:30.000'], $
+ ['11-Dec-2014 19:18:30.000', '11-Dec-2014 19:19:00.000'], ['11-Dec-2014 19:19:00.000', $
+ '11-Dec-2014 19:19:30.000'], ['11-Dec-2014 19:19:30.000', '11-Dec-2014 19:20:00.000']]  
+obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:13:30','11-Dec-2014 19:14:00']]
+obj-> set, spex_erange = [4.,12.]
 ;obj-> set, spex_erange = -1
 
 obj -> dofit, /all                                                                                     

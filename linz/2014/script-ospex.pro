@@ -42,26 +42,34 @@ NOTE 2: The default value for spex_error_use_expected is 1, which means that the
 ; Based on this, my code for fitting FOXSI data with OSPEX.
 ;
 
-spec1 = get_target_spectra( 1, year=2014, /good )
-enm = spec1[6].energy_kev[0:49]
+bin = 0.3
+;spec1 = get_target_spectra( 1, year=2014, /good, bin=bin )
+dat = area_cut(data_lvl2_d0, [0.,-300.], 200., /xy)
+t1 = t1_pos2_start + t_launch
+t2 = t1_pos2_end + t_launch
+i6 = where(dat.wsmr_time gt t1 and dat.wsmr_time lt t2 and dat.error_flag eq 0)
+spec = make_spectrum( dat[i6], bin=bin, /corr )
+
+i = where( spec.energy_kev gt 3. and spec.energy_kev lt 15. )
+enm = spec.energy_kev[i]
 en_lo = enm - deriv(enm)*0.5
 en_hi = enm + deriv(enm)*0.5
 en2 = transpose( [[en_lo],[en_hi]] )
-spec_array = spec1[6].spec_p[0:49]
-resp = get_foxsi_effarea( energy_arr=enm, module=6 )
+spec_array = spec.spec_p[i]
+resp = get_foxsi_effarea( energy_arr=enm, module=0 )
 diag = resp.eff_area_cm2 / max(resp.eff_area_cm2[where(resp.eff_area_cm2 ge 0.)])
 
 o = ospex()
 o -> set, spex_data_source = 'SPEX_USER_DATA'
-o -> set, spectrum = spec_array, spex_ct_edges = en2
+o -> set, spectrum = spec_array, spex_ct_edges = en2, errors = sqrt(spec_array/bin)
 o -> set, spex_respinfo = diag
 o -> set, spex_area = max(resp.eff_area_cm2[where(resp.eff_area_cm2 ge 0.)])
 
 o-> set, fit_function= 'vth'
 o-> set, fit_comp_params= [1., 1.0, 1.00000]                                
 o-> set, fit_comp_free_mask= [1B, 1B, 0B]
-o-> set, fit_comp_spectrum= ['full', '']				; Or maybe continuum only, 'cont'
-o-> set, fit_comp_model= ['mewe', '']
+o-> set, fit_comp_spectrum= ['full', '']
+o-> set, fit_comp_model= ['chianti', '']
 o-> set, spex_erange = [4.,8.]
 o-> set, spex_fit_time_interval = [0.,3600.]
 

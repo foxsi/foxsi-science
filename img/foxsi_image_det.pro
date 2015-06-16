@@ -52,7 +52,7 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 
 	; throw out any potentially bad events
 	if keyword_set( keepall ) then data2=data else data2 = data[ where( data.error_flag eq 0 ) ]
-	
+
 	; restrict ADC range
 	data2 = data2[ where( data2.hit_energy[1] gt erange[0] and data2.hit_energy[1] lt erange[1]$
 				 and data2.hit_energy[0] gt thr_n ) ]
