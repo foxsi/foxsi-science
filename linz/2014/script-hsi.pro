@@ -1,24 +1,121 @@
-t1 = '11-Dec-2014 ' + ['19:00:00','19:30:00']
+;
+; Using Säm's RHESSI image.
+;
+
+restore,'sam/rhsi_xrt_last_foxsi_target.dat'
+loadct2,3
+;popen
+!p.multi=[0,2,1]
+this_fov=3
+this_center=[20,-70]
+this_center=[-65,90]
+this_level=[50,70,90]
+this_xrt=gxmap23
+this_shift=[23,24]
+this_xrt.xc=this_xrt.xc+this_shift(0)
+this_xrt.yc=this_xrt.yc+this_shift(1)
+
+plot_map,this_xrt,fov=this_fov,center=this_center,bot=9,dmax=-1700,dmin=-2500
+plot_map,h_arx,/over,/per,levels=this_level,color=2,thick=4
+xyouts,-147,19,'RHESSI 4-8 keV',charsize=1.4,color=2
+xyouts,-147,7,'19:18:50-19:19:14UT',charsize=1.4,color=2
+
+this_xrt2=gxmap24
+this_xrt2.xc=this_xrt2.xc+this_shift(0)
+this_xrt2.yc=this_xrt2.yc+this_shift(1)
+plot_map,this_xrt2,fov=this_fov,center=this_center,bot=9,dmax=-1700,dmin=-3200
+plot_map,h_arx,/over,/per,levels=this_level,color=2,thick=4
+xyouts,-147,19,'RHESSI 4-8 keV',charsize=1.4,color=2
+xyouts,-147,7,'19:18:50-19:19:14UT',charsize=1.4,color=2
+;pclose
+
+;
+; end Säm's script.
+;
+
+; Adding on the FOXSI image too.
+
+trange=[t5_start, t5_end]
+cen = cen5
+en = [4.,8.]
+m = foxsi_image_map( data_lvl2_d6, cen, erange=en, trange=trange, /XYCORR, thr_n=4., smooth=2 )
+m.id = 'FOXSI Det6 4-8 keV'
+
+loadct, 5
+plot_map, m, cen=this_center, fov=3
+
+sub_fox = make_submap( m, cen=this_center, fov=3)
+sub_hsi = make_submap( h_arx, cen=this_center, fov=3)
+print, map_centroid(sub_fox, thr=1.)
+print, map_centroid(sub_hsi, thr=0.0)
+IDL> print, map_centroid(sub_fox, thr=1.)
+      -108.09132       47.718691
+IDL> print, map_centroid(sub_hsi, thr=0.004)
+      -65.583088       89.430286
+print, map_centroid(sub_hsi, thr=0.004) - map_centroid(sub_fox, thr=1.)
+IDL> print, map_centroid(sub_hsi, thr=0.004) - map_centroid(sub_fox, thr=1.)
+       42.508237       41.711595
+;;;;; UPDATING THESE NUMBERS IN SETUP FILE ;;;;;
+
+
+trange=[t5_start, t5_end]
+cen = cen5
+
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+ma = foxsi_image_map( data_lvl2_d0, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+mb = foxsi_image_map( data_lvl2_d1, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+mc = foxsi_image_map( data_lvl2_d4, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+md = foxsi_image_map( data_lvl2_d5, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+me = foxsi_image_map( data_lvl2_d6, cen, erange=[8,11.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+m4 = ma
+m4.data = ma.data+mb.data+mc.data+md.data+me.data
+
+
+plot_map, m3, cen=this_center, fov=2
+
+ratio = m1
+ratio.data = m2.data / m1.data 
+ratio.data[ where(m2.data lt 1.1) ] = 0.
+ratio.data[ where(m1.data lt 1.1) ] = 0.
+plot_map, ratio, /log, cen=[-100,100], fov=3, /cbar
+plot_map, m1, /over
+
+
+
+
+
+
+
+; Other work.
+
+
+t1 = '11-Dec-2014 ' + ['19:10:00','20:10:00']
 
 obs_obj = hsi_obs_summary( obs_time_interval=t1 )
 obs_obj->plotman, /ylog
+
+; Note: for this event, don't use 2, 4, or 5!
 
 ;
 ; SPEX
 ;
 
-t_int = '11-Dec-2014 ' + ['19:00:00','19:30:00']
+t_int = '11-Dec-2014 ' + ['19:10:00','20:10:00']
 
 obs_obj = hsi_obs_summary()
 obs_obj-> set, obs_time_interval= t_int
-obs_obj-> plotman, /ylog
+;obs_obj-> plotman, /ylog
 
 obj = hsi_spectrum()
 obj-> set, obs_time_interval= t_int
 obj-> set, decimation_correct= 1                                                             
 obj-> set, rear_decimation_correct= 0                                                        
 obj-> set, pileup_correct= 0                                                                 
-obj-> set, seg_index_mask= [1B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, $
+obj-> set, seg_index_mask= [1B, 0B, 1B, 0B, 0B, 1B, 0B, 1B, 1B, $
 							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
 obj-> set, sp_chan_binning= 0
 obj-> set, sp_chan_max= 0
@@ -37,26 +134,63 @@ data = obj->getdata()    ; retrieve the spectrum data
 ;obj-> plot, /pl_time     ; plot the time history
 ;obj-> plotman, pl_time   ; plot the time history in plotman
 
-specfile = 'linz/hsi_spec_20121102_30sec_D1.fits'
-srmfile = 'linz/hsi_srm_20121102_30sec_D1.fits'
+specfile = 'linz/hsi_spec_20141211.fits'
+srmfile = 'linz/hsi_srm_20141211.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+
+obj-> set, seg_index_mask= [1B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D1.fits'
+srmfile = 'linz/hsi_srm_20141211_D1.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 1B, 0B, 0B, 0B, 0B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D3.fits'
+srmfile = 'linz/hsi_srm_20141211_D3.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 1B, 0B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D6.fits'
+srmfile = 'linz/hsi_srm_20141211_D6.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 0B, 1B, 0B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D7.fits'
+srmfile = 'linz/hsi_srm_20141211_D7.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 0B, 0B, 1B, 0B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D8.fits'
+srmfile = 'linz/hsi_srm_20141211_D8.fits'
+obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
+obj-> set, seg_index_mask= [0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 1B, $
+							0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B, 0B]
+specfile = 'linz/hsi_spec_20141211_D9.fits'
+srmfile = 'linz/hsi_srm_20141211_D9.fits'
 obj->filewrite, /buildsrm, all_simplify = 0, srmfile = srmfile, specfile = specfile
 
 
 
 obj = ospex()
-obj-> set, spex_specfile= 'linz/hsi_spec_20121102_30sec_D1.fits'
-obj-> set, spex_drmfile= 'linz/hsi_srm_20121102_30sec_D1.fits'
-obj-> set, spex_bk_time_interval=[' 2-Nov-2012 17:50:30.000', ' 2-Nov-2012 17:53:00.000']
-obj-> set, spex_fit_time_interval= [[' 2-Nov-2012 18:01:30.000', ' 2-Nov-2012 18:02:00.000']]
-
-; 0.00753, 0.732
-; 0.00588, 0.751
-; 0.00400, 0.827
-
-; 0.00671391, 0.745797
-; 
-
-obj-> set, spex_erange = [6.,100.]
+obj-> set, spex_specfile= 'linz/hsi_spec_20141211.fits'
+obj-> set, spex_drmfile= 'linz/hsi_srm_20141211.fits'
+obj-> set, spex_bk_time_interval=[' 11-Dec-2014 20:00:00.000', ' 11-Dec-2014 20:10:00.000']
+obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:10:00.000', $                       
+ '11-Dec-2014 19:10:30.000'], ['11-Dec-2014 19:10:30.000', '11-Dec-2014 19:11:00.000'], $
+ ['11-Dec-2014 19:11:00.000', '11-Dec-2014 19:11:30.000'], ['11-Dec-2014 19:11:30.000', $
+ '11-Dec-2014 19:12:00.000'], ['11-Dec-2014 19:12:00.000', '11-Dec-2014 19:12:30.000'], $
+ ['11-Dec-2014 19:12:30.000', '11-Dec-2014 19:13:00.000'], ['11-Dec-2014 19:13:00.000', $
+ '11-Dec-2014 19:13:30.000'], ['11-Dec-2014 19:13:30.000', '11-Dec-2014 19:14:00.000'], $
+ ['11-Dec-2014 19:14:00.000', '11-Dec-2014 19:14:30.000'], ['11-Dec-2014 19:14:30.000', $
+ '11-Dec-2014 19:15:00.000'], ['11-Dec-2014 19:15:00.000', '11-Dec-2014 19:15:30.000'], $
+ ['11-Dec-2014 19:15:30.000', '11-Dec-2014 19:16:00.000'], ['11-Dec-2014 19:16:00.000', $
+ '11-Dec-2014 19:16:30.000'], ['11-Dec-2014 19:16:30.000', '11-Dec-2014 19:17:00.000'], $
+ ['11-Dec-2014 19:17:00.000', '11-Dec-2014 19:17:30.000'], ['11-Dec-2014 19:17:30.000', $
+ '11-Dec-2014 19:18:00.000'], ['11-Dec-2014 19:18:00.000', '11-Dec-2014 19:18:30.000'], $
+ ['11-Dec-2014 19:18:30.000', '11-Dec-2014 19:19:00.000'], ['11-Dec-2014 19:19:00.000', $
+ '11-Dec-2014 19:19:30.000'], ['11-Dec-2014 19:19:30.000', '11-Dec-2014 19:20:00.000']]  
+obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:13:30','11-Dec-2014 19:14:00']]
+obj-> set, spex_erange = [4.,12.]
 ;obj-> set, spex_erange = -1
 
 obj -> dofit, /all                                                                                     

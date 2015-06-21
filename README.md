@@ -14,22 +14,27 @@ Files:
 
 Directories:
 
+	calibration_data	data from the optics and detector calibration
 	data_2012:	contains FOXSI flight data files and processed data.
 			**This directory is ignored by git through .gitignore!**
 			All files are available for download on the FOXSI FTP site.
 	data_2014:	ditto, for FOXSI-2 data.  Also ignored by .gitignore
-	calibration_data	data from the optics calibration
-	detector_data		data from the detector calibration plus extra auxiliary data
-  	img			Imaging routines
-  	ishikawa	Routines and scripts written by Ishikawa
-  	linz		Lindsay's analysis directory
-  	old			Deprecated items
-  	plots		Some of the plots that have been generated
-  	proc		Routines to process data from raw form to the various levels.
-  	resp		Response and effective area routines
-  	sam			Routines and scripts written by Säm
-  	spec		Spectral routines
-  	util		utility IDL routines
+	fermi		Script used for FOXSI-1 Fermi analysis (didn't find anything)
+	help		Documentation directory (guides and examples)
+  img			Imaging routines
+  ishikawa	Routines and scripts written by Ishikawa
+  linz		Lindsay's analysis directory, with many sample scripts. Use at own risk!
+  milo		Milo's directory
+  old			Deprecated items
+  plots		Partial compilation of plots
+  proc		Routines to process data from raw form to the various levels.
+  psf			Some PSF code and plots from Steven
+  resp		Response and effective area routines
+  sam			Shared routines and scripts written by Säm
+  schriste	Steven's shared routines and scripts
+  spec		Spectral routines
+  util		utility IDL routines
+  vla			SAV files with VLA images
   	
 Detailed directory listing:
 

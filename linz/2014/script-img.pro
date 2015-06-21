@@ -1,64 +1,65 @@
-;@foxsi-setup-script-2014
+@foxsi-setup-script-2014
 
-; Shorter version
+; generic mapping script
 
-trange=[t1_start, t1_adj1]
-;trange=[t1_adj1,t1_adj2]
-;trange=[t1_adj2,t1_end]
-;trange=[t2_start,t2_adj1]
-;trange=[t2_adj1,t2_end]
-;trange=[t3_start,t3_adj1]
-;trange=[t3_adj1,t3_adj2]
-;trange=[t3_adj2,t3_end]
-;trange=[t4_start,t_shtr_start]
-;trange=[t_shtr_end,t4_end]
+;trange=[t1_pos2_start, t1_pos2_end]
+trange=[t3_pos0_start, t3_pos0_end]
+trange=[t3_pos1_start, t3_pos1_end]
+trange=[t3_pos2_start, t3_pos2_end]
 ;trange=[t5_start,t5_end]
 
-cen=cen1
-;cen=cen1_adj1
-;cen=cen1_adj2
-;cen=cen2
-;cen=cen2_adj1
-;cen=cen3
-;cen=cen3_adj1
-;cen=cen3_adj2
+;cen=cen1_pos2
+cen = cen3_pos0
+cen = cen3_pos1
+cen = cen3_pos2
 ;cen=cen4
 ;cen=cen5
 
-image0 = foxsi_image_det( data_lvl2_d0, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image1 = foxsi_image_det( data_lvl2_d1, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image4 = foxsi_image_det( data_lvl2_d4, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image5 = foxsi_image_det( data_lvl2_d5, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
-image6 = foxsi_image_det( data_lvl2_d6, year=2014, trange=trange, erange=[4.,15.], thr_n=4. )
+en = [4.,15.]
 
-xc = cen[0]
-yc = cen[1]
-map0 = rot_map( make_map( image0, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot0 )
-map1 = rot_map( make_map( image1, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot1 )
-map4 = rot_map( make_map( image4, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot4 )
-map5 = rot_map( make_map( image5, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot5 )
-map6 = rot_map( make_map( image6, dx=7.78, dy=7.78, xcen=xc, ycen=yc ), rot6 )
+;@foxsi-setup-script-2014
+map0 = foxsi_image_map( data_lvl2_d0, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
+map1 = foxsi_image_map( data_lvl2_d1, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
+map4 = foxsi_image_map( data_lvl2_d4, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
+map5 = foxsi_image_map( data_lvl2_d5, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
+map6 = foxsi_image_map( data_lvl2_d6, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
 
-map0 = shift_map( map0, shift0[0], shift0[1] )
-map1 = shift_map( map1, shift1[0], shift1[1] )
-map4 = shift_map( map4, shift4[0], shift4[1] )
-map5 = shift_map( map5, shift5[0], shift5[1] )
-map6 = shift_map( map6, shift6[0], shift6[1] )
+map0 = make_submap( map0, map6, /preserve )
+map1 = make_submap( map1, map6, /preserve )
+map4 = make_submap( map4, map6, /preserve)
+map5 = make_submap( map5, map6, /preserve )
+map6 = make_submap( map6, map6, /preserve )
 
-map0.roll_angle = 0
-map1.roll_angle = 0
-map4.roll_angle = 0
-map5.roll_angle = 0
-map6.roll_angle = 0
-map0.roll_center = 0
-map1.roll_center = 0
-map4.roll_center = 0
-map5.roll_center = 0
-map6.roll_center = 0
+help, map0.data, map1.data, map4.data, map5.data, map6.data
+map=map1
+map.data = map0.data + map1.data + map4.data + map5.data + map6.data
+plot_map, map, /log, /limb
 
-map=map0
-map.data = map0.data + map1.data+map4.data+map5.data+map6.data
+map_t3_pos2 = map
+map6_t3_pos2 = map6
 
+maps = [map_t3_pos0, map_t3_pos1, map_t3_pos2]
+maps6 = [map6_t3_pos0, map6_t3_pos1, map6_t3_pos2]
+
+center = [average(maps.xc), average(maps.yc)]
+;movie_map, maps, cen=center, fov=30, /limb, /log
+
+sub0 = make_submap( maps[0], cen=center, fov=30 )
+sub1 = make_submap( maps[1], cen=center, fov=30 )
+sub2 = make_submap( maps[2], cen=center, fov=30 )
+
+sub0 = make_submap( sub0, sub0, /preserve )
+sub1 = make_submap( sub1, sub0, /preserve )
+sub2 = make_submap( sub2, sub0, /preserve )
+
+total = sub0
+total.data = sub0.data + sub1.data + sub2.data
+
+plot_map, total, cen=center, fov=30, /limb, /log
+
+smooth=total
+smooth.data = smooth(total.data,4)
+plot_map, smooth, cen=center, fov=30, /limb    
 
 ; Longer version
 
@@ -432,7 +433,7 @@ plot_map, map, /over, lev=[50,70,90,95], /per, col=2, thi=3
 restore, 'nustar/nustar-obs3-arA.sav', /v
 restore, 'nustar/foxsi-target3-allSi.sav', /v
 
-popen, 'nustar/nustar-foxsi', xsi=7, ysi=7
+;popen, 'nustar/nustar-foxsi', xsi=7, ysi=7
 loadct, 1
 reverse_ct
 plot_map, nust, /limb, lcol=255, grid=10, gcol=255, lth=4, gth=4, charsi=1.3, $
@@ -440,7 +441,7 @@ plot_map, nust, /limb, lcol=255, grid=10, gcol=255, lth=4, gth=4, charsi=1.3, $
 hsi_linecolors
 plot_map, map, /over, col=2, thick=10, lev=[10], /per
 xyouts, 0.18, 0.01, 'FOXSI 19:17:10 - 19:17:45 single counts', /norm, charsi=1.5, charth=2, col=2
-pclose
+;pclose
 
 
 ; North Pole
@@ -580,11 +581,15 @@ pclose
 
 
 
-trange=[t1_pos2_start, t1_pos2_end]
-cen = cen1_pos2
+trange=[t1_pos1_start+10, t1_pos1_end]
+cen = cen1_pos1
 en = [4.,10.]
-m1 = foxsi_image_map( data_lvl2_d6, cen, erange=en, trange=trange, thr_n=4., /xycorr )
-m1.id = 'FOXSI Det6 4-10 keV'
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,10.], trange=trange, thr_n=4., /xycorr, smooth=2 )
+m1.id = 'FOXSI Det6 4-6 keV'
+m2.id = 'FOXSI Det6 6-10 keV'
+
+plot_map, m1, cen=[25,-250], fov=3 
 
 popen, xsi=7, ysi=7
 loadct, 3
@@ -607,7 +612,7 @@ plot_map, m1, /over, thick=3
 ; Imspex, ARX
 ;
 
-trange=[t5_start, t5_end]
+trange=[t1_pos2_start, t1_pos2_end]
 cen = cen5
 
 m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr )
@@ -618,18 +623,24 @@ loadct, 1
 reverse_ct
 popen, xsi=5, ysi=7
 ch=1.4
-plot_map, m1, cen=[-100,100], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 4-6 keV', col=255
-plot_map, m2, cen=[-100,100], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 6-8 keV', col=255
-plot_map, m3, cen=[-100,100], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 8-11 keV', col=255
+plot_map, m1, cen=[-65,90], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 4-6 keV', col=255
+plot_map, m2, cen=[-65,90], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 6-8 keV', col=255
+plot_map, m3, cen=[-65,90], fov=3, charsi=ch, xth=5, yth=5, xtit='', tit='D6 Target 5 8-11 keV', col=255
 pclose
 
 m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,6.], trange=trange, thr_n=4., /xycorr, smooth=3 )
 m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[6.,8.], trange=trange, thr_n=4., /xycorr, smooth=3 )
 m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[8.,11.], trange=trange, thr_n=4., /xycorr, smooth=3 )
 
-m1=shift_map(m1,0,-5)
-m2=shift_map(m2,0,-5)
-m3=shift_map(m3,0,-5)
+plot_map, m1, cen=[-100,100], fov=20, charsi=ch, xth=5, yth=5, xtit=''
+draw_fov, det=6, target=5
+
+plot_map, m3, cen=[-65,90], fov=5, charsi=ch, xth=5, yth=5, xtit=''
+draw_fov, det=6, target=5, shift=[300.,0.]'
+
+;m1=shift_map(m1,0,-5)
+;m2=shift_map(m2,0,-5)
+;m3=shift_map(m3,0,-5)
 
 plot_map, m1, cen=[-100,100], fov=3
 
@@ -637,12 +648,15 @@ ratio = m1
 ratio.data = m2.data / m1.data 
 ratio.data[ where(m2.data lt 1.1) ] = 0.
 ratio.data[ where(m1.data lt 1.1) ] = 0.
-plot_map, ratio, /log, cen=[-100,100], fov=3, /cbar
+loadct,5
+plot_map, ratio, /log, cen=[-65,90], fov=3, /cbar
 plot_map, m1, /over
+;draw_fov, det=6, targ=5, shift=[0.,-240.]
 
 f=file_search('~/data/aia/20141211/*_0094*')
-fits2map, f, aia2
-plot_map, aia2[40], cen=[-90,80], fov=2, /log
+;f=file_search('~/data/aia/20141211/*_0131*')
+fits2map, f, aia
+plot_map, aia[40], cen=[-90,80], fov=2, /log
 plot_map, m1, /over
 dmap = make_dmap(aia2[40], ref_map=aia2[10] )
 plot_map, dmap, cen=[-90,80], fov=2, /log
@@ -691,6 +705,40 @@ plot_map, ratio, /over, thick=8, lev=[10,30], /per, col=255
 
 pclose
 
+;
+; Imaging spectroscopy in different time slices
+;
+
+trange=[t5_start+2., t5_start+12.]
+cen = cen5
+
+m1a = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,5.5], trange=trange, thr_n=4., /xycorr, smooth=3 )
+m2a = foxsi_image_map( data_lvl2_d6, cen, erange=[5.5,7.], trange=trange, thr_n=4., /xycorr, smooth=3 )
+m1b = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,5.5], trange=trange+10., thr_n=4., /xycorr, smooth=3 )
+m2b = foxsi_image_map( data_lvl2_d6, cen, erange=[5.5,7.], trange=trange+10., thr_n=4., /xycorr, smooth=3 )
+m1c = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,5.5], trange=trange+20., thr_n=4., /xycorr, smooth=3 )
+m2c = foxsi_image_map( data_lvl2_d6, cen, erange=[5.5,7.], trange=trange+20., thr_n=4., /xycorr, smooth=3 )
+
+ratioA = m1a
+ratioA.data = m2a.data / m1a.data 
+ratioA.data[ where(m2a.data lt 1.1) ] = 0.
+ratioA.data[ where(m1a.data lt 1.1) ] = 0.
+plot_map, ratioA, /log, cen=[-65,90], fov=3, /cbar
+plot_map, m1a, /over
+
+ratioB = m1b
+ratioB.data = m2b.data / m1b.data 
+ratioB.data[ where(m2b.data lt 1.1) ] = 0.
+ratioB.data[ where(m1b.data lt 1.1) ] = 0.
+plot_map, ratioB, /log, cen=[-65,90], fov=3, /cbar
+plot_map, m1b, /over
+
+ratioC = m1c
+ratioC.data = m2c.data / m1c.data 
+ratioC.data[ where(m2c.data lt 1.1) ] = 0.
+ratioC.data[ where(m1c.data lt 1.1) ] = 0.
+plot_map, ratioC, /log, cen=[-65,90], fov=3, /cbar
+plot_map, m1c, /over
 
 
 ;
@@ -702,5 +750,200 @@ trange=[t1_pos2_start, t1_pos2_end]
 cen = cen1_pos2
 m3 = foxsi_image_map( data_lvl2_d3, cen, trange=trange, thr_n=2.2, /cdte, er=[3.,100])
 plot_map, m3, /cbar, /log
+plot_map, m3, /cbar, cen=[50,-250], fov=2 
+
+m6 = foxsi_image_map( data_lvl2_d6, cen, trange=trange, thr_n=4., er=[4.,15])
+plot_map, m6, /cbar, /log
+
+
+;
+; Making AIA images to show targets
+;
+
+f=file_search('~/data/aia/20141211/*_0094*')
+fits2map, f[20], aia
+
+loadct,1
+reverse_ct
+
+popen, xsi=8, ysi=8
+!p.multi=[0,2,2]
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=1, shift=cen1_pos0-cen1_pos2, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=1, shift=cen1_pos1-cen1_pos2, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=1, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=2, shift=cen2_pos0-cen2_pos1, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=2, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=3, shift=cen3_pos0-cen3_pos2, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=3, shift=cen3_pos1-cen3_pos2, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=3, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=4, col=255
+;plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+;draw_fov, det=5, thick=3, target=5, col=255
+
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+draw_fov, det=5, thick=3, target=1, shift=cen1_pos0-cen1_pos2, col=255
+draw_fov, det=5, thick=3, target=1, shift=cen1_pos1-cen1_pos2, col=255
+draw_fov, det=5, thick=3, target=1, col=255
+draw_fov, det=5, thick=3, target=2, shift=cen2_pos0-cen2_pos1, col=255
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+draw_fov, det=5, thick=3, target=2, col=255
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+draw_fov, det=5, thick=3, target=3, shift=cen3_pos0-cen3_pos2, col=255
+draw_fov, det=5, thick=3, target=3, shift=cen3_pos1-cen3_pos2, col=255
+draw_fov, det=5, thick=3, target=3, col=255
+pclose
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+draw_fov, det=5, thick=3, target=4, col=255
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+draw_fov, det=5, thick=3, target=5, col=255
+!p.multi=0
+pclose
+
+
+;
+; with VLA
+;
+
+; VLA
+restore, 'vlamaps_20141211.1s.fullsun.spw3.sav'
+vla144 = vlamaps
+restore, 'vlamaps_20141211.1s.fullsun.spw7.sav'
+vla194 = vlamaps
+plot_map, vla144[0,0], /limb, cen=cen1_pos2, fov=5
+plot_map, vla194[0,0], /over
+; 12 Mhz freq bin
+
+; AIA094
+f=file_search('~/data/aia/20141211/*_0094*')
+fits2map, f[15], aia
+
+; FOXSI
+trange=[t1_pos2_start, t1_pos2_end]
+cen = cen1_pos2
+m6 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+loadct, 3
+plot_map, vlamaps[0,0], /limb, cen=[0,-100], fov=10
+draw_fov, det=5, target=1  
+hsi_linecolors
+plot_map, m6, /over, col=7, thick=4, lev=[5,10,30,50,70,90], /per
+
+aia_lct, r,g,b,wave=94, /load
+;reverse_ct
+;plot_map, aia, cen=[0,-100], fov=10
+plot_map, aia, cen=[20,-250], fov=5, /log
+hsi_linecolors
+plot_map, vla144[0,0], col=5, thick=2, /over, lev=[30,50,70,90], /per
+plot_map, vla194[0,0], col=6, thick=2, /over, lev=[30,50,70,90], /per
+xyouts, -200, -400, 'VLA 1.44 GHz 19:15', col=5, charth=2
+xyouts, -200, -450, 'VLA 1.94 GHz 19:15', col=6, charth=2
+plot_map, m6, /over, col=8, thick=2, lev=[10,30,50,70,90], /per
+xyouts, -200, -500, 'FOXSI D6 19:13:46-19:14:24', col=8, charth=2
+
+aia_lct, r,g,b,wave=94, /load
+plot_map, aia, cen=[20,-250], fov=10, /log, char=ch, charth=2, xth=5, yth=5
+hsi_linecolors
+plot_map, vlamaps[0,0], col=5, thick=2, /over, lev=[30,50,70,90], /per
+xyouts, -200, -450, 'VLA freq? 19:15', col=5, charth=2, charsi=ch
+plot_map, m6, /over, col=8, thick=2, lev=[10,30,50,70,90], /per
+xyouts, -200, -500, 'FOXSI D6 19:13:46-19:14:24', col=8, charth=2, charsi=ch
+
+popen, 'plots/foxsi2/vla-foxsi.ps', xsi=8, ysi=8
+!p.multi=[0,2,2]
+aia_lct, r,g,b,wave=94, /load
+plot_map, aia, cen=[20,-250], fov=10, /log, char=ch, charth=2, xth=5, yth=5, /nodate
+hsi_linecolors
+aia_lct, r,g,b,wave=94, /load
+plot_map, aia, cen=[20,-250], fov=10, /log, char=ch, charth=2, xth=5, yth=5, /nodate
+hsi_linecolors
+plot_map, vlamaps[0,0], col=5, thick=4, /over, lev=[30,50,70,90], /per
+xyouts, -200, -450, 'VLA 1.44 GHz 19:15 1 sec', col=5, charth=2, charsi=ch
+aia_lct, r,g,b,wave=94, /load
+plot_map, aia, cen=[20,-250], fov=10, /log, char=ch, charth=2, xth=5, yth=5, /nodate
+hsi_linecolors
+plot_map, m6, /over, col=8, thick=4, lev=[10,35,60,90], /per
+xyouts, -200, -500, 'FOXSI D6 19:13:46-19:14:24', col=8, charth=2, charsi=ch
+aia_lct, r,g,b,wave=94, /load
+plot_map, aia, cen=[20,-250], fov=10, /log, char=ch, charth=2, xth=5, yth=5, /nodate
+hsi_linecolors
+plot_map, vlamaps[0,0], col=5, thick=4, /over, lev=[30,50,70,90], /per
+xyouts, -200, -450, 'VLA 1.44 GHz 19:15 1 sec', col=5, charth=2, charsi=ch
+plot_map, m6, /over, col=8, thick=4, lev=[10,35,60,90], /per
+xyouts, -200, -500, 'FOXSI D6 19:13:46-19:14:24', col=8, charth=2, charsi=ch
+pclose
+
+; FOXSI
+trange=[t5_start, t5_end]
+cen = cen5
+m6 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smooth=2 )
+
+
+;
+; All FOXSI maps
+;
+
+trange=[t1_pos2_start, t1_pos2_end]
+cen = cen1_pos2
+m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t2_pos1_start, t2_pos1_end]
+cen = cen2_pos1
+m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t3_pos2_start, t3_pos2_end]
+cen = cen3_pos2
+m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t4_start, t4_end]
+cen = cen4
+m4 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+trange=[t5_start, t5_end]
+cen = cen5
+m5 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+
+f=file_search('~/data/aia/20141211/*_0094*')
+fits2map, f[20], aia
+
+popen, xsi=5, ysi=5
+loadct,1
+reverse_ct
+plot_map, aia, col=0, dmin=0, dmax=50, fov=60
+hsi_linecolors
+plot_map, m1, /over, col=2, lev=[2,5,10],/per, th=6
+plot_map, m2, /over, col=2, lev=[2,5,10],/per, th=6
+;plot_map, m3, /over, col=2, lev=[2,5,10],/per, th=6
+;plot_map, m4, /over, col=2, lev=[2,5,10],/per, th=6
+plot_map, m5, /over, col=2, lev=[2,5,10],/per, th=6
+;draw_fov, det=5, thick=2, target=1, col=255
+;draw_fov, det=5, thick=2, target=2, col=255
+;draw_fov, det=5, thick=2, target=3, col=255
+;draw_fov, det=5, thick=2, target=4, col=255
+;draw_fov, det=5, thick=2, target=5, col=255
+pclose
+
+
+popen, xsi=7, ysi=7
+loadct,1
+reverse_ct
+plot_map, aia, dmin=0, dmax=50, fov=3, cen=flare1, col=255, xth=5, yth=5
+hsi_linecolors
+plot_map, m1, /over, thick=12, col=2, lev=[10,30,50,70,90], /per
+
+loadct,1
+reverse_ct
+plot_map, aia, dmin=0, dmax=50, fov=3, cen=flare2, col=255, xth=5, yth=5
+hsi_linecolors
+plot_map, shift_map(m5,-10,-10), /over, thick=12, col=2, lev=[10,30,50,70,90], /per
+pclose
 
 

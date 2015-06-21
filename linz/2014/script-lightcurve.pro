@@ -92,7 +92,7 @@ outplot, anytim(lcadd.time,/yo), lcadd.persec, col=7, thick=4, psym=10
 ; Set these parameters.
 start = t1_pos0_start+tlaunch	; Start time.
 finish = t5_end+tlaunch		; End time
-dt = 3.					; Time bin width
+dt = 5.					; Time bin width
 eBin = 0.4				; Energy bin width
 
 d6 = time_cut( data_lvl2_d6, start, start+10. )
@@ -110,14 +110,144 @@ for i=0, nTime-1 do begin
 	d5 = time_cut( data_lvl2_d5, start+i*dt, start+dt+i*dt, /good )
 	d6 = time_cut( data_lvl2_d6, start+i*dt, start+dt+i*dt, /good )
 	spec = make_spectrum( [d0,d4,d5,d6], binwidth=eBin )
+;	spec = make_spectrum( [d6], binwidth=eBin )
 	gram[i,*] = spec.spec_p*eBin
 endfor
 end
 
-;popen, 'spectrogram', xsi=8, ysi=4, /land
+popen, 'plots/foxsi2/spectrogram', xsi=8, ysi=4, /land
 loadct,5
 spectro_plot, gram, time, spec.energy_kev, yr=[0,15], /cbar, charsi=1.5, xth=5, yth=5, $
+	title='D0,4,5,6'
 ;	ytit='Energy [keV]', xr='2014-dec-11 '+['19:13:00','19:20:00']
-	ytit='Energy [keV]', xr='2014-dec-11 '+['19:13:00','19:17:00']
+;	ytit='Energy [keV]', xr='2014-dec-11 '+['19:13:00','19:17:00']
 ; add time bars.
-;pclose
+outplot, anytim(t1_pos0_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t1_pos0_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t1_pos1_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t1_pos1_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t1_pos2_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t1_pos2_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t2_pos0_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t2_pos0_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t2_pos1_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t2_pos1_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t3_pos0_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t3_pos0_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t3_pos1_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t3_pos1_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t3_pos2_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t3_pos2_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t4_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t4_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t_shtr_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t_shtr_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t5_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+outplot, anytim(t5_end*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),[0,15]
+pclose
+
+
+;
+; Natalie's code
+;
+
+; initial sizes and energy definitions
+;
+all_e = [4.,15.]
+low_e = [4.,7.]
+high_e = [7.,15.]
+
+sm_reg = [-125,50]
+sm_rad = 75
+lg_reg = [0,-300]
+lg_rad = 200
+
+dt=5
+
+; cutting out the active regions
+; by solar coordinates
+;
+sm_cut = area_cut(data_lvl2_d6, sm_reg, sm_rad, /xy)
+lg_cut = area_cut(data_lvl2_d6, lg_reg, lg_rad, /xy)
+
+
+; light curve over the entire detector
+; 
+all_d6 = foxsi_lc(data_lvl2_d6, year=2014, dt=dt, energy=all_e)
+d6_lo = foxsi_lc(data_lvl2_d6, year=2014, dt=dt, energy=low_e)
+d6_hi = foxsi_lc(data_lvl2_d6, year=2014, dt=dt, energy=high_e)
+
+; small active region photon counts
+; by energy range
+;
+sm_all = foxsi_lc(sm_cut, year=2014, dt=dt, energy=all_e, start_time=t1_pos0_start, end_time=t5_end)
+sm_lo = foxsi_lc(sm_cut, year=2014, dt=dt, energy=low_e, start_time=t1_pos0_start, end_time=t5_end)
+sm_hi = foxsi_lc(sm_cut, year=2014, dt=dt, energy=high_e, start_time=t1_pos0_start, end_time=t5_end)
+
+; large active region photon counts
+; by energy range
+;
+lg_all = foxsi_lc(lg_cut, year=2014, dt=dt, energy=all_e, /good, start_time=t1_pos0_start, end_time=t5_end)
+lg_lo = foxsi_lc(lg_cut, year=2014, dt=dt, energy=low_e, /good, start_time=t1_pos0_start, end_time=t5_end)
+lg_hi = foxsi_lc(lg_cut, year=2014, dt=dt, energy=high_e, /good, start_time=t1_pos0_start, end_time=t5_end)
+
+; adding together the low and high energies
+; should be the same as total (sm_all, lg_all)
+;
+sm_add = sm_lo.persec + sm_hi.persec
+lg_add = lg_lo.persec + lg_hi.persec
+d6_add = d6_lo.persec + d6_hi.persec
+
+; example of plotting one of the regions
+; 
+loadct, 15
+utplot, sm_all.time, sm_all.persec, /nodata, color=255, charsi=1.2, $
+title= 'Photon flux differences based on different energy ranges'
+
+outplot, sm_all.time, sm_all.persec, color=15, th=2.5, psym=10	; red
+
+outplot, sm_all.time, sm_add, color=120, th=2.5, psym=10	; blue
+
+
+; example of plotting one of the regions
+; 
+loadct, 15
+utplot, lg_all.time, lg_all.persec, /nodata, color=255, charsi=1.2, $
+title= 'Photon flux differences based on different energy ranges'
+
+outplot, lg_all.time, lg_all.persec, color=15, th=2.5, psym=10	; red
+
+outplot, lg_all.time, lg_add, color=120, th=2.5, psym=10	; blue
+
+;
+; Based on this, try to look at lightcurve from all Si det, large AR
+;
+
+en1 = [4.,6]
+en2 = [6,8.]
+en3 = [4.,15.]
+lg_reg = [0,-300]
+lg_rad = 200
+
+dt=2.
+
+dat = [data_lvl2_d0, data_lvl2_d1, data_lvl2_d4, data_lvl2_d5, data_lvl2_d6]
+
+lg_cut = area_cut(dat, lg_reg, lg_rad, /xy)
+lg_cut = dat
+;lc1 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=all_e, /good, start_time=t1_pos0_start, end_time=t5_end)
+lc1 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en1, /good, start_time=t1_pos0_start, end_time=t5_end)
+lc2 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en2, /good, start_time=t1_pos0_start, end_time=t5_end)
+lc3 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en3, /good, start_time=t1_pos0_start, end_time=t5_end)
+
+popen, xsi=8, ysi=4
+hsi_linecolors
+utplot, lc3.time, lc3.persec, /nodata, charsi=1.4, charth=2, xth=5, yth=5, $
+	title= 'FOXSI 4-15 keV, all Si', ytit='Counts s!U-1!N'
+;outplot, lc1.time, lc1.persec, color=6, th=2, psym=10
+;outplot, lc2.time, lc2.persec, color=7, th=2, psym=10
+outplot, lc3.time, lc3.persec, th=6, psym=10
+draw_target_change_times, thick=4
+al_legend, ['Target start','Target end','Shutter motion'], col=[6,7,4], thick=6, line=0, $
+	charsi=1.3, charth=2, /top, /right, back=1
+pclose	

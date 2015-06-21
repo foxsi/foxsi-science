@@ -56,3 +56,27 @@ plot_map, make_map(test3), /cbar
 min = min(test3,ind)
 ind2 = array_indices(test3,ind)
 test=tempfun8( nbla[ind2[0]], off[ind2[1]], spec, 80., /info, module=module )
+
+
+;
+; Notes on blanketing self-calibration...
+;
+
+choices:
+
+energy range
+energy bin width
+which energy bin is denominator (what about the one with highest counts outside of 6-7.5?)
+thoughts:
+	with these it’s probably best to put some statistical criteria on it…
+
+
+method of computing slope/chi_squared/correlation for temperature
+
+whether to include EM.
+	if so, how to compute EM (not fully done now)
+	if so, best figure of merit to use for EM.
+
+what values of NBLA and OFFSET to try.  (range and coarseness)
+
+how to combine CHI for temp and EM.

@@ -34,13 +34,13 @@
 
 FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, SMOOTH = SMOOTH, $
-                          YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, STOP = STOP
+                          YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, STOP = STOP
 
 	default, erange, [4.,15.]
 	default, thr_n, 4.		; n-side keV threshold
   default, year, 2014
   default, trange, [0,500]
-  default, year, 2014
+  default, fov, 20.
 
 	case year of
 		2012:	restore, 'data_2012/flight2012-parameters.sav'
@@ -72,8 +72,17 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 		
 	if keyword_set( smooth ) then image = smooth( image, smooth )
 
+	; pad data on either side so the map can be larger than the FOV, if desired.
+	nPix = fix( (fov*2)/16.*128.) 
+	temp = fltarr( nPix, nPix )
+	ind = (nPix/2)+[-64,63]
+	temp[ind[0]:ind[1],ind[0]:ind[1]] = image
+	image = temp
+
 	map = make_map( image, dx=stripsize, dy=stripsize, xcen=xc, ycen=yc, $
-		time=time, id='Det'+strtrim(detnum,2) )
+		time=time, id='Det'+strtrim(detnum,2), fov=2*fov )
+
+;	help, map.data
 
 	case detnum of
 		0: shift = shift0
@@ -89,8 +98,7 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 		end
 	endcase
 
-	; Apply positioning corrections, if desired.
-	if keyword_set( XYCORR ) then map = shift_map( map, shift[0], shift[1] )
+	if keyword_set( STOP ) then stop
 
 	case detnum of
 		0: rot = rot0
@@ -110,6 +118,13 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 	map = rot_map( map, rot )
 	map.roll_angle = 0.
 	map.roll_center = 0.
+	
+;	help, map.data
+
+	; Apply positioning corrections, if desired.
+	if keyword_set( XYCORR ) then map = shift_map( map, shift[0], shift[1] )
+	map = make_submap( map, cen=center, fov=fov )
+;	help, map.data
 
 	return, map
 	
