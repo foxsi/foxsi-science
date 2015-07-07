@@ -1,6 +1,8 @@
 ;+
 ; This procedure grabs Level 2 data structures for a given target during a FOXSI flight.
-; For each flight, there are 6 targets to choose from:
+; For FOXSI-1 there are 6 targets to choose from, and for FOXSI-2 there are 5.  For 
+; FOXSI-2, this includes the data for each target after any pointing adjustments were
+; done.  The "shutter in" time is not included in Target 4 (quiet Sun target).
 ;
 ; FOXSI-1	Target 1: AR1
 ;			Target 2: AR2
@@ -13,12 +15,11 @@
 ;			Target 2: AR2, after all repointings
 ;			Target 3: AR3, after all repointings
 ;			Target 4: Quiet Sun, prior to shutter
-;			Target 5: Quiet Sun with shutter in
-;			Target 6: AR1, with shutter in
+;			Target 5: AR1, with shutter in
 ;
 ; Inputs:	
 ;
-;		TARGET		Options are 1-6 for either flight; see index above.
+;		TARGET		Options are 1-5 or 1-6; see index above.
 ;
 ; Outputs:
 ;
