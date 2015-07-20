@@ -29,7 +29,9 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		spex = make_spectrum( data_level2_D6, binwidth=0.5, /corr )
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;
-
+;	History
+; 	2012-jul-19  LG		Fixed a bug in which energy array was 1 larger than spectrum array.
+;-
 
 
 	default, binwidth, 0.1
@@ -80,7 +82,8 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 	spec_p = spec_p / ratio_good / binwidth
 	p_error = p_error / ratio_good / binwidth
 
-	energy = energy + binwidth/2.  ; make energy array the midpoints of the bins.
+;	energy = energy + binwidth/2.
+	energy = get_edges( energy, /mean )  ; make energy array the midpoints of the bins.
 
 	spex = create_struct( 'energy_kev', energy, 'spec_n', spec_n, 'spec_p', spec_p, $
 						  'spec_p_err', p_error )
