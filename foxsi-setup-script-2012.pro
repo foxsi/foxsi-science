@@ -43,13 +43,13 @@ cen6 = [ 700,-600]
 flare = [967,-207]	; from RHESSI flarelist
 
 ; Offsets determined by comparison with the RHESSI flare centroid.
-shift0 = [ 55.4700,     -135.977 ]
-shift1 = [ 81.4900,     -131.124 ]
-shift2 = [ 96.3600,     -130.241 ]
-shift3 = [ 87.8900,     -92.7310 ]
-shift4 = [ 48.2700,     -95.3080 ]
-shift5 = [ 49.5500,     -120.276 ]
-shift6 = [ 63.4500,     -106.360 ]
+shift0 = -[ 55.4700,     -135.977 ]
+shift1 = -[ 81.4900,     -131.124 ]
+shift2 = -[ 96.3600,     -130.241 ]
+shift3 = -[ 87.8900,     -92.7310 ]
+shift4 = -[ 48.2700,     -95.3080 ]
+shift5 = -[ 49.5500,     -120.276 ]
+shift6 = -[ 63.4500,     -106.360 ]
 
 ; overall offset
 offset_xy = [0.,0.]
@@ -63,12 +63,21 @@ rot4 = 97.5
 rot5 = 90.
 rot6 = -60.
 
+detnum0 = 108
+detnum1 = 109
+detnum2 = 102
+detnum3 = 103
+detnum4 = 104
+detnum5 = 105
+detnum6 = 106
+
 ; Save the values set here for use by some of the routines.
 ; Saving this file each time ensures that updating a value in this setup script
 ; propagates through to all routines.
 save, tlaunch, t_launch, t1_start, t1_end, t2_start, t2_end, t3_start, t3_end, $
 	t4_start, t4_end, t5_start, t5_end, t6_start, t6_end, date, t0, $	
 	offset_xy, cen1, cen2, cen3, cen4, cen5, cen6, $
-	shift0, shift1, shift4, shift5, shift6, $
-	rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
+	shift0, shift1, shift2, shift3, shift4, shift5, shift6, $
+	rot0, rot1, rot2, rot3, rot4, rot5, rot6, , $
+	detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
 	file = 'data_2012/flight2012-parameters.sav'

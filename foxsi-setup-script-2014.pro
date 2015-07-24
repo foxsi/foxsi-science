@@ -94,6 +94,14 @@ rot4 = 97.5
 rot5 = 90.
 rot6 = -60.
 
+detnum0 = 108
+detnum1 = 101
+detnum2 = 0
+detnum3 = 0
+detnum4 = 104
+detnum5 = 105
+detnum6 = 102
+
 
 ; Save the values set here for use by some of the routines.
 ; Saving this file each time ensures that updating a value in this setup script
@@ -105,4 +113,6 @@ save, tlaunch, t_launch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 	t5_start, t5_end, date, t0, offset_xy, cen1_pos0, cen1_pos1, cen1_pos2, $
 	cen2_pos0, cen2_pos1, cen3_pos0, cen3_pos1, cen3_pos2, cen4, cen5, $
 	shift0, shift1, shift2, shift3, shift4, shift5, shift6, rot0, rot1, rot2, rot3, $
-	rot4, rot5, rot6, file = 'data_2014/flight2014-parameters.sav'
+	rot4, rot5, rot6, $
+	detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
+	file = 'data_2014/flight2014-parameters.sav'

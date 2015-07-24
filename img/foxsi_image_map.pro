@@ -18,6 +18,7 @@
 ;		KEEPALL	Keep all events, not just the "good" ones (i.e. those w/no error flags)
 ;		XYCORR	If set, use the position offset for that detector.
 ;		CDTE	Signifies CdTe detector.  Use alternate imaging routine.
+;		FLATFIELD	If set, perform a flatfield correction for differing strip sensitivity.
 ;
 ;
 ; Example:
@@ -27,6 +28,7 @@
 ;	plot_map, map6, /log, /cbar
 ;
 ; History:	
+;		2015 jul 23	Linz	Added flatfielding keyword, passed through to foxsi_image_det.pro
 ;		2015 mar 3	Linz	Added functionality to include CdTe geometry from Ishikawa.
 ;		2015 feb 05	Linz	Fixed strip size bug.  Was 60um default, now 75um unless CdTe.
 ;		2015 Jan 19	Linz	Created routine.
@@ -34,7 +36,8 @@
 
 FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, SMOOTH = SMOOTH, $
-                          YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, STOP = STOP
+                          YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, $
+                          flatfield=flatfield, STOP = STOP
 
 	default, erange, [4.,15.]
 	default, thr_n, 4.		; n-side keV threshold
@@ -66,7 +69,7 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 						keepall=keepall, year=year, thr_n=thr_n )	$
 		else $
 		image = foxsi_image_det( data, trange=trange, erange=erange, $
-						keepall=keepall, year=year, thr_n=thr_n )
+						keepall=keepall, year=year, thr_n=thr_n, flatfield=flatfield )
 
 	if keyword_set( CDTE ) then stripsize = 6.1879 else stripsize = 7.7349
 		
@@ -98,8 +101,6 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 		end
 	endcase
 
-	if keyword_set( STOP ) then stop
-
 	case detnum of
 		0: rot = rot0
 		1: rot = rot1
@@ -125,6 +126,8 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
 	if keyword_set( XYCORR ) then map = shift_map( map, shift[0], shift[1] )
 	map = make_submap( map, cen=center, fov=fov )
 ;	help, map.data
+
+	if keyword_set( STOP ) then stop
 
 	return, map
 	

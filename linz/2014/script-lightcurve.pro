@@ -251,3 +251,96 @@ draw_target_change_times, thick=4
 al_legend, ['Target start','Target end','Shutter motion'], col=[6,7,4], thick=6, line=0, $
 	charsi=1.3, charth=2, /top, /right, back=1
 pclose	
+
+
+;
+; July 21 2015
+;
+; Making lightcurves with different assumptions for where the on-axis position is.
+; Using AR 12230 as example.
+; 
+
+
+en = [4.,12]
+
+; First, get some rough ideas of the coordinates for the ARs.
+map_t1pos0 = foxsi_image_map( data_lvl2_d6, cen1_pos0, erange=en, tra=[t1_pos0_start, t1_pos0_end] )
+map_t1pos1 = foxsi_image_map( data_lvl2_d6, cen1_pos1, erange=en, tra=[t1_pos1_start, t1_pos1_end] )
+map_t1pos2 = foxsi_image_map( data_lvl2_d6, cen1_pos2, erange=en, tra=[t1_pos2_start, t1_pos2_end] )
+map_t2pos0 = foxsi_image_map( data_lvl2_d6, cen2_pos0, erange=en, tra=[t2_pos0_start, t2_pos0_end] )
+map_t2pos1 = foxsi_image_map( data_lvl2_d6, cen2_pos1, erange=en, tra=[t2_pos1_start, t2_pos1_end] )
+
+print, map_centroid( map_t1pos0, thr=0.5*max(map_t1pos0.data) ) - cen1_pos0
+print, map_centroid( map_t1pos1, thr=0.5*max(map_t1pos1.data) ) - cen1_pos1
+print, map_centroid( map_t1pos2, thr=0.5*max(map_t1pos2.data) ) - cen1_pos2
+print, map_centroid( map_t2pos0, thr=0.5*max(map_t2pos0.data) ) - cen2_pos0
+print, map_centroid( map_t2pos1, thr=0.5*max(map_t2pos1.data) ) - cen2_pos1
+
+; Here, select the version you want.
+; Either on-axis position is the FOXSI center.
+; Or on-axis position is the reverse of the FOXSI-SPARCS misalignment.
+;off_t1pos0 = map_centroid( map_t1pos0, thr=0.5*max(map_t1pos0.data) ) - cen1_pos0
+;off_t1pos1 = map_centroid( map_t1pos1, thr=0.5*max(map_t1pos1.data) ) - cen1_pos1
+;off_t1pos2 = map_centroid( map_t1pos2, thr=0.5*max(map_t1pos2.data) ) - cen1_pos2
+;off_t2pos0 = map_centroid( map_t2pos0, thr=0.5*max(map_t2pos0.data) ) - cen2_pos0
+;off_t2pos1 = map_centroid( map_t2pos1, thr=0.5*max(map_t2pos1.data) ) - cen2_pos1
+off_t1pos0 = (map_centroid( map_t1pos0, thr=0.5*max(map_t1pos0.data) )-cen1_pos0) - [-332,147]
+off_t1pos1 = (map_centroid( map_t1pos1, thr=0.5*max(map_t1pos1.data) )-cen1_pos1) - [-332,147]
+off_t1pos2 = (map_centroid( map_t1pos2, thr=0.5*max(map_t1pos2.data) )-cen1_pos2) - [-332,147]
+off_t2pos0 = (map_centroid( map_t2pos0, thr=0.5*max(map_t2pos0.data) )-cen2_pos0) - [-332,147]
+off_t2pos1 = (map_centroid( map_t2pos1, thr=0.5*max(map_t2pos1.data) )-cen2_pos1) - [-332,147]
+
+off_t1pos0 = sqrt(off_t1pos0[0]^2 + off_t1pos0[1]^2 ) / 60.
+off_t1pos1 = sqrt(off_t1pos1[0]^2 + off_t1pos1[1]^2 ) / 60.
+off_t1pos2 = sqrt(off_t1pos2[0]^2 + off_t1pos2[1]^2 ) / 60.
+off_t2pos0 = sqrt(off_t2pos0[0]^2 + off_t2pos0[1]^2 ) / 60.
+off_t2pos1 = sqrt(off_t2pos1[0]^2 + off_t2pos1[1]^2 ) / 60.
+
+; Get vignetting at ~5.9 keV for that off-axis angle.
+vig_t1pos0 = (get_foxsi_offaxis_resp( off=off_t1pos0 )).factor[50]
+vig_t1pos1 = (get_foxsi_offaxis_resp( off=off_t1pos1 )).factor[50]
+vig_t1pos2 = (get_foxsi_offaxis_resp( off=off_t1pos2 )).factor[50]
+vig_t2pos0 = (get_foxsi_offaxis_resp( off=off_t2pos0 )).factor[50]
+vig_t2pos1 = (get_foxsi_offaxis_resp( off=off_t2pos1 )).factor[50]
+
+print, off_t1pos0, vig_t1pos0
+print, off_t1pos1, vig_t1pos1
+print, off_t1pos2, vig_t1pos2
+print, off_t2pos0, vig_t2pos0
+print, off_t2pos1, vig_t2pos1
+
+lg_reg = [0,-300]
+lg_rad = 200
+dt=5.
+
+dat = [data_lvl2_d0, data_lvl2_d1, data_lvl2_d4, data_lvl2_d5, data_lvl2_d6]
+dat = [data_lvl2_d6]
+lg_cut = area_cut(dat, lg_reg, lg_rad, /xy)
+
+lc_t1pos0 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en, /good, start_time=t1_pos0_start, end_time=t1_pos0_end)
+lc_t1pos1 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en, /good, start_time=t1_pos1_start, end_time=t1_pos1_end)
+lc_t1pos2 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en, /good, start_time=t1_pos2_start, end_time=t1_pos2_end)
+lc_t2pos0 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en, /good, start_time=t2_pos0_start, end_time=t2_pos0_end)
+lc_t2pos1 = foxsi_lc(lg_cut, year=2014, dt=dt, energy=en, /good, start_time=t2_pos1_start, end_time=t2_pos1_end)
+
+lc_t1pos0.persec /= vig_t1pos0
+lc_t1pos1.persec /= vig_t1pos1
+lc_t1pos2.persec /= vig_t1pos2
+lc_t2pos0.persec /= vig_t2pos0
+lc_t2pos1.persec /= vig_t2pos1
+
+lc = [lc_t1pos0,lc_t1pos1,lc_t1pos2,lc_t2pos0,lc_t2pos1]
+
+;popen, xsi=8, ysi=4
+hsi_linecolors
+utplot, lc.time, lc.persec, /nodata, charsi=1.4, charth=2, xth=5, yth=5, $
+	title= 'FOXSI 4-12 keV, Det6, assume on-axis is AR in first target', ytit='Counts s!U-1!N'
+;outplot, lc1.time, lc1.persec, color=6, th=2, psym=10
+;outplot, lc2.time, lc2.persec, color=7, th=2, psym=10
+outplot, lc.time, lc.persec, th=6, psym=10
+outplot, lc.time, lc.persec, th=6, psym=10
+draw_target_change_times, thick=4
+;al_legend, ['Target start','Target end','Shutter motion'], col=[6,7,4], thick=6, line=0, $
+;	charsi=1.3, charth=2, /top, /right, back=1
+;pclose	
+
