@@ -78,6 +78,6 @@ save, tlaunch, t_launch, t1_start, t1_end, t2_start, t2_end, t3_start, t3_end, $
 	t4_start, t4_end, t5_start, t5_end, t6_start, t6_end, date, t0, $	
 	offset_xy, cen1, cen2, cen3, cen4, cen5, cen6, $
 	shift0, shift1, shift2, shift3, shift4, shift5, shift6, $
-	rot0, rot1, rot2, rot3, rot4, rot5, rot6, , $
+	rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
 	detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
 	file = 'data_2012/flight2012-parameters.sav'

@@ -108,7 +108,7 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 		for i=0, 127 do img2[i,*]=img[i,*]/x[i]*1000
 		for i=0, 127 do img2[*,i]=img[*,i]/y[i]*1000
 		img2[ where(finite(img2) eq 0) ] = 0.
-		img2 = im2*total(img)/total(im2)	; overall scaling to match original
+		img2 = img2*total(img)/total(img2)	; overall scaling to match original
 		img = img2
 
 	endif

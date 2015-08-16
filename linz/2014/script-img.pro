@@ -947,3 +947,27 @@ plot_map, shift_map(m5,-10,-10), /over, thick=12, col=2, lev=[10,30,50,70,90], /
 pclose
 
 
+;
+; Just a Target 5 image from D6, overlaid on AIA.
+;
+
+m6 = foxsi_image_map( data_lvl2_d6, cen5, era=[4.,12.], tra=[t5_start,t5_end], $
+	/xyc)
+	
+m6.data = smooth(m6.data,2)
+plot_map, m6, cen=flare2, fov=5
+
+fits2map, '~/data/aia/20141211/AIA20141211_191901_0094.fits', aia
+
+
+;popen, xsi=7, ysi=7
+aia_lct, r,g,b, wave=94, /load
+plot_map, aia, cen=flare2, fov=5, /log, dmin=2., charth=2, charsi=1.2, xth=5, yth=5
+hsi_linecolors
+plot_map, shift_map(m6,-10,-10), /over, thick=8, lev=[10,30,50,70,90], /per, col=6
+xyouts, -210,-50, 'FOXSI 4-12 keV', charsi=2, charth=2, col=6
+;pclose
+
+
+
+

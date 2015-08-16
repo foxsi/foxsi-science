@@ -80,9 +80,20 @@ shift1 = [-13.,17.] + shift6
 shift4 = [-6.,-28.] + shift6
 shift5 = [20.,-2.] + shift6
 
-; Flare locations
+; Flare and AR locations
 flare1 = [30,-220]
 flare2 = [-70,90]
+ar27 = [713, -45]
+ar30 = [82,-245]
+ar32 = [-391,177]
+ar33 = [186,59]
+ar34 = [-84,93]
+ar35 = [-742,-113]
+ar25 = [940,-251]
+ar29 = [635,-376]
+ar31 = [640,-44]
+
+; To see ARs on HMI image, open hmi-foxsi2.png
 
 
 ; Rotation angles for all detectors

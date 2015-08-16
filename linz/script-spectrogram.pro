@@ -36,5 +36,5 @@ end
 popen, 'linz/fig/fxi-spectrogram', xsi=8, ysi=4
 loadct, 13
 spectro_plot, gram, time, spec.energy_kev, yr=[3,12], /ysty, charsi=1.5, xth=5, yth=5, $
-	ytit='Energy [keV]', xr='2012-nov-2 '+['18:30:00','18:03:30']
+	ytit='Energy [keV]', xr='2012-nov-2 '+['18:00','18:04'], /xsty
 pclose

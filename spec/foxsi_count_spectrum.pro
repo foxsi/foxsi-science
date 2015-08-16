@@ -1,6 +1,6 @@
 FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS, $
-	FOXSI2 = FOXSI2, SMEAR = SMEAR, N_BLANKETS = N_BLANKETS, OFFSET = OFFSET
+	FOXSI1 = FOXSI1, FOXSI2 = FOXSI2, SMEAR = SMEAR, N_BLANKETS = N_BLANKETS, OFFSET = OFFSET
 
 ; General function for computing FOXSI expected count rates, no imaging.  
 ; Note that no field of view is taken into account here.  
@@ -61,18 +61,18 @@ flux[ where( emid le 2 ) ] = sqrt(-1)
 ; lines are easy to borrow for analyzing payload elements individually.
 
 area_bare =    get_foxsi_effarea( $ 	; optics only
-		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath)
+		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath, _extra=_extra)
 area_blankets =get_foxsi_effarea( $ 	; optics + blankets
-		energy=emid, data_dir=data_dir, /nodet, /noshut)
+		energy=emid, data_dir=data_dir, /nodet, /noshut, _extra=_extra)
 area_det = 	   get_foxsi_effarea( $ 	; optics + detectors
-		energy=emid, data_dir=data_dir, /noshut, /nopath, let_file=let_file)
+		energy=emid, data_dir=data_dir, /noshut, /nopath, let_file=let_file, _extra=_extra)
 area_offaxis = get_foxsi_effarea( $		; optics + off-axis response factor
-		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath, offaxis_angle=7.0)
+		energy=emid, data_dir=data_dir, /nodet, /noshut, /nopath, offaxis_angle=7.0, _extra=_extra)
 
 ; Now, the full response.  This is the one we'll use.
 area = get_foxsi_effarea( $
 		energy=emid, data_dir=data_dir, let_file=let_file , $
-		offaxis_angle=offaxis, foxsi2=foxsi2 )
+		offaxis_angle=offaxis, foxsi2=foxsi2, _extra=_extra )
 
 ; Multiply that area by extra blanketing attenuation.
 ; Since one set of blankets was already included in the previous call,
