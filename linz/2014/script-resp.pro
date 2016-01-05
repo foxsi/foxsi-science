@@ -146,17 +146,35 @@ endfor
 
 ; This example gets the count spectra for Target 1.  spec_targ1 is a structure containing
 ; a count spectrum for each detector (0-6).
-spec_targ1 = get_target_spectra( 1, year=2014, /good )
+spec_targ1 = get_target_spectra( 1, year=2014, /good, binwidth=1.0 )
+
+get_target_data, 1, dat0,dat1,dat2,dat3,dat4,dat5,dat6
+
+dat0 = area_cut( dat0, flare1, 200, /xy)
+dat1 = area_cut( dat1, flare1, 200, /xy)
+dat4 = area_cut( dat4, flare1, 200, /xy)
+dat5 = area_cut( dat5, flare1, 200, /xy)
+dat6 = area_cut( dat6, flare1, 200, /xy)
+
+bin = 0.2
+
+spec0 = make_spectrum( dat0, /correct, bin=bin )
+spec1 = make_spectrum( dat1, /correct, bin=bin )
+spec4 = make_spectrum( dat4, /correct, bin=bin )
+spec5 = make_spectrum( dat5, /correct, bin=bin )
+spec6 = make_spectrum( dat6, /correct, bin=bin )
+
+spec_targ1 = [spec0, spec1, spec1, spec1, spec4, spec5, spec6]
 
 ; Get an energy array from the spectrum.
 en_array = spec_targ1[6].energy_kev
 
 ; Compute the inverse response for each Si detector/module.
-inv0 = inverse_resp( en_array, module=0 )
-inv1 = inverse_resp( en_array, module=1 )
-inv4 = inverse_resp( en_array, module=4 )
-inv5 = inverse_resp( en_array, module=5 )
-inv6 = inverse_resp( en_array, module=6 )
+inv0 = inverse_resp( en_array, module=0, let='efficiency_det108_asic2.sav' )
+inv1 = inverse_resp( en_array, module=1, let='efficiency_det101_asic3.sav' )
+inv4 = inverse_resp( en_array, module=4, let='efficiency_det104_asic2.sav' )
+inv5 = inverse_resp( en_array, module=5, let='efficiency_det105_asic3.sav' )
+inv6 = inverse_resp( en_array, module=6, let='efficiency_det102_asic2.sav' )
 
 ; Use the count spectra and inverse response to compute a photon spectrum.
 phot0 = spec_targ1[0].spec_p * inv0.per_cm2
@@ -165,18 +183,70 @@ phot4 = spec_targ1[4].spec_p * inv4.per_cm2
 phot5 = spec_targ1[5].spec_p * inv5.per_cm2
 phot6 = spec_targ1[6].spec_p * inv6.per_cm2
 
+err0 = spec_targ1[0].spec_p_err * inv0.per_cm2
+err1 = spec_targ1[1].spec_p_err * inv1.per_cm2
+err4 = spec_targ1[4].spec_p_err * inv4.per_cm2
+err5 = spec_targ1[5].spec_p_err * inv5.per_cm2
+err6 = spec_targ1[6].spec_p_err * inv6.per_cm2
+
 ; Plot it!
-;popen, 'photon-spex-example', xsi=7, ysi=5
+;popen, 'photon-spex-orig-calib', xsi=7, ysi=5
 hsi_linecolors
 plot, spec_targ1[6].energy_kev, phot6, /xlo, /ylo, /nodata, $
 	xr=[3.,15.], yr=[1.e-3,1.e2], charsi=1.2, charth=2, xth=5, yth=5, /xsty, $
 	xtit='Energy [keV]', ytit='Photons cm!U-2!N s!U-1!N keV!U-1!N', $
 	title='Target 1 photon spectra'
-oplot, spec_targ1[0].energy_kev, phot0, thick=5, psym=10, col=6
-oplot, spec_targ1[1].energy_kev, phot1, thick=5, psym=10, col=7
-oplot, spec_targ1[4].energy_kev, phot4, thick=5, psym=10, col=10
-oplot, spec_targ1[5].energy_kev, phot5, thick=5, psym=10, col=12
-oplot, spec_targ1[6].energy_kev, phot6, thick=5, psym=10, col=2
+oplot_err, spec_targ1[0].energy_kev, phot0, yerr=err0, thick=5, psym=10, col=6
+oplot_err, spec_targ1[1].energy_kev, phot1, yerr=err1, thick=5, psym=10, col=7
+oplot_err, spec_targ1[4].energy_kev, phot4, yerr=err4, thick=5, psym=10, col=10
+oplot_err, spec_targ1[5].energy_kev, phot5, yerr=err5, thick=5, psym=10, col=12
+oplot_err, spec_targ1[6].energy_kev, phot6, yerr=err6, thick=5, psym=10, col=2
 al_legend, ['D0','D1','D4','D5','D6'], line=0, col=[6,7,10,12,2], thick=5, /rig, box=0
-oplot, [4.,4.], [1.e-3,1.e2], line=1, thick=3
-;pclose
+oplot, [4.,4.], [1.e-3,1.e2], line=2, thick=3
+oplot, [5.,5.], [1.e-3,1.e2], line=1, thick=3
+pclose
+
+; examine level of agreement.
+; Try using standard deviation
+stdev = stddev( [[phot0],[phot1],[phot4],[phot5],[phot6]], 2)
+plot, spec_targ1[0].energy_kev, stdev, /psy, yr=[0.001,1.],/xlo,/ylo
+
+; Try using chi squre
+chi = fltarr(499)
+stdev = stddev( [[phot0],[phot1],[phot4],[phot5],[phot6]], 2)
+.run
+for i=0,199 do begin
+		exp = mean( [phot0[i],phot1[i],phot4[i],phot5[i],phot6[i]] )
+		chi[i] = ( [phot0[i],phot1[i],phot4[i],phot5[i],phot6[i]] - exp )^2 / stdev[i]^2
+endfor
+end
+plot, spec_targ1[0].energy_kev, chi, /psy, xr=[0,20]
+
+
+
+;
+; determine which ASIC we need.
+;
+
+t1 = tlaunch+t1_pos2_start
+t2 = tlaunch+t1_pos2_end
+
+d0 = data_lvl0_d0[where(data_lvl0_d0.inflight eq 1 and data_lvl0_d0.wsmr_time gt t1 and data_lvl0_d0.wsmr_time lt t2)]
+d1 = data_lvl0_d1[where(data_lvl0_d1.inflight eq 1 and data_lvl0_d1.wsmr_time gt t1 and data_lvl0_d1.wsmr_time lt t2)]
+d4 = data_lvl0_d4[where(data_lvl0_d4.inflight eq 1 and data_lvl0_d4.wsmr_time gt t1 and data_lvl0_d4.wsmr_time lt t2)]
+d5 = data_lvl0_d5[where(data_lvl0_d5.inflight eq 1 and data_lvl0_d5.wsmr_time gt t1 and data_lvl0_d5.wsmr_time lt t2)]
+d6 = data_lvl0_d6[where(data_lvl0_d6.inflight eq 1 and data_lvl0_d6.wsmr_time gt t1 and data_lvl0_d6.wsmr_time lt t2)]
+
+hist = histogram( d0.hit_asic[1], loc=loc )
+plot, loc, hist, psym=10
+print, hist
+
+Results:  D0:  ASIC 2: 472, ASIC 3: 636				; det108 ASIC 2
+					D1:  ASIC 2: 462, ASIC 3: 593				; det101 ASIC 3
+					D4:  ASIC 2: 404, ASIC 3: 304				; det104 ASIC 2
+					D5:  ASIC 2: 222, ASIC 3: 396				; det105 ASIC 3
+					D6:  ASIC 2: 1215, ASIC 3: 346			; det102 ASIC 2
+					
+
+
+D0:  ASIC

@@ -25,7 +25,10 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	xy = data_mod.hit_xy_solar
 	dist = sqrt( (xy[0,*]-cen[0])^2 + (xy[1,*]-cen[1])^2 )
 
-	i = where( dist lt radius )
+	; This is to handle an encountered bug. Should be transparent for anyone who hasn't 
+	; encountered array problems, and should fix it for those who have.
+	if isarray( RADIUS ) then radius = radius[0]
+	i = where( reform(dist) lt radius )
 	
 	if keyword_set(stop) then stop
 	

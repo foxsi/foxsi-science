@@ -43,7 +43,8 @@ restore, 'rhessi-lc.sav'
 
 	utplot,  anytim( rhessi_time,/yo ), rhessi_flux, psym=10, thick=4, yr=[0,20], $
 	ytitle='Count rate (s!U-1!N detector!U-1!N)', title=rhessi_title, $
-	timerange='2014-dec-11 19:'+['12:40','19:40']
+;	timerange='2014-dec-11 19:'+['12:40','19:40']
+	timerange='2014-dec-11 19:'+['12:30','15:40']
 
 
 ;

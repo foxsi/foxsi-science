@@ -15,6 +15,7 @@
 ;		THR_N	Threshold to use for n-side data.
 ;		YEAR	2012 or 2014 flight.  Default 2014.
 ;		KEEPALL	Keep all events, not just the "good" ones (i.e. those w/no error flags)
+;		FLATFIELD		Apply flatfielding correction.
 ;
 ;
 ; Example:
@@ -25,21 +26,24 @@
 ;	time=time, id='D6' )
 ;
 ; History:	
-;		2014 Jan	Linz	Wrote routine
-;		Updates throughout 2014 for FOXSI-1 data
-;		2014 Dec	Linz	Updated to work for 2014 data too.
+;		2015 Jul 23	Linz	Added flatfielding capability
 ;		2015 Jan 19	Linz	Drawing flight parameters from file instead of hardcoding.
+;		2014 Dec	Linz	Updated to work for 2014 data too.
+;		Updates throughout 2014 for FOXSI-1 data
+;		2014 Jan	Linz	Wrote routine
 ;-
 
 FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, $
-                          YEAR=YEAR, STOP = STOP
+                          YEAR=YEAR, flatfield=flatfield, STOP = STOP
 
 	default, erange, [4.,15.]
 ;  	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
 	default, thr_n, 4.		; n-side keV threshold
   	default, year, 2014
   	default, trange, [0,500]
+  	
+  	detector = data[0].det_num
 
 	case year of
 		2012:	restore, 'data_2012/flight2012-parameters.sav'
@@ -82,6 +86,33 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
   
 	if keyword_set(stop) then stop
 
-return, reverse( img, 2 )
+	img = reverse( img, 2 )
+	
+	; Apply flatfield correction
+	if keyword_set( flatfield ) then begin
+		case detector of
+			0: det=detnum0
+			1: det=detnum1
+			2: det=detnum2
+			3: det=detnum3
+			4: det=detnum4
+			5: det=detnum5
+			6: det=detnum6
+		endcase	
+
+		restore, 'calibration_data/norm_D'+strtrim(det,2)+'_allASIC_allChan.sav
+	
+		x = [ reverse(chan2), reverse(chan3) ]
+		y = [ reverse(chan1), reverse(chan0) ]
+		img2 = img
+		for i=0, 127 do img2[i,*]=img[i,*]/x[i]*1000
+		for i=0, 127 do img2[*,i]=img[*,i]/y[i]*1000
+		img2[ where(finite(img2) eq 0) ] = 0.
+		img2 = img2*total(img)/total(img2)	; overall scaling to match original
+		img = img2
+
+	endif
+	
+	return, img
 
 END

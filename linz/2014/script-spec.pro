@@ -6,7 +6,7 @@ spec3 = get_target_spectra( 3, year=2014, /good )
 spec4 = get_target_spectra( 4, year=2014, /good )
 spec5 = get_target_spectra( 5, year=2014, /good )
 
-popen, 'plots/foxsi2/spectra', xsi=7, ysi=5
+popen, 'spectra', xsi=7, ysi=5
 spec=spec1
 hsi_linecolors
 plot, spec[6].energy_kev, spec[6].spec_p, /xlo, /ylo, /nodata, $
@@ -196,4 +196,66 @@ avg[ where( finite(avg) eq 0 ) ] = 0.
 smooth = smooth( avg, 2 )
 oplot, en_array[8:20], smooth[8:20], thick=8
 pclose
+
+;
+; Spectra from several FOXSI ARs
+;
+
+get_target_data, 2, d0,d1,d2,d3,d4,d5,d6, delta_t=dt1, /good
+;d6_cut = area_cut(d6, ar30, 120, /xy)
+spec30 = make_spectrum( area_cut(d6, ar30-[60.,0.], 150, /xy), bin=0.3, /log )
+spec34 = make_spectrum( area_cut(d6, ar34, 150, /xy), bin=0.3, /log )
+im30 = foxsi_image_map( area_cut(d6, ar30-[60.,0.], 150, /xy), cen2_pos1, /xycor )
+im34 = foxsi_image_map( area_cut(d6, ar34-[0.,0.], 150, /xy), cen2_pos1, /xycor )
+plot_map, im30
+circle= circle( ar30[0]-60.,ar30[1], 120)
+oplot, circle[0,*], circle[1,*] 
+
+get_target_data, 2, d0,d1,d2,d3,d4,d5,d6, delta_t=dt2, /good
+spec35 = make_spectrum( area_cut(d6, ar35, 150, /xy), bin=0.3, /log )
+im35 = foxsi_image_map( area_cut(d6, ar35-[0.,0.], 150, /xy), cen2_pos1, /xycor )
+circle= circle( ar35[0]-0.,ar35[1], 120)
+oplot, circle[0,*], circle[1,*] 
+
+plot, spec35.energy_kev, spec35.spec_p, psym=10, /xlo, /ylo, xr=[3.,10.], /xsty, yra=minmax(spec35.spec_p[where(spec35.spec_p gt 0.)])
+plot, spec34.energy_kev, spec34.spec_p, psym=10, /xlo, /ylo, xr=[3.,10.], /xsty, yra=minmax(spec34.spec_p[where(spec34.spec_p gt 0.)])
+
+popen, 'spec-3AR', xsi=7, ysi=6
+th=8
+hsi_linecolors
+plot_err, spec30.energy_kev, spec30.spec_p, yerr=spec30.spec_p_err, psym=10, /xlo, /ylo, $
+	xr=[4.,15.], /xsty, yra=minmax(spec30.spec_p[where(spec30.spec_p gt 0.)])*[1.,1.], $
+	charsi=1.4, charth=2, xth=4, yth=4, thick=th, $
+	xtit='Energy [keV]', ytit='Counts s!U-1!N keV!U-1!N', tit='FOXSI Detector 6, 53 seconds'
+oplot_err, spec34.energy_kev, spec34.spec_p, yerr=spec34.spec_p_err, psym=10, $
+	thick=th, col=6
+oplot_err, spec35.energy_kev, spec35.spec_p, yerr=spec35.spec_p_err, psym=10, $
+	thick=th, col=7
+al_legend, ['AR 12230 (decaying flare): 687 cts','AR 12234: 233 cts','AR 12235:  30 cts'], $
+	textcol=[0,6,7], charsi=1.2, charth=2, /right, /top, box=0
+pclose
+
+;
+; Spectrum for Ishikawa's AR.
+;
+
+rad = 150		; radius around location to include
+
+data = data_lvl2_d6			; D6 only
+;data = [data_lvl2_d0, data_lvl2_d1, data_lvl2_d4, data_lvl2_d5, data_lvl2_d6]		; all Si dets
+
+north_cut = area_cut(data, flare2, rad, /xy)
+i=where( north_cut.wsmr_time gt t1_pos2_start+tlaunch and north_cut.wsmr_time lt t1_pos2_end+tlaunch )
+north_cut = north_cut[i]
+
+spec = make_spectrum( north_cut, bin=0.5, /corr )
+dt = t1_pos2_end - t1_pos2_start
+
+
+plot, spec.energy_kev, spec.spec_p, psym=10, /xlo, /ylo, xr=[3.,10.], yr=[1.,1.e2], /xsty, $
+	xtit='Energy[keV]', ytit='Counts keV!U-1!N', tit='FOXSI DET6 38.5 sec'
+oplot_err, spec.energy_kev, spec.spec_p, yerr=spec.spec_p_err, psym=10
+
+
+
 

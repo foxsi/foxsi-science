@@ -893,23 +893,48 @@ m6 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4.
 
 trange=[t1_pos2_start, t1_pos2_end]
 cen = cen1_pos2
-m1 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+md0_targ1 = foxsi_image_map( data_lvl2_d0, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md1_targ1 = foxsi_image_map( data_lvl2_d1, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md4_targ1 = foxsi_image_map( data_lvl2_d4, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md5_targ1 = foxsi_image_map( data_lvl2_d5, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md6_targ1 = foxsi_image_map( data_lvl2_d6, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
 
 trange=[t2_pos1_start, t2_pos1_end]
 cen = cen2_pos1
-m2 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+md0_targ2 = foxsi_image_map( data_lvl2_d0, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md1_targ2 = foxsi_image_map( data_lvl2_d1, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md4_targ2 = foxsi_image_map( data_lvl2_d4, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md5_targ2 = foxsi_image_map( data_lvl2_d5, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md6_targ2 = foxsi_image_map( data_lvl2_d6, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
 
 trange=[t3_pos2_start, t3_pos2_end]
 cen = cen3_pos2
-m3 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+md0_targ3 = foxsi_image_map( data_lvl2_d0, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md1_targ3 = foxsi_image_map( data_lvl2_d1, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md4_targ3 = foxsi_image_map( data_lvl2_d4, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md5_targ3 = foxsi_image_map( data_lvl2_d5, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md6_targ3 = foxsi_image_map( data_lvl2_d6, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
 
 trange=[t4_start, t4_end]
 cen = cen4
-m4 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+md0_targ4 = foxsi_image_map( data_lvl2_d0, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md1_targ4 = foxsi_image_map( data_lvl2_d1, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md4_targ4 = foxsi_image_map( data_lvl2_d4, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md5_targ4 = foxsi_image_map( data_lvl2_d5, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+md6_targ4 = foxsi_image_map( data_lvl2_d6, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
 
 trange=[t5_start, t5_end]
 cen = cen5
-m5 = foxsi_image_map( data_lvl2_d6, cen, erange=[4.,15], trange=trange, thr_n=4., /xycorr, smoo=2 )
+md6_targ5 = foxsi_image_map( data_lvl2_d6, cen, erange=[5.,15], trange=trange, thr_n=4., /xycorr)
+
+save, md6_targ1, md6_targ2, md6_targ3, md6_targ4, md6_targ5, file='maps-det6.sav'
+
+restore, 'maps-det6.sav'
+plot_map, md6_targ5, /limb
+draw_fov, det=6, target=5
+
+
+
 
 f=file_search('~/data/aia/20141211/*_0094*')
 fits2map, f[20], aia
@@ -945,5 +970,94 @@ plot_map, aia, dmin=0, dmax=50, fov=3, cen=flare2, col=255, xth=5, yth=5
 hsi_linecolors
 plot_map, shift_map(m5,-10,-10), /over, thick=12, col=2, lev=[10,30,50,70,90], /per
 pclose
+
+
+;
+; Just a Target 5 image from D6, overlaid on AIA.
+;
+
+m6 = foxsi_image_map( data_lvl2_d6, cen5, era=[4.,12.], tra=[t5_start,t5_end], $
+	/xyc)
+	
+m6.data = smooth(m6.data,2)
+plot_map, m6, cen=flare2, fov=5
+
+fits2map, '~/data/aia/20141211/AIA20141211_191901_0094.fits', aia
+
+
+;popen, xsi=7, ysi=7
+aia_lct, r,g,b, wave=94, /load
+plot_map, aia, cen=flare2, fov=5, /log, dmin=2., charth=2, charsi=1.2, xth=5, yth=5
+hsi_linecolors
+plot_map, shift_map(m6,-10,-10), /over, thick=8, lev=[10,30,50,70,90], /per, col=6
+xyouts, -210,-50, 'FOXSI 4-12 keV', charsi=2, charth=2, col=6
+;pclose
+
+;
+; make ratios of counts in D6 to D0 and D1 in each target.
+;
+
+ref1 = total(md1_targ1.data + md0_targ1.data)/2.
+d6 = total(md6_targ1.data)
+ratio1 = d6/ref1
+ref2 = total(md1_targ2.data + md0_targ2.data)/2.
+d6 = total(md6_targ2.data)
+ratio2 = d6/ref2
+ref3 = total(md1_targ3.data + md0_targ3.data)/2.
+d6 = total(md6_targ3.data)
+ratio3 = d6/ref3
+ref4 = total(md1_targ4.data + md0_targ4.data)/2.
+d6 = total(md6_targ4.data)
+ratio4 = d6/ref4
+
+get_target_data, 1, d0,d1,d2,d3,d4,d5,d6, eband=[5.,15.], /good
+nb1 = [n_elements(d0),n_elements(d1),n_elements(d4),n_elements(d5),n_elements(d6)]
+print, nb1
+get_target_data, 2, d0,d1,d2,d3,d4,d5,d6, eband=[5.,15.], /good
+nb2 = [n_elements(d0),n_elements(d1),n_elements(d4),n_elements(d5),n_elements(d6)]
+print, nb2
+get_target_data, 3, d0,d1,d2,d3,d4,d5,d6, eband=[5.,15.], /good
+nb3 = [n_elements(d0),n_elements(d1),n_elements(d4),n_elements(d5),n_elements(d6)]
+print, nb3
+get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, eband=[5.,15.], /good
+nb4 = [n_elements(d0),n_elements(d1),n_elements(d4),n_elements(d5),n_elements(d6)]
+print, nb4
+
+print, float(nb1[4]) / nb1[0]
+print, float(nb2[4]) / nb2[0]
+print, float(nb3[4]) / nb3[0]
+print, float(nb4[4]) / nb4[0]
+
+print, float(nb1[4]) / nb1[1]
+print, float(nb2[4]) / nb2[1]
+print, float(nb3[4]) / nb3[1]
+print, float(nb4[4]) / nb4[1]
+
+plot, [1,2,3,4], float([nb1[4],nb2[4],nb3[4],nb4[4]]) / [nb1[3],nb2[3],nb3[3],nb4[3]], psy=-1, $
+	xtit='Target', ytit='Ratio 10 shell (D6) counts to 7 shell module counts', /nodata
+oplot, [1,2,3,4], float([nb1[4],nb2[4],nb3[4],nb4[4]]) / [nb1[0],nb2[0],nb3[0],nb4[0]], psy=-1, col=6, thick=4
+oplot, [1,2,3,4], float([nb1[4],nb2[4],nb3[4],nb4[4]]) / [nb1[1],nb2[1],nb3[1],nb4[1]], psy=-1, col=7, thick=4
+oplot, [1,2,3,4], float([nb1[4],nb2[4],nb3[4],nb4[4]]) / [nb1[2],nb2[2],nb3[2],nb4[2]], psy=-1, col=10, thick=4
+oplot, [1,2,3,4], float([nb1[4],nb2[4],nb3[4],nb4[4]]) / [nb1[3],nb2[3],nb3[3],nb4[3]], psy=-1, col=12, thick=4
+al_legend,['Ref det0','Ref det1','Ref det4','Ref det5'], color=[6,7,10,12], thick=4, line=0, /bott, box=0
+
+;
+; A good map of the QS target.
+;
+
+loadct, 7
+reverse_ct
+trange=[t4_start,t_shtr_start]
+m0 = foxsi_image_map( data_lvl2_d0, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
+m1 = foxsi_image_map( data_lvl2_d1, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
+m4 = foxsi_image_map( data_lvl2_d4, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
+m5 = foxsi_image_map( data_lvl2_d5, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
+m6 = foxsi_image_map( data_lvl2_d6, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
+
+m=m6
+m.data = m0.data+m1.data+m4.data+m5.data+m6.data
+m.id = 'D0+D1+D4+D5+D6'
+
+plot_map, m, /limb, lcol=255, lthick=5, col=255, xth=5, yth=5, charsi=1.2, charth=2
 
 

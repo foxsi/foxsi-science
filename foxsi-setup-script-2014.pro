@@ -80,9 +80,20 @@ shift1 = [-13.,17.] + shift6
 shift4 = [-6.,-28.] + shift6
 shift5 = [20.,-2.] + shift6
 
-; Flare locations
+; Flare and AR locations
 flare1 = [30,-220]
 flare2 = [-70,90]
+ar27 = [713, -45]
+ar30 = [82,-245]
+ar32 = [-391,177]
+ar33 = [186,59]
+ar34 = [-84,93]
+ar35 = [-742,-113]
+ar25 = [940,-251]
+ar29 = [635,-376]
+ar31 = [640,-44]
+
+; To see ARs on HMI image, open hmi-foxsi2.png
 
 
 ; Rotation angles for all detectors
@@ -93,6 +104,14 @@ rot3 = -75.
 rot4 = 97.5
 rot5 = 90.
 rot6 = -60.
+
+detnum0 = 108
+detnum1 = 101
+detnum2 = 0
+detnum3 = 0
+detnum4 = 104
+detnum5 = 105
+detnum6 = 102
 
 
 ; Save the values set here for use by some of the routines.
@@ -105,4 +124,6 @@ save, tlaunch, t_launch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 	t5_start, t5_end, date, t0, offset_xy, cen1_pos0, cen1_pos1, cen1_pos2, $
 	cen2_pos0, cen2_pos1, cen3_pos0, cen3_pos1, cen3_pos2, cen4, cen5, $
 	shift0, shift1, shift2, shift3, shift4, shift5, shift6, rot0, rot1, rot2, rot3, $
-	rot4, rot5, rot6, file = 'data_2014/flight2014-parameters.sav'
+	rot4, rot5, rot6, $
+	detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
+	file = 'data_2014/flight2014-parameters.sav'

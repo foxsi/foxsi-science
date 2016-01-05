@@ -1,5 +1,5 @@
 FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
-			CORRECT = CORRECT, THREE = THREE, SPLIT_LIMIT = SPLIT_LIMIT
+			CORRECT = CORRECT, THREE = THREE, SPLIT_LIMIT = SPLIT_LIMIT, LOG=LOG
 
 ;	This function takes a FOXSI level 2 data structure and returns an energy spectrum.
 ;	
@@ -29,7 +29,9 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		spex = make_spectrum( data_level2_D6, binwidth=0.5, /corr )
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;
-
+;	History
+; 	2012-jul-19  LG		Fixed a bug in which energy array was 1 larger than spectrum array.
+;-
 
 
 	default, binwidth, 0.1
@@ -51,8 +53,6 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy)-1, $
 						min=min(energy), max=max(energy) )
 
-	if keyword_set(stop) then stop
-	
 	if keyword_set(three) then begin
 
 		i=where( data_good.assoc_energy[0,1,0] gt split_limit )
@@ -73,6 +73,23 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 									 max=max(energy) )
 	endif
 
+;	energy = energy + binwidth/2.
+	energy = get_edges( energy, /mean )  ; make energy array the midpoints of the bins.
+
+	; For logarithmic binning instead:
+	if keyword_set( log ) then begin
+		bins = 1.15^findgen(20.)
+		spec_n = histogram( Value_Locate(bins, data_good.hit_energy[0]), min=0., max=n_elements(bins)-1 )
+		spec_p = histogram( Value_Locate(bins, data_good.hit_energy[1]), min=0., max=n_elements(bins)-1, loc=loc )
+		energy = bins
+		energy = get_edges( energy, /mean )
+		;plot, energy, test2[1:n_elements(bins)-1]
+		binwidth = get_edges(bins, /width)
+		; throw out the underflow and overflow bins.
+		spec_p = spec_p[0:n_elements(spec_p)-2]
+		spec_n = spec_n[0:n_elements(spec_n)-2]
+	endif
+
 	p_error = sqrt( spec_p )
 
 	; Correct for thrown-out events and bin width.
@@ -80,8 +97,8 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 	spec_p = spec_p / ratio_good / binwidth
 	p_error = p_error / ratio_good / binwidth
 
-	energy = energy + binwidth/2.  ; make energy array the midpoints of the bins.
-
+	if keyword_set(stop) then stop
+	
 	spex = create_struct( 'energy_kev', energy, 'spec_n', spec_n, 'spec_p', spec_p, $
 						  'spec_p_err', p_error )
 

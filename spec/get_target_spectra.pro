@@ -1,5 +1,5 @@
 FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GOOD, $
-			YEAR=YEAR, STOP=STOP
+			YEAR=YEAR, LOG=LOG, STOP=STOP
 
 ;	Returns structure array (7 elements) holding spectra for all detectors
 ;   for the selected target.  (Targets numbered 1-6.)
@@ -95,13 +95,23 @@ endif else begin
 	i6 = where(data_lvl2_d6.wsmr_time gt t1 and data_lvl2_d6.wsmr_time lt t2)
 endelse
 
-spec_d0 = make_spectrum( data_lvl2_d0[i0], bin=binwidth, correct=correct )
-spec_d1 = make_spectrum( data_lvl2_d1[i1], bin=binwidth, correct=correct )
-spec_d2 = make_spectrum( data_lvl2_d2[i2], bin=binwidth, correct=correct )
-spec_d3 = make_spectrum( data_lvl2_d3[i3], bin=binwidth, correct=correct )
-spec_d4 = make_spectrum( data_lvl2_d4[i4], bin=binwidth, correct=correct )
-spec_d5 = make_spectrum( data_lvl2_d5[i5], bin=binwidth, correct=correct )
-spec_d6 = make_spectrum( data_lvl2_d6[i6], bin=binwidth, correct=correct )
+if keyword_set( LOG ) then begin
+	spec_d0 = make_spectrum( data_lvl2_d0[i0], correct=correct, /log )
+	spec_d1 = make_spectrum( data_lvl2_d1[i1], correct=correct, /log )
+	spec_d2 = make_spectrum( data_lvl2_d2[i2], correct=correct, /log )
+	spec_d3 = make_spectrum( data_lvl2_d3[i3], correct=correct, /log )
+	spec_d4 = make_spectrum( data_lvl2_d4[i4], correct=correct, /log )
+	spec_d5 = make_spectrum( data_lvl2_d5[i5], correct=correct, /log )
+	spec_d6 = make_spectrum( data_lvl2_d6[i6], correct=correct, /log )
+endif else begin
+	spec_d0 = make_spectrum( data_lvl2_d0[i0], correct=correct, binwidth=binwidth )
+	spec_d1 = make_spectrum( data_lvl2_d1[i1], correct=correct, binwidth=binwidth )
+	spec_d2 = make_spectrum( data_lvl2_d2[i2], correct=correct, binwidth=binwidth )
+	spec_d3 = make_spectrum( data_lvl2_d3[i3], correct=correct, binwidth=binwidth )
+	spec_d4 = make_spectrum( data_lvl2_d4[i4], correct=correct, binwidth=binwidth )
+	spec_d5 = make_spectrum( data_lvl2_d5[i5], correct=correct, binwidth=binwidth )
+	spec_d6 = make_spectrum( data_lvl2_d6[i6], correct=correct, binwidth=binwidth )
+endelse
 
 spec = [spec_d0, spec_d1, spec_d2, spec_d3, spec_d4, spec_d5, spec_d6]
 
