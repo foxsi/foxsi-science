@@ -50,6 +50,35 @@ That's in 4-15 keV range.
 Counts per second per detector per keV are:
 	0.038, 0.030, 0.023, 0.023   So basically 0.02 to 0.04.
 
+; D0,1,4,5 background spectrum, scaled to 7 detectors:
+en = bkgd0.energy_kev
+dt = t_end - t_start
+bkgd = (bkgd0.spec_p + bkgd1.spec_p + bkgd4.spec_p + bkgd5.spec_p)/4./dt
+
+i=where(en ge 4. and en le 15.)
+en = en[i]
+bkgd_0 = bkgd0.spec_p[i]
+bkgd_1 = bkgd1.spec_p[i]
+bkgd_4 = bkgd4.spec_p[i]
+bkgd_5 = bkgd5.spec_p[i]
+
+plot, en, bkgd_0, col=6
+oplot, en, bkgd_1, col=7
+oplot, en, bkgd_4, col=10
+oplot, en, bkgd_5, col=12
+
+avg = average([total(bkgd_0), total(bkgd_1), total(bkgd_4), total(bkgd_5)] ) / dt / 9.
+sig = stdev(  [total(bkgd_0), total(bkgd_1), total(bkgd_4), total(bkgd_5)] ) / dt / 9.
+
+print, total(bkgd)/9.
+
+
+;popen, 'background_spec', xsi=6, ysi=6
+plot, en, bkgd, /xlo, /ylo, psym=10, yr=[1.e-2,1.], xr=[3.,15.], /xsty, thick=6, $
+	charsi=1.2, xth=4, yth=4, xtit='Energy [keV]', ytit='Background counts s!U-1!N keV!U-1!N',$
+	tit='Measured bkgd w/shutters, scaled to 7 detectors'
+;pclose
+	
 ; everything below here is from FOXSI-1
 
 

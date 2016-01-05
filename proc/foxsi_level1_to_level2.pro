@@ -164,13 +164,22 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 		; First, process the "single-pixel hit" separately:
 
         for side = 0, 1 do begin
-			chan = data0[evt].hit_strip[side]
-			asic = data0[evt].hit_asic[side]
-			if asic eq -1 then continue
-			adc  = data0[evt].hit_adc[side]
-        	data_struct[evt].hit_energy[side] = $
-        		spline( peaks[*,chan,asic,0],peaks[*,chan,asic,1],adc - cmn[side,evt] )
-;        		spline( peaks[2:9,chan,asic,0],peaks[2:9,chan,asic,1],adc - cmn[side,evt] )
+					chan = data0[evt].hit_strip[side]
+					asic = data0[evt].hit_asic[side]
+					if asic eq -1 then continue
+					adc  = data0[evt].hit_adc[side]
+        	
+        	; new method using quadratic
+					fit = poly_fit( peaks[*,chan,asic,1], peaks[*,chan,asic,0], 2 )
+					y_array = findgen(1000)/1000.*100.
+					x_array = fit[0] + fit[1]*y_array + fit[2]*y_array^2
+        	data_struct[evt].hit_energy[side] = interpol( y_array, x_array, adc - cmn[side,evt] )
+
+					; old method using splines.
+					; data_struct[evt].hit_energy[side] = $
+					;			spline( peaks[*,chan,asic,0],peaks[*,chan,asic,1],adc - cmn[side,evt] )
+        		
+        	        		
 		endfor
 
 		; Then repeat for all the "associated" values.
@@ -182,10 +191,19 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
         	for strip = 0, 2 do begin
 				chan = data0[evt].strips[asic,strip]
 				adc  = data0[evt].adc[asic,strip]
-        		energy = $
-        			spline( peaks[*,chan,asic,0],peaks[*,chan,asic,1],adc - cmn[side,evt] )
-;        			spline( peaks[2:9,chan,asic,0],peaks[2:9,chan,asic,1],adc - cmn[side,evt] )
-				if side eq 0 then begin
+        	
+        ; new method using quadratic
+				fit = poly_fit( peaks[*,chan,asic,1], peaks[*,chan,asic,0], 2 )
+				y_array = findgen(1000)/1000.*100.
+				x_array = fit[0] + fit[1]*y_array + fit[2]*y_array^2
+        energy = interpol( y_array, x_array, adc - cmn[side,evt] )
+
+					; old method using splines.
+					; energy = $
+					;			spline( peaks[*,chan,asic,0],peaks[*,chan,asic,1],adc - cmn[side,evt] )
+        		
+
+					if side eq 0 then begin
 					data_struct[evt].assoc_energy[strip,0,0] = energy
 					data_struct[evt].assoc_energy[strip,1,0] = energy
 					data_struct[evt].assoc_energy[strip,2,0] = energy

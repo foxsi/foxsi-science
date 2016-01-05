@@ -344,3 +344,25 @@ draw_target_change_times, thick=4
 ;	charsi=1.3, charth=2, /top, /right, back=1
 ;pclose	
 
+;
+; Lightcurves for quiet-Sun time
+;
+
+lc0 = foxsi_lc( data_lvl2_d0, dt=10., energy=[4.,8.], start_time=t4_start, end_time=t4_end)
+lc1 = foxsi_lc( data_lvl2_d1, dt=10., energy=[4.,8.], start_time=t4_start, end_time=t4_end)
+lc4 = foxsi_lc( data_lvl2_d4, dt=10., energy=[4.,8.], start_time=t4_start, end_time=t4_end)
+lc5 = foxsi_lc( data_lvl2_d5, dt=10., energy=[4.,8.], start_time=t4_start, end_time=t4_end)
+lc6 = foxsi_lc( data_lvl2_d6, dt=10., energy=[4.,8.], start_time=t4_start, end_time=t4_end)
+
+yr = minmax([lc0.persec,lc1.persec,lc4.persec,lc5.persec,lc6.persec])
+
+popen, 'quiet-sun-lc', xsi=8, ysi=5
+utplot, anytim(lc0.time,/yo), lc0.persec, /nodata, yr=yr, charsi=1.2, ytit='Counts s!U-1!N', $
+	title='FOXSI-2 lightcurves, quiet Sun, 4-8 keV'
+outplot, anytim(lc0.time,/yo), lc0.persec, col=6, psym=10, thick=6
+outplot, anytim(lc1.time,/yo), lc1.persec, col=7, psym=10, thick=6
+outplot, anytim(lc4.time,/yo), lc4.persec, col=10, psym=10, thick=6
+outplot, anytim(lc5.time,/yo), lc5.persec, col=12, psym=10, thick=6
+outplot, anytim(lc6.time,/yo), lc6.persec, col=2, psym=10, thick=6
+al_legend, ['D0','D1','D4','D5','D6'], line=0, color=[6,7,10,12,2], thick=6, /left, box=0,charsi=1.2
+pclose
