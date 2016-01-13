@@ -8,6 +8,8 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	
 	default, year, 2014
 	
+	detnum = data[0].det_num
+
 	case year of
 		2012:	restore, 'data_2012/flight2012-parameters.sav'
 		2014:	restore, 'data_2014/flight2014-parameters.sav'
@@ -20,7 +22,22 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	if keyword_set(good) then data_mod = data[ where(data.error_flag eq 0) ] $
 		else data_mod = data
 		
-	if keyword_set(xycorr) then cen = center - offset_xy else cen = center
+	case detnum of
+		0: shift = shift0
+		1: shift = shift1
+		2: shift = shift2
+		3: shift = shift3
+		4: shift = shift4
+		5: shift = shift5
+		6: shift = shift6
+		else: begin
+			print, 'Incorrect detector number; bad data!'
+			return, -1
+		end
+	endcase
+
+;	if keyword_set(xycorr) then cen = center - offset_xy else cen = center
+	if keyword_set(xycorr) then cen = center - (offset_xy+shift) else cen = center
 
 	xy = data_mod.hit_xy_solar
 	dist = sqrt( (xy[0,*]-cen[0])^2 + (xy[1,*]-cen[1])^2 )
