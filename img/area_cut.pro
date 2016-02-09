@@ -44,9 +44,25 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 
 	; This is to handle an encountered bug. Should be transparent for anyone who hasn't 
 	; encountered array problems, and should fix it for those who have.
-	if isarray( RADIUS ) then radius = radius[0]
-	i = where( reform(dist) lt radius )
-	
+	if isarray( RADIUS ) then begin
+		sr = size(radius,/dimensions)
+		case sr of
+			1: begin ;single circle
+				radius = radius[0]
+				i = where( reform(dist) lt radius )
+			end
+			2: begin ; annulus
+				radius0 = radius[0]
+				radius1 = radius[1]
+				i = where( (reform(dist) lt radius1) and (reform(dist) gt radius0))
+			end
+			else: begin
+				print,'Radius must be a float or a 1 or 2 dimensional array'
+				return,-1
+			end
+		endcase
+	endif else i = where( reform(dist) lt radius )
+
 	if keyword_set(stop) then stop
 	
 	return, data_mod[i]
