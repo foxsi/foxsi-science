@@ -1,5 +1,5 @@
 FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
-					XYCORR = XYCORR
+					XYCORR = XYCORR, INDEX=INDEX
 
 	; This function takes in FOXSI level 2 data and returns a clipped version
 	; corresponding only to the specified heliographic area in arcsec.  
@@ -48,6 +48,11 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	i = where( reform(dist) lt radius )
 	
 	if keyword_set(stop) then stop
+	
+	if keyword_set( INDEX ) then begin
+		
+
+	endif
 	
 	return, data_mod[i]
 	

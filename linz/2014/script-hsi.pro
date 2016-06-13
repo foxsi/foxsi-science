@@ -189,7 +189,8 @@ obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:11:30.000', $
 ; ['11-Dec-2014 19:18:30.000', '11-Dec-2014 19:19:00.000'], ['11-Dec-2014 19:19:00.000', $
 ; '11-Dec-2014 19:19:30.000'], ['11-Dec-2014 19:19:30.000', '11-Dec-2014 19:20:00.000']]  
 ;;obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:13:30','11-Dec-2014 19:14:00']]
-obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:12:40','11-Dec-2014 19:13:20']]
+;obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:12:40','11-Dec-2014 19:13:20']]
+obj-> set, spex_fit_time_interval= [['11-Dec-2014 19:18:30','11-Dec-2014 19:18:40']]
 obj-> set, spex_erange = [4.,12.]
 ;obj-> set, spex_erange = -1
 

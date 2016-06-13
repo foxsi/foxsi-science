@@ -257,5 +257,70 @@ plot, spec.energy_kev, spec.spec_p, psym=10, /xlo, /ylo, xr=[3.,10.], yr=[1.,1.e
 oplot_err, spec.energy_kev, spec.spec_p, yerr=spec.spec_p_err, psym=10
 
 
+;
+; Predicted AR counts for NuSTAR occulted AR source (for Matej)
+;
+
+1.7x10^46
+3.8 MK
+
+em = 1.7e-3
+t = 3.8
+
+f = foxsi2_count_spectrum( em, t, time=1., binsize=1., module=6, offaxis=0 )
+
+plot, f.energy_kev, f.counts, psym=10
+
+
+;;;;; March 22 2016 (Ishikawa's visit to UMN) ;;;;;;
+
+;
+; Checking response for 2nd AR pixels by looking at later flare in that region.
+; Using both old and new calibration to check the calibration.
+;
+
+rad = 150		; radius around location to include
+
+restore, 'data_2014/foxsi_level2_data.sav', /v		; new calibration
+data = data_lvl2_d6			; D6 only
+north_cut = area_cut(data, flare2, rad, /xy)
+i=where( north_cut.wsmr_time gt t5_start+tlaunch and north_cut.wsmr_time lt t5_end+tlaunch )
+north_cut = north_cut[i]
+north_cut_new = north_cut
+
+restore, 'data_2014/old-calib-march2015/foxsi_level2_data.sav', /v		; old calibration
+data = data_lvl2_d6			; D6 only
+north_cut = area_cut(data, flare2, rad, /xy)
+i=where( north_cut.wsmr_time gt t5_start+tlaunch and north_cut.wsmr_time lt t5_end+tlaunch )
+north_cut = north_cut[i]
+north_cut_old = north_cut
+
+spec_new = make_spectrum( north_cut_new, bin=0.5, /log, /corr )
+spec_old = make_spectrum( north_cut_old, bin=0.5, /log, /corr )
+dt = t5_end - t5_start
+
+
+plot, spec_new.energy_kev, spec_new.spec_p, psym=10, /xlo, /ylo, xr=[3.,10.], yr=[1.,1.e4], $
+	/xsty, xtit='Energy[keV]', ytit='Counts keV!U-1!N', tit='FOXSI DET6 Flare2'
+oplot_err, spec_new.energy_kev, spec_new.spec_p, yerr=spec_new.spec_p_err, psym=10
+oplot_err, spec_old.energy_kev, spec_old.spec_p, yerr=spec_old.spec_p_err, psym=10, col=6
+
+
+
+; Go back to Ishikawa's time interval, and examine the photon list directly.
+
+rad = 150		; radius around location to include
+
+restore, 'data_2014/old-calib-march2015/foxsi_level2_data.sav', /v		; old calibration
+north_cut = area_cut(data_lvl2_d6, flare2, rad, /xy)
+i=where( north_cut.wsmr_time gt t1_pos2_start+tlaunch and north_cut.wsmr_time lt t1_pos2_end+tlaunch and $
+					north_cut.hit_energy[1] gt 4. )
+north_cut = north_cut[i]
+list_old = north_cut
+
+restore, 'data_2014/foxsi_level2_data.sav', /v		; new calibration
+list_new = data_lvl2_d6[north_cut[i]]
+
+;;list_new = data_lvl2_d6[i]
 
 
