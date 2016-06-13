@@ -234,8 +234,16 @@ end
 
 
 f=file_search('~/data/aia/20141211/*_0131*')
-fits2map, f, m0131
-save, m0131, file='aia-131.sav'
+fits2map, f[10:30], m131
+f=file_search('~/data/aia/20141211/*_0193*')
+fits2map, f[10:30], m193
+f=file_search('~/data/aia/20141211/*_0211*')
+fits2map, f[10:30], m211
+;save, m0131, file='aia-131.sav'
+
+movie_map, m131, cen=[-110,80], fov=1
+movie_map, m193, cen=[-110,80], fov=1
+movie_map, m211, cen=[-110,80], fov=1
  
 
 plot_map, aia[0], /log, fov=16
@@ -1042,17 +1050,17 @@ oplot, [1,2,3,4], float([nb1[4],nb2[4],nb3[4],nb4[4]]) / [nb1[3],nb2[3],nb3[3],n
 al_legend,['Ref det0','Ref det1','Ref det4','Ref det5'], color=[6,7,10,12], thick=4, line=0, /bott, box=0
 
 ;
-; A good map of the QS target.
+; A good map of one target.
 ;
 
 loadct, 7
 reverse_ct
-trange=[t4_start,t_shtr_start]
-m0 = foxsi_image_map( data_lvl2_d0, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
-m1 = foxsi_image_map( data_lvl2_d1, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
-m4 = foxsi_image_map( data_lvl2_d4, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
-m5 = foxsi_image_map( data_lvl2_d5, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
-m6 = foxsi_image_map( data_lvl2_d6, cen4, erange=[5.,10.], trange=trange, thr_n=4., /xycorr )
+trange=[t1_pos2_start,t1_pos2_end]
+m0 = foxsi_image_map( data_lvl2_d0, cen1_pos2, erange=[5.,6.], trange=trange, thr_n=4., /xycorr )
+m1 = foxsi_image_map( data_lvl2_d1, cen1_pos2, erange=[5.,6.], trange=trange, thr_n=4., /xycorr )
+m4 = foxsi_image_map( data_lvl2_d4, cen1_pos2, erange=[5.,6.], trange=trange, thr_n=4., /xycorr )
+m5 = foxsi_image_map( data_lvl2_d5, cen1_pos2, erange=[5.,6.], trange=trange, thr_n=4., /xycorr )
+m6 = foxsi_image_map( data_lvl2_d6, cen1_pos2, erange=[5.,6.], trange=trange, thr_n=4., /xycorr )
 
 m=m6
 m.data = m0.data+m1.data+m4.data+m5.data+m6.data
