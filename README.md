@@ -21,20 +21,20 @@ Directories:
 	data_2014:	ditto, for FOXSI-2 data.  Also ignored by .gitignore
 	fermi		Script used for FOXSI-1 Fermi analysis (didn't find anything)
 	help		Documentation directory (guides and examples)
-  img			Imaging routines
-  ishikawa	Routines and scripts written by Ishikawa
-  linz		Lindsay's analysis directory, with many sample scripts. Use at own risk!
-  milo		Milo's directory
-  old			Deprecated items
-  plots		Partial compilation of plots
-  proc		Routines to process data from raw form to the various levels.
-  psf			Some PSF code and plots from Steven
-  resp		Response and effective area routines
-  sam			Shared routines and scripts written by Säm
-  schriste	Steven's shared routines and scripts
-  spec		Spectral routines
-  util		utility IDL routines
-  vla			SAV files with VLA images
+  	img			Imaging routines
+  	ishikawa	Routines and scripts written by Ishikawa
+  	linz		Lindsay's analysis directory, with many sample scripts. Use at own risk!
+  	milo		Milo's directory
+  	old			Deprecated items
+  	plots		Partial compilation of plots
+  	proc		Routines to process data from raw form to the various levels.
+  	psf			Some PSF code and plots from Steven
+  	resp		Response and effective area routines
+  	sam			Shared routines and scripts written by Säm
+  	schriste	Steven's shared routines and scripts
+  	spec		Spectral routines
+  	util		utility IDL routines
+  	vla			SAV files with VLA images
   	
 Detailed directory listing:
 
