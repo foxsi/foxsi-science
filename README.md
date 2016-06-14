@@ -1,6 +1,28 @@
 foxsi-science
 =============
 
+INTALL:
+    
+    Include this five lines in your personal IDL_STARTUP file
+
+    COMMON FOXSI,FOXSIPKG,FOXSIDB
+    FOXSIPKG='path/to/your/foxsi-science/directory'
+    FOXSIDB='path/to/your/foxsi-data/directory/foxsidb'
+    add_path,FOXSIPKG
+    add_path,FOXSIDB
+
+Run SSWIDL and start up FOXSI by
+
+    foxsi,year
+
+year = 2014 or 2012
+
+Example:
+    
+    foxsi,2014
+
+
+
 Analysis tools to reduce and analyze FOXSI data
 
 Directory info:

@@ -1,19 +1,7 @@
 ; setup script to analyze FOXSI data, now for 2014 launch.  (FOXSI-2)
 
-; Set Path where foxsi-science is
-CD, Current=fs_location
-
-; add directory paths
-add_path, fs_location+'/fermi'
-add_path, fs_location+'/img'
-add_path, fs_location+'/resp'
-add_path, fs_location+'/psf'
-add_path, fs_location+'/proc'
-add_path, fs_location+'/spec'
-add_path, fs_location+'/util'
-
 ; load the Level 2 data.
-restore, 'data_2014/foxsi_level2_data.sav', /v
+restore, FOXSIDB+'/data_2014/foxsi_level2_data.sav', /v
 
 t_launch = 69060
 
@@ -126,4 +114,4 @@ save, tlaunch, t_launch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 	shift0, shift1, shift2, shift3, shift4, shift5, shift6, rot0, rot1, rot2, rot3, $
 	rot4, rot5, rot6, $
 	detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
-	file = 'data_2014/flight2014-parameters.sav'
+	file = FOXSIDB+'/data_2014/flight2014-parameters.sav'
