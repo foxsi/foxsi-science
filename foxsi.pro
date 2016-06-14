@@ -230,4 +230,5 @@ endif else begin
 		print, 'Example: foxsi,2014'
 	endelse
 endelse
+stop
 END
