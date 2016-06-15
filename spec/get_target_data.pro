@@ -44,7 +44,7 @@
 ;
 ;	or, for a selected energy range, and only good events:
 ;
-;		get_target_data, 6, d0, d1, d2, d3, d4, d5, d6 /good, eband=[5.,10.]
+;		get_target_data, 6, d0, d1, d2, d3, d4, d5, d6, /good, eband=[5.,10.]
 ;
 ;
 ; History:	
