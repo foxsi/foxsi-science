@@ -1,15 +1,30 @@
 foxsi-science
 =============
 
-INTALL:
+INSTALL:
     
     Include this five lines in your personal IDL_STARTUP file
 
     COMMON FOXSI,FOXSIPKG,FOXSIDB
-    FOXSIPKG='path/to/your/foxsi-science/directory'
+    FOXSIPKG='path/to/your/foxsi-science'
     FOXSIDB='path/to/your/foxsi-data/directory/foxsidb'
     add_path,FOXSIPKG
     add_path,FOXSIDB
+    restore,FOXSIDB+'/data_2014/flight2014-parameters.sav'
+
+
+    FOXSI-Data-Base Directory (FOXSIDB)
+    
+    Should include at leats:
+        
+        Folder      Files
+
+        data_2012   flight2012-parameters.sav
+                    foxsi_level2_data.sav
+
+        data_2014   flight2014-parameters.sav
+                    foxsi_level2_data.sav
+
 
 Run SSWIDL and start up FOXSI by
 
@@ -30,9 +45,7 @@ Directory info:
 Files:
 
 	README.md				This file
-	foxsi-setup-script-2012.pro		Setup for the 2012 data
-	foxsi-setup-script-2014.pro		Setup for the 2014 data
-	
+	foxsi.pro               Setup	
 
 Directories:
 
