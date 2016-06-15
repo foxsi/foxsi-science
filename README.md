@@ -8,7 +8,7 @@ INSTALL:
     COMMON FOXSI,FOXSIPKG,FOXSIDB
     FOXSIPKG='path/to/your/foxsi-science'
     FOXSIDB='path/to/your/foxsi-data/directory/foxsidb'
-    add_path,FOXSIPKG
+    add_path,FOXSIPKG,/expand
     add_path,FOXSIDB
     restore,FOXSIDB+'/data_2014/flight2014-parameters.sav'
 
