@@ -1,6 +1,10 @@
 # Coordinated Observations
 
-## IRIS
+## FOXSI-1
+
+## FOXSI-2
+
+### IRIS
 
 observatory | time (UT) | targets
 ------------| -----| -------
