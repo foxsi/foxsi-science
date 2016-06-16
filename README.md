@@ -2,7 +2,9 @@ foxsi-science
 =============
 
 INSTALL:
-    
+
+    You need to have IDL and SSW previously installed
+
     Include this five lines in your personal IDL_STARTUP file
 
     COMMON FOXSI,FOXSIPKG,FOXSIDB
@@ -15,7 +17,7 @@ INSTALL:
 
     FOXSI-Data-Base Directory (FOXSIDB)
     
-    Should include at leats:
+    Should include:
         
         Folder      Files
 
@@ -24,6 +26,8 @@ INSTALL:
 
         data_2014   flight2014-parameters.sav
                     foxsi_level2_data.sav
+
+    
 
 
 Run SSWIDL and start up FOXSI by
