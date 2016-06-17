@@ -12,7 +12,7 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, 
 	;		Created routine sometime in 2014!  LG
 	;		Jan 2015  Updated for FOXSI-2 flight.
 	;		March 12 2015	LG	Added START_TIME and END_TIME keywords so that array sizes can be controlled.
-	
+	COMMON PARAM
 	default, dt, 10		; default time step is 10 sec
 	default, energy, [4.,15.]
 	default, year, 2014
@@ -26,8 +26,8 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, 
 	
 	nEvts = n_elements(data_mod)
 	
-	if year eq 2014 then restore,'data_2014/flight2014-parameters.sav' $
-			else restore, 'data_2012/flight2012-parameters.sav'
+	if year eq 2014 then restore,'$FOXSIDB'+'/data_2014/flight2014-parameters.sav' $
+			else restore, '$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
 	
 	; determine time range
 	times = data_mod.wsmr_time

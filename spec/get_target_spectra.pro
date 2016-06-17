@@ -8,6 +8,7 @@ FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GO
 ;	2014 Feb	Linz	Added keyword GOOD
 ;
 
+COMMON PARAM
 default, binwidth, 0.5
 default, year, 2012
 
@@ -16,8 +17,8 @@ if year ne 2012 and year ne 2014 then begin
 	return, -1
 endif
 
-if year eq 2012 then restore, 'data_2012/foxsi_level2_data.sav', /v
-if year eq 2014 then restore, 'data_2014/foxsi_level2_data.sav', /v
+if year eq 2012 then restore, '$FOXSIDB'+'/data_2012/foxsi_level2_data.sav', /v
+if year eq 2014 then restore, '$FOXSIDB'+'/data_2014/foxsi_level2_data.sav', /v
 
 
 ; Target times for each flight.
@@ -40,7 +41,7 @@ if year eq 2012 then begin
 endif
 
 if year eq 2014 then begin
-	restore,'data_2014/flight2014-parameters.sav'
+	restore,FOXSIDB+'/data_2014/flight2014-parameters.sav'
 	t1_start = t1_pos2_start + t_launch
 	t1_end   = t1_pos2_end + t_launch
 	t2_start = t2_pos1_start + t_launch

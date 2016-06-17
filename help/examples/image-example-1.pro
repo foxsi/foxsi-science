@@ -1,5 +1,5 @@
 ; Set auto parameters for 2014 flight.
-@foxsi-setup-script-2014
+foxsi,2014
 
 ; Choose the time range and location.
 trange = [t1_pos2_start,t1_pos2_end]  ; values defined in setup script

@@ -58,11 +58,12 @@ PRO		GET_TARGET_DATA, TARGET, D0, D1, D2, D3, D4, D5, D6, LEVEL1 = LEVEL1, $
 		D0_IN = D0_IN, D1_IN = D1_IN, D2_IN = D2_IN, D3_IN = D3_IN, D4_IN = D4_IN, $
 		D5_IN = D5_IN, D6_IN = D6_IN, DELTA_T = DELTA_T, YEAR = YEAR, STOP = STOP
 
+COMMON PARAM
 default, year, 2014
 
 case year of
-	2012:  dir = 'data_2012/'
-	2014:  dir = 'data_2014/'
+	2012:  dir = '$FOXSIDB'+'data_2012/'
+	2014:  dir = '$FOXSIDB'+'data_2014/'
 	else: begin
 		print, 'FOXSI did not fly that year!'
 		return
@@ -107,7 +108,7 @@ if year eq 2012 then begin
 endif
 
 if year eq 2014 then begin
-	restore,'data_2014/flight2014-parameters.sav'
+	restore,FOXSIDB+'/data_2014/flight2014-parameters.sav'
 	t1_start = t1_pos2_start
 	t1_end   = t1_pos2_end
 	t2_start = t2_pos1_start

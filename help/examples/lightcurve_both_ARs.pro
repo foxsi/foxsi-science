@@ -2,7 +2,7 @@
 ; Natalie's code, slight mods by Linz
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 
 ; initial sizes and energy definitions
 ;

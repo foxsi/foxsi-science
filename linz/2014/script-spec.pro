@@ -1,4 +1,4 @@
-@foxsi-setup-script-2014
+foxsi,2014
 
 spec1 = get_target_spectra( 1, year=2014, /good )
 spec2 = get_target_spectra( 2, year=2014, /good )
@@ -79,7 +79,7 @@ pclose
 ; Look at the high-energy emission from nonflaring region.
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 
 trange=[t5_start, t5_end]
 cen = cen5

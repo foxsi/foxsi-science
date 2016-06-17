@@ -46,7 +46,7 @@ al_legend, ['D0','D1','D4','D5','D6'], thick=th, col=[6,7,10,12,2], line=0, /rig
 ; at the detectors.
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 
 spec1 = get_target_spectra( 1, year=2014, /good )
 spec2 = get_target_spectra( 2, year=2014, /good )
@@ -142,7 +142,7 @@ endfor
 ; Still to do: make sure the blanketing parameters are correct and include livetime.
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 
 ; This example gets the count spectra for Target 1.  spec_targ1 is a structure containing
 ; a count spectrum for each detector (0-6).

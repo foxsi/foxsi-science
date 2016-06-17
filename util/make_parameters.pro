@@ -6,22 +6,12 @@
 
 PRO make_parameters, YEAR
 
-COMMON FOXSI
-
 if not keyword_set(year) then begin 
 	print,'Please provide the year of the FOXSI flight (2012 or 2014).'
 	print,'       Example: make_parameters,2014'
 endif else begin
 
 	if ((year eq 2012) OR (year eq 2014)) then begin
-		; add directory paths
-		add_path, FOXSIPKG+'/fermi'
-		add_path, FOXSIPKG+'/img'
-		add_path, FOXSIPKG+'/resp'
-		add_path, FOXSIPKG+'/psf'
-		add_path, FOXSIPKG+'/proc'
-		add_path, FOXSIPKG+'/spec'
-		add_path, FOXSIPKG+'/util'
 
 		if year eq 2014 then begin
 			t_launch = 69060
@@ -134,11 +124,11 @@ endif else begin
 			shift0, shift1, shift2, shift3, shift4, shift5, shift6, rot0, rot1, rot2, rot3, $
 			rot4, rot5, rot6, $
 			detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
-			file = FOXSIDB+'/data_2014/flight2014-parameters.sav'
+			file = '$FOXSIDB'+'/data_2014/flight2014-parameters.sav'
 			print, 'You just created a file with the parameters and needed' 
 			print, 'to do the analysis of the FOXSI 2014 observations.'
 			print, ''
-			print, 'File location:   '+FOXSIDB+'/data_2014/flight2014-parameters.sav'
+			print, 'File location:   '+'$FOXSIDB'+'/data_2014/flight2014-parameters.sav'
 		endif
 
 		if year eq 2012 then begin
@@ -211,11 +201,11 @@ endif else begin
 				shift0, shift1, shift2, shift3, shift4, shift5, shift6, $
 				rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
 				detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6, $
-				file = FOXSIDB+'/data_2012/flight2012-parameters.sav'
+				file = '$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
 			print, 'You just created a file with the parameters and needed' 
 			print, 'to do the analysis of the FOXSI 2012 observations.'
 			print, ''
-			print, 'File location:   '+FOXSIDB+'/data_2012/flight2012-parameters.sav'
+			print, 'File location:   '+'$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
 		endif		
 
 	endif else begin

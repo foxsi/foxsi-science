@@ -3,7 +3,7 @@
 ; Written Jan. 5 2016 to use as a starting point for quiet-Sun / axion analysis.
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 
 ;
 ; Make a map to get an overall sense of what we're looking at.

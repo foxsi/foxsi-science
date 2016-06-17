@@ -32,8 +32,8 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA_IN, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE,
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-	default, erange, [4.,15.]      	; energy range in keV
+  COMMON PARAM
+  default, erange, [4.,15.]      	; energy range in keV
   default, trange, [108.3,498.3] 	; time range in sec (from launch)
   default, trange, [0.,1200.] 	; time range in sec (from launch)
   default, center, [0.,0.]    	; img center position in arcsec
@@ -43,8 +43,8 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA_IN, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE,
   default, year, 2014
 
 		if year eq 2014 then $
-			restore, 'data_2014/flight2014-parameters.sav' else if year eq 2012 then $
-			restore, 'data_2012/flight2012-parameters.sav'
+			restore, '$FOXSIDB'+'/data_2014/flight2014-parameters.sav' else if year eq 2012 then $
+			restore, '$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
 			
 ;    ; Here are Ishikawa's offsets used if XYCOR is set:
 ;    xerr=[55.4700,    81.490,   96.360,  87.8900,  48.2700,   49.550,   63.450]

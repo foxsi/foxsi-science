@@ -7,12 +7,11 @@ INSTALL:
 
     Include this five lines in your personal IDL_STARTUP file
 
-    COMMON FOXSI,FOXSIPKG,FOXSIDB
-    FOXSIPKG='path/to/your/foxsi-science'
-    FOXSIDB='path/to/your/foxsi-data/directory/foxsidb'
-    add_path,FOXSIPKG,/expand
-    add_path,FOXSIDB
-    restore,FOXSIDB+'/data_2014/flight2014-parameters.sav'
+    setenv,'FOXSIPKG=~/Desktop/foxsi-science'
+    setenv,'FOXSIDB=~/WORK_SSWIDL/Default/foxsidb'
+    add_path,'$FOXSIPKG',/expand
+    add_path,'$FOXSIDB'
+    @init_param
 
 
     FOXSI-Data-Base Directory (FOXSIDB)
@@ -27,7 +26,8 @@ INSTALL:
         data_2014   flight2014-parameters.sav
                     foxsi_level2_data.sav
 
-    
+    To know whether your installation was a success, run @image-example-1
+    and you should get an image of the first target.
 
 
 Run SSWIDL and start up FOXSI by

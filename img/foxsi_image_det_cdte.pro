@@ -35,7 +35,7 @@
 FUNCTION FOXSI_IMAGE_DET_CDTE, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, $
                           YEAR=YEAR, STOP = STOP
-
+                          
 	default, erange, [4.,15.]
 ;  	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
 	default, thr_n, 4.		; n-side keV threshold

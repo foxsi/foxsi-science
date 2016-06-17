@@ -5,14 +5,15 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	; corresponding only to the specified heliographic area in arcsec.  
 	; /GOOD returns only the data with no error flags.
 	; /XYCORR corrects the center position using the "known" xy offset.
-	
+
+	COMMON PARAM
 	default, year, 2014
 	
 	detnum = data[0].det_num
 
 	case year of
-		2012:	restore, 'data_2012/flight2012-parameters.sav'
-		2014:	restore, 'data_2014/flight2014-parameters.sav'
+		2012:	restore, '$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
+		2014:	restore, '$FOXSIDB'+'/data_2014/flight2014-parameters.sav'
 		else: begin
 			print, 'Year can only be 2012 or 2014.'
 			return, -1
