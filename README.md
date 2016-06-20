@@ -49,7 +49,10 @@ Directory info:
 Files:
 
 	README.md				This file
-	foxsi.pro               Setup	
+	foxsi.pro       Setup	
+  param2012       Flight parameters 2012
+  param2014       Flight parameters 2014
+
 
 Directories:
 
