@@ -7,8 +7,8 @@ INSTALL:
 
     Include this five lines in your personal IDL_STARTUP file
 
-    setenv,'FOXSIPKG=~/Desktop/foxsi-science'
-    setenv,'FOXSIDB=~/WORK_SSWIDL/Default/foxsidb'
+    setenv,'FOXSIPKG=My/personal/path/to/foxsi-science'
+    setenv,'FOXSIDB=My/personal/path/to/foxsidb'
     add_path,'$FOXSIPKG',/expand
     add_path,'$FOXSIDB'
     @init_param
@@ -16,15 +16,22 @@ INSTALL:
 
     FOXSI-Data-Base Directory (FOXSIDB)
     
+    Create a new folder called 'foxsidb' in a convenient location for you.
     Should include:
         
         Folder      Files
 
-        data_2012   flight2012-parameters.sav
-                    foxsi_level2_data.sav
+        data_2012   foxsi_level2_data.sav
 
-        data_2014   flight2014-parameters.sav
-                    foxsi_level2_data.sav
+        data_2014   foxsi_level2_data.sav
+
+
+    You can download these two files from 
+
+    2012: ftp://apollo.ssl.berkeley.edu/pub/foxsi/data_2012/
+
+    2014: ftp://apollo.ssl.berkeley.edu/pub/foxsi/data_2014/
+
 
     To know whether your installation was a success, run @image-example-1
     and you should get an image of the first target.
