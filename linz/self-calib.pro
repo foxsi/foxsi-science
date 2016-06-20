@@ -141,8 +141,6 @@ END
 
 PRO	CYCLE_MODULES
 
-	restore, FOXSIDB+'data_2012/flight2012-parameters.sav'
-
 	get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, year=2012
 	t1 = t4_start
 	t2 = t6_end

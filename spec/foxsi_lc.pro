@@ -15,7 +15,6 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, 
 	COMMON PARAM
 	default, dt, 10		; default time step is 10 sec
 	default, energy, [4.,15.]
-	default, year, 2014
 
 	; perform cuts.
 	data_mod = data
@@ -25,9 +24,6 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, 
 									data_mod.hit_energy[1] lt energy[1] ) ]
 	
 	nEvts = n_elements(data_mod)
-	
-	if year eq 2014 then restore,'$FOXSIDB'+'/data_2014/flight2014-parameters.sav' $
-			else restore, '$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
 	
 	; determine time range
 	times = data_mod.wsmr_time

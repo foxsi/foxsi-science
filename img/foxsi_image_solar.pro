@@ -40,11 +40,6 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA_IN, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE,
 	default, psize,  7.735   		; img pixel size (arcseconds/imagepixel)
 ;    default, size,   [2000,2000] 	; size in image pixel numbers
   default, thr_n,   4.0    		; desired n-side energy threshold
-  default, year, 2014
-
-		if year eq 2014 then $
-			restore, '$FOXSIDB'+'/data_2014/flight2014-parameters.sav' else if year eq 2012 then $
-			restore, '$FOXSIDB'+'/data_2012/flight2012-parameters.sav'
 			
 ;    ; Here are Ishikawa's offsets used if XYCOR is set:
 ;    xerr=[55.4700,    81.490,   96.360,  87.8900,  48.2700,   49.550,   63.450]
