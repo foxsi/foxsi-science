@@ -18,14 +18,12 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;
 ;	Example 1:
 ;
-;		restore, 'foxsi_level2_data.sav',/v
 ;		i=where( data_level2_D6.error flag eq 0 )
 ;		spex = make_spectrum( data_level2_D6[i], binwidth=0.5 )
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;
 ;	Example 2: (probably most used)
 ;
-;		restore, 'foxsi_level2_data.sav',/v
 ;		spex = make_spectrum( data_level2_D6, binwidth=0.5, /corr )
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;

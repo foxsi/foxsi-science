@@ -1,6 +1,6 @@
 PRO	DRAW_ALL, PIX=PIX, ERANGE=ERANGE, TARGET=TARGET, FOV=FOV, FILE=FILE, MAX=MAX
 
-restore, 'data_2012/foxsi_level2_data.sav', /v
+COMMON FOXSI
 
 default, pix, 100.
 default, erange, [4,15]
