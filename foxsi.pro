@@ -31,7 +31,7 @@ endif else begin
 		endif
 		if year eq 2012 then begin
 			; load the Level 2 data.
-			@param2014
+			@param2012
 			restore, '$FOXSIDB'+'/data_2012/foxsi_level2_data.sav', /v
 			DATA_LVL2_D0=DATA_LVL2_D0
 			DATA_LVL2_D1=DATA_LVL2_D1
