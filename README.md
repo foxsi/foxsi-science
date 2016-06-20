@@ -50,33 +50,28 @@ Files:
 
 	README.md				This file
 	foxsi.pro       Setup	
-  param2012       Flight parameters 2012
-  param2014       Flight parameters 2014
 
 
 Directories:
 
 	calibration_data	data from the optics and detector calibration
-	data_2012:	contains FOXSI flight data files and processed data.
-			**This directory is ignored by git through .gitignore!**
-			All files are available for download on the FOXSI FTP site.
-	data_2014:	ditto, for FOXSI-2 data.  Also ignored by .gitignore
 	fermi		Script used for FOXSI-1 Fermi analysis (didn't find anything)
+	ghost-rays	Routines and data used to make ghost-image analysis
 	help		Documentation directory (guides and examples)
-  	img			Imaging routines
+  	img		Imaging routines
   	ishikawa	Routines and scripts written by Ishikawa
   	linz		Lindsay's analysis directory, with many sample scripts. Use at own risk!
-  	milo		Milo's directory
-  	old			Deprecated items
-  	plots		Partial compilation of plots
+  	nustar		Data and scripts for Nustar analysis
+  	old		Deprecated items
+  	parameters	Set global parameters
   	proc		Routines to process data from raw form to the various levels.
-  	psf			Some PSF code and plots from Steven
+  	psf		Some PSF code and plots from Steven
   	resp		Response and effective area routines
-  	sam			Shared routines and scripts written by Säm
+  	sam		Shared routines and scripts written by Säm
   	schriste	Steven's shared routines and scripts
   	spec		Spectral routines
   	util		utility IDL routines
-  	vla			SAV files with VLA images
+  	vla		SAV files with VLA images
   	
 Detailed directory listing:
 
