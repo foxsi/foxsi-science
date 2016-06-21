@@ -8,7 +8,7 @@ INSTALL:
     Include this five lines in your personal IDL_STARTUP file
 
     setenv,'FOXSIPKG=My/personal/path/to/foxsi-science'
-    setenv,'FOXSIDB=My/personal/path/to/foxsidb'
+    setenv,'FOXSIDB=My/other/personal/path/to/foxsidb'
     add_path,'$FOXSIPKG',/expand
     add_path,'$FOXSIDB'
     @init_param
