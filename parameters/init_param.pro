@@ -1,4 +1,4 @@
-COMMON PARAM, t_launch, tlaunch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
+COMMON FOXSI_PARAM, t_launch, tlaunch, t1_pos0_start, t1_pos0_end, t1_pos1_start, $
 t1_pos1_end, t1_pos2_start, t1_pos2_end, t2_pos0_start, t2_pos0_end, t2_pos1_start, $
 t2_pos1_end, t3_pos0_start, t3_pos0_end, t3_pos1_start, t3_pos1_end, t3_pos2_start, $
 t3_pos2_end, t4_start, t_shtr_start, t_shtr_end, t4_end, t5_start, t5_end, $

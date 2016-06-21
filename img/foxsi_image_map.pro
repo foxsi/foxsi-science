@@ -39,7 +39,7 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
                           YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, $
                           flatfield=flatfield, STOP = STOP
 
-COMMON PARAM
+COMMON FOXSI_PARAM
 default, erange, [4.,15.]
 default, thr_n, 4.		; n-side keV threshold
 default, year, 2014

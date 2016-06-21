@@ -20,8 +20,7 @@ PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, YEAR=YEA
 ;
 
 
-default, year, 2014
-COMMON PARAM
+COMMON FOXSI_PARAM
 
 ; figure out which det(s) we're dealing with
 det_arr = bytarr(7)

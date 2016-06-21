@@ -5,7 +5,7 @@
 ;
 
 PRO FOXSI, YEAR
-COMMON PARAM
+COMMON FOXSI_PARAM
 if not keyword_set(year) then begin 
 	print,'Please provide the year of the FOXSI flight (2012 or 2014).'
 	print,'       Example: foxsi,2014'

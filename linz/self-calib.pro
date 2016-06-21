@@ -2,7 +2,7 @@ FUNCTION assess_params, n_bla, offset, spec, delta_t, stop=stop, info=info, $
 	ch_t=ch_t, ch_em=ch_em, t=t, em=em, phottot=totphot, quiet=quiet, module=module, $
 	plot=plot
 
-COMMON FOXSI
+COMMON FOXSI_PARAM
 ; Produce photon spex from count spex.
 inverse = inverse_resp( spec.energy_kev, offaxis=7.3, n_bla=n_bla, offset=offset, /quiet,$
 												/foxsi1, module=module )

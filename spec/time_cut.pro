@@ -4,7 +4,7 @@ FUNCTION	TIME_CUT, DATA, Ti, Tf, GOOD=GOOD, YEAR=YEAR, energy=energy, stop=stop
 	; corresponding only to the specified timerange.  T0 and T1 should be in anytim
 	; seconds.  /GOOD returns only the data with no error flags.
 	
-	COMMON PARAM
+	COMMON FOXSI_PARAM
 	if keyword_set(good) then data_mod = data[ where(data.error_flag eq 0) ] $
 		else data_mod = data
 	

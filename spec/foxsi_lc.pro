@@ -12,7 +12,7 @@ FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, 
 	;		Created routine sometime in 2014!  LG
 	;		Jan 2015  Updated for FOXSI-2 flight.
 	;		March 12 2015	LG	Added START_TIME and END_TIME keywords so that array sizes can be controlled.
-	COMMON PARAM
+	COMMON FOXSI_PARAM
 	default, dt, 10		; default time step is 10 sec
 	default, energy, [4.,15.]
 

@@ -32,7 +32,7 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA_IN, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE,
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  COMMON PARAM
+  COMMON FOXSI_PARAM
   default, erange, [4.,15.]      	; energy range in keV
   default, trange, [108.3,498.3] 	; time range in sec (from launch)
   default, trange, [0.,1200.] 	; time range in sec (from launch)

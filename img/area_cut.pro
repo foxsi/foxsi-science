@@ -6,7 +6,7 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	; /GOOD returns only the data with no error flags.
 	; /XYCORR corrects the center position using the "known" xy offset.
 
-	COMMON PARAM
+	COMMON FOXSI_PARAM
 	default, year, 2014
 	
 	detnum = data[0].det_num
