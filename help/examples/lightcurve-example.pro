@@ -1,7 +1,7 @@
 ; Sample script to generate a FOXSI lightcurve
 
 ; Set parameters for 2014 flight (from foxsi-science directory)
-@foxsi-setup-script-2014
+foxsi,2014
 
 dt = 5.	; time interval over which to integrate
 lc0 = foxsi_lc( data_lvl2_d0, year=2014, dt=dt)

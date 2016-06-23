@@ -1,6 +1,54 @@
 foxsi-science
 =============
 
+INSTALL:
+
+    You need to have IDL and SSW previously installed
+
+    Include this five lines in your personal IDL_STARTUP file
+
+    setenv,'FOXSIPKG=My/personal/path/to/foxsi-science'
+    setenv,'FOXSIDB=My/other/personal/path/to/foxsidb'
+    add_path,'$FOXSIPKG',/expand
+    add_path,'$FOXSIDB'
+    @init_param
+
+
+    FOXSI-Data-Base Directory (FOXSIDB)
+    
+    Create a new folder called 'foxsidb' in a convenient location for you.
+    Should include:
+        
+        Folder      Files
+
+        data_2012   foxsi_level2_data.sav
+
+        data_2014   foxsi_level2_data.sav
+
+
+    You can download these two files from 
+
+    2012: ftp://apollo.ssl.berkeley.edu/pub/foxsi/data_2012/
+
+    2014: ftp://apollo.ssl.berkeley.edu/pub/foxsi/data_2014/
+
+
+    To know whether your installation was a success, run @image-example-1
+    and you should get an image of the first target.
+
+
+Run SSWIDL and start up FOXSI by
+
+    foxsi,year
+
+year = 2014 or 2012
+
+Example:
+    
+    foxsi,2014
+
+
+
 Analysis tools to reduce and analyze FOXSI data
 
 Directory info:
@@ -8,33 +56,29 @@ Directory info:
 Files:
 
 	README.md				This file
-	foxsi-setup-script-2012.pro		Setup for the 2012 data
-	foxsi-setup-script-2014.pro		Setup for the 2014 data
-	
+	foxsi.pro       Setup	
+
 
 Directories:
 
 	calibration_data	data from the optics and detector calibration
-	data_2012:	contains FOXSI flight data files and processed data.
-			**This directory is ignored by git through .gitignore!**
-			All files are available for download on the FOXSI FTP site.
-	data_2014:	ditto, for FOXSI-2 data.  Also ignored by .gitignore
 	fermi		Script used for FOXSI-1 Fermi analysis (didn't find anything)
+	ghost-rays	Routines and data used to make ghost-image analysis
 	help		Documentation directory (guides and examples)
-  	img			Imaging routines
+  	img		Imaging routines
   	ishikawa	Routines and scripts written by Ishikawa
   	linz		Lindsay's analysis directory, with many sample scripts. Use at own risk!
-  	milo		Milo's directory
-  	old			Deprecated items
-  	plots		Partial compilation of plots
+  	nustar		Data and scripts for Nustar analysis
+  	old		Deprecated items
+  	parameters	Set global parameters
   	proc		Routines to process data from raw form to the various levels.
-  	psf			Some PSF code and plots from Steven
+  	psf		Some PSF code and plots from Steven
   	resp		Response and effective area routines
-  	sam			Shared routines and scripts written by Säm
+  	sam		Shared routines and scripts written by Säm
   	schriste	Steven's shared routines and scripts
   	spec		Spectral routines
   	util		utility IDL routines
-  	vla			SAV files with VLA images
+  	vla		SAV files with VLA images
   	
 Detailed directory listing:
 

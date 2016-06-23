@@ -2,9 +2,6 @@
 ; Example script for measuring FOXSI count rates in any target, time, or energy.
 ; Written Jan. 5 2016 to use as a starting point for quiet-Sun / axion analysis.
 ;
-
-@foxsi-setup-script-2014
-
 ;
 ; Make a map to get an overall sense of what we're looking at.
 ; Example is 1st target after 2 pointing adjustments (target 1, position 2)
@@ -44,7 +41,7 @@ data = time_cut( data, times[0], times[1], energy=energy_band )
 n_all = n_elements( data )
 data  = data[ where( data.error_flag eq 0 ) ]
 n_good = n_elements( data )
-live = n_good / n_all
+live = float(n_good) / n_all
 ; Later, we should calculate a a more accurate livetime accounting for readout time.
 
 
@@ -61,5 +58,5 @@ live = n_good / n_all
 ; Some code to help with the flux calculation:
 
 area6 = get_foxsi_effarea( module_num=6, energy=energy_band )
-area6_live = area6*live			; correct for livetime
+area6_live = area6.eff_area_cm2*live			; correct for livetime
 

@@ -58,33 +58,8 @@ PRO		GET_TARGET_DATA, TARGET, D0, D1, D2, D3, D4, D5, D6, LEVEL1 = LEVEL1, $
 		D0_IN = D0_IN, D1_IN = D1_IN, D2_IN = D2_IN, D3_IN = D3_IN, D4_IN = D4_IN, $
 		D5_IN = D5_IN, D6_IN = D6_IN, DELTA_T = DELTA_T, YEAR = YEAR, STOP = STOP
 
+COMMON FOXSI_PARAM
 default, year, 2014
-
-case year of
-	2012:  dir = 'data_2012/'
-	2014:  dir = 'data_2014/'
-	else: begin
-		print, 'FOXSI did not fly that year!'
-		return
-	end
-endcase
-
-
-; Check if we're inputting data.  If not, restore Level 1 or Level 2 data.
-if ( (exist(d0_in) and exist(d1_in) and exist(d1_in) and exist(d1_in) and exist(d1_in) $
-	 	and exist(d1_in) and exist(d1_in)) eq 0) then begin
-	if keyword_set(level1) then begin
-			restore, dir+'foxsi_level1_data.sav'
-	endif else restore, dir+'foxsi_level2_data.sav'
-endif else begin
-	data_lvl2_d0 = d0_in
-	data_lvl2_d1 = d1_in
-	data_lvl2_d2 = d2_in
-	data_lvl2_d3 = d3_in
-	data_lvl2_d4 = d4_in
-	data_lvl2_d5 = d5_in
-	data_lvl2_d6 = d6_in
-endelse
 
 ;
 ; Timing information, same values as used in foxsi_setup_script.pro
@@ -107,7 +82,6 @@ if year eq 2012 then begin
 endif
 
 if year eq 2014 then begin
-	restore,'data_2014/flight2014-parameters.sav'
 	t1_start = t1_pos2_start
 	t1_end   = t1_pos2_end
 	t2_start = t2_pos1_start

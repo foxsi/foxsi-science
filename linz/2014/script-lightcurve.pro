@@ -1,4 +1,4 @@
-@foxsi-setup-script-2014
+foxsi,2014
 
 dt = 5.
 lc0 = foxsi_lc( data_lvl2_d0, year=2014, dt=dt)
@@ -67,7 +67,7 @@ IDL> ptim, wsmrt
 ; Lightcurves at different energies
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 
 lca=foxsi_lc(data_lvl2_d6,dt=4,energy=[4,7], /good)
 lcb=foxsi_lc(data_lvl2_d6,dt=4,energy=[7,15], /good)

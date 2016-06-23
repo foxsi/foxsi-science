@@ -22,20 +22,20 @@ IF NOT keyword_set(det_thick) THEN det_thick_um = 500 ELSE det_thick_um = det_th
 
 IF ((NOT keyword_set(TYPE)) OR (TYPE EQ 'si')) THEN BEGIN
 
-    restore, data_dir + "si_atten_len.dat" 
+    restore, '$FOXSIPKG'+'/'+data_dir + "si_atten_len.dat" 
     atten_len_um = result.atten_len_um
     energy_keV = result.energy_ev/1000.0
 ENDIF ELSE BEGIN
 
     IF TYPE EQ 'czt' THEN BEGIN 
         ;det thick in file is 1000 um
-        restore, data_dir + "czt_xray_data.dat"
+        restore, '$FOXSIPKG'+'/'+data_dir + "czt_xray_data.dat"
         energy_keV = result.energy_keV
         atten_len_um = 1/(result.atten_len_photo_cm)*10000
     ENDIF
 
     IF TYPE EQ 'cdte' THEN BEGIN 
-        restore, data_dir + "cdte_xray_data.dat"
+        restore, '$FOXSIPKG'+'/'+data_dir + "cdte_xray_data.dat"
         energy_keV = result.energy_keV
         atten_len_um = 1/(result.atten_len_photo_cm)*10000
     ENDIF
@@ -55,7 +55,7 @@ det_eff = 1 - exp(-det_thick_um/atten_len_um)
 
 if not keyword_set(no_let) then begin
 	
-	restore, data_dir + let_file
+	restore, '$FOXSIPKG'+'/'+data_dir + let_file
 	if is_struct(efficiency) then begin
 		let = interpol(efficiency.efficiency, efficiency.energy_keV, energy_arr)
 

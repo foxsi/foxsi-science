@@ -1,4 +1,4 @@
-@foxsi-setup-script-2014
+foxsi,2014
 
 ; generic mapping script
 
@@ -17,7 +17,7 @@ cen = cen3_pos2
 
 en = [4.,15.]
 
-;@foxsi-setup-script-2014
+;foxsi,2014
 map0 = foxsi_image_map( data_lvl2_d0, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
 map1 = foxsi_image_map( data_lvl2_d1, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
 map4 = foxsi_image_map( data_lvl2_d4, cen, tra=trange, era=en, thr_n=4., /xyc, fov=40 )
@@ -571,14 +571,12 @@ loadct, 1
 reverse_ct
 popen, xsi=7, ysi=7
 
-restore, 'data_2012/flight2012-parameters.sav'
 plot_map, aia1[20], dmin=0., dmax=50, thick=5, xth=5,yth=5,charth=2, charsi=1.3, fov=50
 oplot, coords[0,*]+cen1[0], coords[1,*]+cen1[1], thick=5, col=255
 oplot, coords[0,*]+cen2[0], coords[1,*]+cen2[1], thick=5, col=255
 oplot, coords[0,*]+cen3[0], coords[1,*]+cen3[1], thick=5, col=255
 oplot, coords[0,*]+cen4[0], coords[1,*]+cen4[1], thick=5, col=255
 
-restore, 'data_2014/flight2014-parameters.sav'
 plot_map, aia2[10], dmin=0., dmax=50, thick=5, xth=5,yth=5,charth=2, charsi=1.3, fov=50
 oplot, coords[0,*]+cen1_pos2[0], coords[1,*]+cen1_pos2[1], thick=5, col=255
 oplot, coords[0,*]+cen2_pos1[0], coords[1,*]+cen2_pos1[1], thick=5, col=255
@@ -753,7 +751,7 @@ plot_map, m1c, /over
 ; CdTe
 ;
 
-@foxsi-setup-script-2014
+foxsi,2014
 trange=[t1_pos2_start, t1_pos2_end]
 cen = cen1_pos2
 m3 = foxsi_image_map( data_lvl2_d3, cen, trange=trange, thr_n=2.2, /cdte, er=[3.,100])
