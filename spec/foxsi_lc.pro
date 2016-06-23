@@ -1,17 +1,25 @@
 FUNCTION	foxsi_lc, data, dt=dt, stop=stop, good=good, energy=energy, year=year, $
 					start_time=start_time, end_time=end_time
 					
-
-	;	produces a FOXSI lightcurve given a FOXSI level2 data structure.
-	;	DT is the time interval.  Constant for entire curve.
-	
-	; sample call:
-	; get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, /good 
-	
-	; history:
-	;		Created routine sometime in 2014!  LG
-	;		Jan 2015  Updated for FOXSI-2 flight.
-	;		March 12 2015	LG	Added START_TIME and END_TIME keywords so that array sizes can be controlled.
+;	Produces a FOXSI lightcurve given a FOXSI level2 data structure.
+;	
+; INPUTS:
+;
+;	DATA:		FOXSI level 2 data structure
+;	DT:		time bin size (in seconds), default is 10 sec
+;	GOOD:		Only return events with error_flag eq 0
+;	ENERGY:		Restrict to energy range defined by this 2-element array, default is [4.,15.] keV
+;	YEAR:		2012 or 2014, default is 2014
+;	START_TIME:	start of time interval (in seconds-since-launch) 
+;	END_TIME:	end of time interval (in seconds-since-launch)
+;
+; History:
+;		Created routine sometime in 2014!  LG
+;		Jan 2015  Updated for FOXSI-2 flight.
+;		March 12 2015	LG	Added START_TIME and END_TIME keywords so that array sizes can be controlled.
+;
+; Example:
+;
 	
 	default, dt, 10		; default time step is 10 sec
 	default, energy, [4.,15.]
