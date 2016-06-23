@@ -1,4 +1,4 @@
-@foxsi-setup-script-2012
+foxsi,2012
 
 iter=[1,5,10,20,40,60,80,100,150,200]
 iter=findgen(12)*5+5

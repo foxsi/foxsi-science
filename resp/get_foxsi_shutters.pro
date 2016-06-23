@@ -58,7 +58,7 @@ add_um = [mylar_um, be_um, al_um, kapton_um]
 
 total_th_um = th_um + add_um
 
-f = data_dir + ["mylar_atten_len.dat","be_atten_len.dat", "al_atten_len.dat", "kapton_atten_len.dat"]
+f = '$FOXSIPKG'+'/'+data_dir + ["mylar_atten_len.dat","be_atten_len.dat", "al_atten_len.dat", "kapton_atten_len.dat"]
 
 FOR i = 0, n_elements(f)-1 DO BEGIN
 

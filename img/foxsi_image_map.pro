@@ -39,20 +39,12 @@ FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
                           YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, $
                           flatfield=flatfield, STOP = STOP
 
-	default, erange, [4.,15.]
-	default, thr_n, 4.		; n-side keV threshold
-  default, year, 2014
-  default, trange, [0,500]
-  default, fov, 20.
-
-	case year of
-		2012:	restore, 'data_2012/flight2012-parameters.sav'
-		2014:	restore, 'data_2014/flight2014-parameters.sav'
-		else: begin
-			print, 'Year can only be 2012 or 2014.'
-			return, -1
-		end
-	endcase
+COMMON FOXSI_PARAM
+default, erange, [4.,15.]
+default, thr_n, 4.		; n-side keV threshold
+default, year, 2014
+default, trange, [0,500]
+default, fov, 20.
 
 	xc = center[0]
 	yc = center[1]

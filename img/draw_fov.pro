@@ -20,7 +20,7 @@ PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, YEAR=YEA
 ;
 
 
-	default, year, 2014
+COMMON FOXSI_PARAM
 
 ; figure out which det(s) we're dealing with
 det_arr = bytarr(7)
@@ -60,8 +60,7 @@ if keyword_set(xycor) then yerr=$
 
 target_centers = [[-480,-350], [-850,150], [600,400], [700,-600], [1000,-900], [700,-600]]
 
-	if year eq 2014 then begin 
-		restore, 'data_2014/flight2014-parameters.sav'
+	if tlaunch eq 69060 then begin 
 		target_centers = [ [cen1_pos2], [cen2_pos1], [cen3_pos2], [cen4], [cen5] ]
 		if keyword_set( xycor ) then xerr[*] = -offset_xy[0]
 		if keyword_set( xycor ) then yerr[*] = -offset_xy[1]		

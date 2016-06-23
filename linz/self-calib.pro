@@ -2,6 +2,7 @@ FUNCTION assess_params, n_bla, offset, spec, delta_t, stop=stop, info=info, $
 	ch_t=ch_t, ch_em=ch_em, t=t, em=em, phottot=totphot, quiet=quiet, module=module, $
 	plot=plot
 
+COMMON FOXSI_PARAM
 ; Produce photon spex from count spex.
 inverse = inverse_resp( spec.energy_kev, offaxis=7.3, n_bla=n_bla, offset=offset, /quiet,$
 												/foxsi1, module=module )
@@ -139,8 +140,6 @@ END
 
 
 PRO	CYCLE_MODULES
-
-	restore, 'data_2012/flight2012-parameters.sav'
 
 	get_target_data, 4, d0,d1,d2,d3,d4,d5,d6, year=2012
 	t1 = t4_start

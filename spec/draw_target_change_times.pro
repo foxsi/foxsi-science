@@ -1,11 +1,9 @@
 PRO	DRAW_TARGET_CHANGE_TIMES, YRANGE=YRANGE, THICK=THICK
-
+	COMMON FOXSI_PARAM
 	; Only works for FOXSI-2 so far!
 
 	default, yrange, [0.,100]
 	default, thick, 2
-
-	restore, 'data_2014/flight2014-parameters.sav'
 
 	hsi_linecolors
 	outplot, anytim(t1_pos0_start*[1.,1.]+tlaunch+anytim('2014-dec-11'), /yo),yrange, col=6, thick=thick

@@ -47,7 +47,7 @@ if not keyword_set(FOXSI1) and not keyword_set(QUIET) then $
 
 if keyword_set(USE_THEORETICAL) then begin
 
-	restore, data_dir + "eff_area_permodules2.dat"
+	restore, '$FOXSIPKG' + '/' + data_dir + "eff_area_permodules2.dat"
 	eff_area = eff_area_permod.eff_area2
 	energy = eff_area_permod.energy
 	IF keyword_set(FOXSI1) THEN eff_area = eff_area_permod.eff_area

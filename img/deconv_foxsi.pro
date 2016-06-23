@@ -6,9 +6,7 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 					   MEASURED_PSF = MEASURED_PSF, STOP = STOP, FIRST = FIRST, $
 					   PSF_map=PSF_map, FIX4=FIX4, iter=iter, $
 					   RECONV_map = reconv_map, CSTAT=cstat, year=year
-					   
-					   
- 
+
  	; Detector should be an index array saying which detectors we're using.
  	; Example [0,0,0,0,0,1] for D6.
  
@@ -24,17 +22,6 @@ FUNCTION DECONV_FOXSI, DETECTOR, TIME_RANGE, PIX=PIX, FOV=FOV, ERANGE=ERANGE, AL
 	default, measured_psf, 0
 	default, iter, [1,2,3,4,5,10,20,40,80,100]
 
-	
-	print
-	print, 'Loading data.'
-	print
-	
-	if year eq 2012 then restore, 'data_2012/foxsi_level2_data.sav' $
-		else if year eq 2014 then restore, 'data_2014/foxsi_level2_data.sav' $
-		else begin
-			print, 'year should be 2012 or 2014'
-			return, -1
-		endelse
 		
 	if year eq 2012 then flare=[967,-207] $	; from RHESSI flarelist
 		else flare=[0,-200]

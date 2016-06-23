@@ -35,22 +35,13 @@
 FUNCTION FOXSI_IMAGE_DET_CDTE, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, $
                           YEAR=YEAR, STOP = STOP
-
+                          
 	default, erange, [4.,15.]
 ;  	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
 	default, thr_n, 4.		; n-side keV threshold
   	default, year, 2014
   	default, trange, [0,500]
   	default, year, 2014
-
-;	case year of
-;		2012:	restore, 'data_2012/flight2012-parameters.sav'
-;		2014:	restore, 'data_2014/flight2014-parameters.sav'
-;		else: begin
-;			print, 'Year can only be 2012 or 2014.'
-;			return, -1
-;		end
-;	endcase
 
 	; throw out any potentially bad events
 	if keyword_set( keepall ) then data2=data else data2 = data[ where( data.error_flag eq 0 ) ]
