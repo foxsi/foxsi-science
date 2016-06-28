@@ -11,18 +11,29 @@ FUNCTION FOXSI2_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
 ; 
 ; Return value: Structure containing the energy vector, count vector, and count uncertainty vector.
 ;
-;	EM: 	 emission measure in units of 10.^49 cm^-3
-;	T:  	 temperature in MK (Yes, it's MK!  Sorry but can't be changed now.)
-;	TIME:  	 time interval for observation, in seconds (Default 1 sec)
-;	BINSIZE: width of energy bins (Default 0.5 keV)
+; INPUTS:
+;
+;	EM: 	 	emission measure in units of 10.^49 cm^-3
+;	T:  	 	temperature in MK (Yes, it's MK!  Sorry but can't be changed now.)
+;	TIME:  	 	time interval for observation, in seconds (Default 1 sec)
+;	BINSIZE: 	width of energy bins (Default 0.5 keV)
+;	DATA_DIR: 	directory where calibration data is stored
+;	MODULE_NUM: 	
 ;	OFFAXIS:	off-axis angle in arcmin.  (Default 0.0)
-;	SMEAR:	if set, smear the counts to simulate imperfect energy resolution.
+;	SMEAR:		if set, smear the counts to simulate imperfect energy resolution.
 ;
 ; History: 	
-;			Linz 8/31/2015	Created for FOXSI-2 (based on FOXSI-1 version)
+;			Linz 	8/31/2015	Created for FOXSI-2 (based on FOXSI-1 version)
 ;			Linz	2/6/2014	Added FOXSI2 keyword
 ;			Linz	9/5/2013 	Updated
-; 		Linz	Created summer 2012
+;	 		Linz	Created summer 2012
+;
+; Example: 
+;
+; 	f = foxsi_count_spectrum(3.e-5,7.,time=60)
+; 	plot, f.energy_kev, f.counts, psym=10, /xlog, /ylog
+; 	ploterr,f.energy_kev,f.counts,fltarr(20),f.count_error,psym=10,/xlog, $
+;       /ylog,yr=[1.e-1,1.e3],xr=[1,20],xstyle=1
 ;
 
 default, time, 1.
@@ -86,9 +97,3 @@ result = create_struct("energy_keV", emid_coarse, $
 return, result
 
 END
-
-; example of plotting
-; f = foxsi_count_spectrum(3.e-5,7.,time=60)
-; plot, f.energy_kev, f.counts, psym=10, /xlog, /ylog
-; ploterr,f.energy_kev,f.counts,fltarr(20),f.count_error,psym=10,/xlog, $
-;	/ylog,yr=[1.e-1,1.e3],xr=[1,20],xstyle=1

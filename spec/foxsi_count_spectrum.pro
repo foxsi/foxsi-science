@@ -1,27 +1,32 @@
 FUNCTION FOXSI_COUNT_SPECTRUM, EM, T, TIME=TIME, BINSIZE=BINSIZE, STOP=STOP, $
-	DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS, $
-	FOXSI1 = FOXSI1, FOXSI2 = FOXSI2, SMEAR = SMEAR, N_BLANKETS = N_BLANKETS, OFFSET = OFFSET
+	 DATA_DIR = data_dir, LET_FILE = let_file, SINGLE = SINGLE, OFFAXIS=OFFAXIS, $
+	 FOXSI1 = FOXSI1, FOXSI2 = FOXSI2, SMEAR = SMEAR, N_BLANKETS = N_BLANKETS, OFFSET = OFFSET
 
-; General function for computing FOXSI expected count rates, no imaging.  
-; Note that no field of view is taken into account here.  
-; If the plasma is a whole-disk plasma, need to adjust for FOV.  
-; If source area is smaller than FOV then no correction needed.  
-; No energy resolution is considered in this simulation.
-; Livetime is not considered.
+; 	General function for computing FOXSI expected count rates, no imaging.  
+; 	Note that no field of view is taken into account here.  
+; 	If the plasma is a whole-disk plasma, need to adjust for FOV.  
+; 	If source area is smaller than FOV then no correction needed.  
+; 	No energy resolution is considered in this simulation.
+;	Livetime is not considered.
 ; 
-; Return value: Structure containing the energy vector, count vector, and count uncertainty vector.
+; 	Return value: Structure containing the energy vector, count vector, and count uncertainty vector.
 ;
-;	EM: 	 emission measure in units of 10.^49 cm^-3
-;	T:  	 temperature in MK (Yes, it's MK!  Sorry but can't be changed now.)
-;	TIME:  	 time interval for observation, in seconds (Default 1 sec)
-;	BINSIZE: width of energy bins (Default 0.5 keV)
-;	LET_FILE:	detector efficiency file to use. (Default "average" LET.)
-;	SINGLE:	scale counts for a single module only (as opposed to all 7)
-;	OFFAXIS:	off-axis angle in arcmin.  (Default 0.0)
-;	SMEAR:	if set, smear the counts to simulate imperfect energy resolution.
-;	N_BLANKETS:  n times nominal blanketing thickness.
+;	INPUTS:
+;		EM: 	 	emission measure in units of 10.^49 cm^-3
+;		T:  	 	temperature in MK (Yes, it's MK!  Sorry but can't be changed now.)
+;		TIME:  	 	time interval for observation, in seconds (Default 1 sec)
+;		DATA_DIR:	directory where calibration data is stored, default is 'calibration_data/'
+;		BINSIZE: 	width of energy bins (Default 0.5 keV)
+;		LET_FILE:	detector efficiency file to use. (Default "average" LET.)
+;		SINGLE:		scale counts for a single module only (as opposed to all 7)
+;		OFFAXIS:	off-axis angle in arcmin.  (Default 0.0)
+;		FOXSI1:		
+;		FOXSI2:
+;		SMEAR:		if set, smear the counts to simulate imperfect energy resolution.
+;		N_BLANKETS:  	n times nominal blanketing thickness.
+;		OFFSET: 
 ;
-; History: 	
+; 	History: 	
 ;			Linz	2/6/2014	Added FOXSI2 keyword
 ;			Linz	9/5/2013 	Updated
 ; 			Linz	Created summer 2012

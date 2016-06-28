@@ -1,10 +1,18 @@
-FUNCTION	TIME_CUT, DATA, Ti, Tf, GOOD=GOOD, YEAR=YEAR, energy=energy, stop=stop
+FUNCTION	TIME_CUT, DATA, Ti, Tf, GOOD=GOOD, YEAR=YEAR, ENERGY=ENERGY, STOP=STOP
 
-	; This function takes in FOXSI level 2 data and returns a clipped version
-	; corresponding only to the specified timerange.  T0 and T1 should be in anytim
-	; seconds.  /GOOD returns only the data with no error flags.
+;	This function takes in FOXSI level 2 data and returns a clipped version
+;	corresponding only to the specified timerange.
+;
+;	INPUTS:
+;		DATA:		FOXSI level 2 data structure
+;		T0:		start of time range (in seconds-of-day OR seconds-since launch) 
+;		T1:		end of time range (in seconds-of-day OR seconds-since launch)
+;		GOOD:		returns only the data with no error flags
+;		YEAR:		2012 or 2014, default 2014
+;		ENERGY:		Restrict to energy range defined by this 2-element array
 	
 	COMMON FOXSI_PARAM
+
 	if keyword_set(good) then data_mod = data[ where(data.error_flag eq 0) ] $
 		else data_mod = data
 	
