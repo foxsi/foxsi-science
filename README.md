@@ -17,8 +17,7 @@ type | value
 launch date | 2014-12-11
 obs time (UT) | 19:12:51 - 19:19:25
 
-
-INSTALL:
+# INSTALL
 
     You need to have IDL and SSW previously installed
 
