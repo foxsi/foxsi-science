@@ -1,6 +1,23 @@
 foxsi-science
 =============
 
+# Flight Info
+
+## FOXSI-1
+
+type | value
+-----| -----
+launch date | 2012-11-2
+obs time (UT) | 17:56:48 - 18:03:18
+
+## FOXSI-2
+
+type | value
+-----| -----
+launch date | 2014-12-11
+obs time (UT) | 19:12:51 - 19:19:25
+
+
 INSTALL:
 
     You need to have IDL and SSW previously installed
