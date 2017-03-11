@@ -22,6 +22,8 @@
 ;		THR_N			Threshold to use for n-side data.
 ;		GOOD_FRACTION 	Routine returns the good_fraction for the chose target and time
 ;		COUNTS			Funtion returns the counts inside the circular area of interest
+;		FLUX			Return counts per second per keV per solar suface area, correcting 
+;						for the effective area of the optical module. 
 ;		PLOT    		Plot of the region of interest
 ;		STOP 			Stop to debugg program
 ;
@@ -31,6 +33,7 @@
 ;
 ;	cmap = foxsi_image_cut( data_lvl2_d6, cen1_pos2, /plot)
 ;	counts = foxsi_image_cut( data_lvl2_d0,center=[400.,-440.],radius=[200.],cen1_pos0 ,/counts)
+;	flux = foxsi_image_cut( data_lvl2_d0,center=[400.,-440.],radius=[200.],cen1_pos1 ,/flux)
 ;
 ;
 ; History:	
@@ -38,7 +41,8 @@
 ;-
 
 FUNCTION FOXSI_IMAGE_CUT, DATA,TARGET,CENTER=CENTER,RADIUS=RADIUS,ERANGE=ERANGE, TRANGE=TRANGE, $
-						THR_N=THR_N,GOOD_FRACTION=GOOD_FRACTION,COUNTS=COUNTS,PLOT=PLOT,STOP=STOP
+						THR_N=THR_N,GOOD_FRACTION=GOOD_FRACTION,COUNTS=COUNTS,FLUX=FLUX,$
+						PLOT=PLOT,STOP=STOP
 COMMON FOXSI_PARAM
 default, center, target
 default, radius, [200.]
@@ -88,9 +92,31 @@ endif
 if keyword_set( COUNTS ) then begin
 	Counts = n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) - 1.
 	print, 'Counts = ', Counts
-	print, 'Center = ', Center
-	print, 'Radius = ', Radius
+	print, 'Center [arcsec] = ', Center
+	print, 'Radius [arcsec] = ', Radius
 	return, Counts
+endif
+
+if keyword_set( FLUX ) then begin
+	dt = trange[1] - trange[0] ; delta time
+	dE = erange[1] - erange[0] ; delta Energy
+	theta = center - target ;off_axis distance
+	offaxis_angle = sqrt(theta[0]*theta[0] + theta[1]*theta[1])/60. ;arcmin
+	EA = get_foxsi_optics_effarea(module_number=detnum,energy_arr=erange,offaxis_angle=offaxis_angle)
+	cir_area = !pi * radius[0] * radius[0] * 2.3e-11 ; steradian
+	Flux = (n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) - 1.) $
+			/ ( dt * dE * average(EA.eff_area_cm2) * cir_area )
+	Uncertainty = sqrt(flux)
+	print, 'Flux [photons/(s keV cm2 steradians)]= ', Flux
+	print, 'Poisson Uncertainty = ', Uncertainty
+	print, 'Center [arcsec] = ', Center
+	print, 'Radius [arcsec] = ', Radius
+	print, 'Off axis angle [arcmin] = ', offaxis_angle
+	print, 'Effective Area [cm2] = ', average(EA.eff_area_cm2)
+	print, 'circular area [steradians] = ', cir_area
+	result = create_struct('Flux', Flux,$
+			 'Poisson_Uncertainty', Uncertainty)
+	return, result
 endif
 
 if keyword_set( PLOT ) then begin
