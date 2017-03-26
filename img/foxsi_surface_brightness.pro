@@ -102,7 +102,6 @@ if keyword_set( COUNTS ) then begin
 	print, 'Counts = ', Counts
 	print, 'Center [arcsec] = ', Center
 	print, 'Radius [arcsec] = ', Radius
-	print, where( cdata.error_flag eq 0 )
 	return, Counts
 endif
 
