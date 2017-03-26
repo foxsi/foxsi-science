@@ -135,7 +135,7 @@ if keyword_set( FLUX ) then begin
 	print, 'Off axis angle [arcmin] = ', offaxis_angle
 	print, 'Effective Area [cm2] = ', average(EA.eff_area_cm2)
 	print, 'circular area [steradian] = ', cir_area
-	stop
+
 	return, Flux
 endif
 
