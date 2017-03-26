@@ -22,7 +22,7 @@
 ;		THR_N			Threshold to use for n-side data.
 ;		GOOD_FRACTION 	Routine returns the good_fraction for the chose target and time
 ;		COUNTS			Funtion returns the counts inside the circular area of interest
-;		FLUX			Return counts per second per keV per solar suface area, correcting 
+;		FLUX			Return counts per second per keV per solar surface area, correcting 
 ;						for the effective area of the optical module. 
 ;		PLOT    		Plot of the region of interest
 ;		STOP 			Stop to debugg program
@@ -31,18 +31,18 @@
 ; Examples:
 ; 	To make a cut circular image for D6 for the FOXSI-2 flight:
 ;
-;	cmap = foxsi_image_cut( data_lvl2_d6, cen1_pos2, /plot)
-;	counts = foxsi_image_cut( data_lvl2_d0,center=[400.,-440.],radius=[200.],cen1_pos0 ,/counts)
-;	flux = foxsi_image_cut( data_lvl2_d0,center=[400.,-440.],radius=[200.],cen1_pos1 ,/flux)
+;	cmap = foxsi_surface_brightness( data_lvl2_d6, cen1_pos2, /plot)
+;	counts = foxsi_surface_brightness( data_lvl2_d0,center=[400.,-440.],radius=[200.],cen1_pos0 ,/counts)
+;	flux = foxsi_surface_brightness( data_lvl2_d0,center=[400.,-440.],radius=[200.],cen1_pos1 ,/flux)
 ;
 ;
 ; History:	
 ;		2017 March	Milo	Wrote routine
 ;-
 
-FUNCTION FOXSI_IMAGE_CUT, DATA,TARGET,CENTER=CENTER,RADIUS=RADIUS,ERANGE=ERANGE, TRANGE=TRANGE, $
+FUNCTION FOXSI_SURFACE_BRIGHTNESS, DATA,TARGET,CENTER=CENTER,RADIUS=RADIUS,ERANGE=ERANGE, TRANGE=TRANGE, $
 						THR_N=THR_N,GOOD_FRACTION=GOOD_FRACTION,COUNTS=COUNTS,FLUX=FLUX,$
-						PLOT=PLOT,STOP=STOP
+						Uncertainty=Uncertainty,PLOT=PLOT,STOP=STOP
 COMMON FOXSI_PARAM
 default, center, target
 default, radius, [200.]
@@ -51,6 +51,7 @@ default, thr_n, 4.		; n-side keV threshold
 
 detnum = data[0].det_num
 targetnum = fix(strmid(scope_varname(target),3,1))
+
 
 if keyword_set( TRANGE ) then begin 
 	trange = trange 
@@ -76,6 +77,13 @@ endelse
 
 cdata = area_cut( data, center, radius, /xycorr)
 cdata = time_cut( cdata, trange[0], trange[1], energy=erange )
+if is_struct(cdata) eq 0 then begin
+	print,'Counts = ', 0
+	print,'Flux   = ', 0
+	print,'Uncertainty   = ', -1
+	Uncertainty = -1
+	return, 0 
+endif
 cmap = foxsi_image_map(cdata, target, erange=erange, trange=trange, thr_n=thr_n, /xycorr )
 
 if keyword_set( GOOD_FRACTION ) then begin
@@ -90,10 +98,11 @@ if keyword_set( GOOD_FRACTION ) then begin
 endif
 
 if keyword_set( COUNTS ) then begin
-	Counts = n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) - 1.
+	Counts = n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) 
 	print, 'Counts = ', Counts
 	print, 'Center [arcsec] = ', Center
 	print, 'Radius [arcsec] = ', Radius
+	print, where( cdata.error_flag eq 0 )
 	return, Counts
 endif
 
@@ -103,20 +112,19 @@ if keyword_set( FLUX ) then begin
 	theta = center - target ;off_axis distance
 	offaxis_angle = sqrt(theta[0]*theta[0] + theta[1]*theta[1])/60. ;arcmin
 	EA = get_foxsi_optics_effarea(module_number=detnum,energy_arr=erange,offaxis_angle=offaxis_angle)
-	cir_area = !pi * radius[0] * radius[0] * 2.3e-11 ; steradian
-	Flux = (n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) - 1.) $
+	cir_area = !pi * radius[0] * radius[0] * 2.353e-11 ; steradian
+	Flux = (n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) ) $
 			/ ( dt * dE * average(EA.eff_area_cm2) * cir_area )
-	Uncertainty = sqrt(flux)
-	print, 'Flux [photons/(s keV cm2 steradians)]= ', Flux
+	Uncertainty = sqrt((n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) )) $
+			/ ( dt * dE * average(EA.eff_area_cm2) * cir_area )
+	print, 'Flux [photons/(s keV cm2 steradian)]= ', Flux
 	print, 'Poisson Uncertainty = ', Uncertainty
 	print, 'Center [arcsec] = ', Center
 	print, 'Radius [arcsec] = ', Radius
 	print, 'Off axis angle [arcmin] = ', offaxis_angle
 	print, 'Effective Area [cm2] = ', average(EA.eff_area_cm2)
-	print, 'circular area [steradians] = ', cir_area
-	result = create_struct('Flux', Flux,$
-			 'Poisson_Uncertainty', Uncertainty)
-	return, result
+	print, 'circular area [steradian] = ', cir_area
+	return, Flux
 endif
 
 if keyword_set( PLOT ) then begin
