@@ -108,14 +108,26 @@ endif
 if keyword_set( FLUX ) then begin
 	dt = trange[1] - trange[0] ; delta time
 	dE = erange[1] - erange[0] ; delta Energy
+	energy_dim = 1000
+	energy_arr = findgen(energy_dim+1) * (erange[1] - erange[0])/energy_dim + erange[0] ;energy arrange
 	theta = center - target ;off_axis distance
 	offaxis_angle = sqrt(theta[0]*theta[0] + theta[1]*theta[1])/60. ;arcmin
-	EA = get_foxsi_optics_effarea(module_number=detnum,energy_arr=erange,offaxis_angle=offaxis_angle)
+	EA = get_foxsi_effarea(module_number=detnum,energy_arr=get_edges(energy_arr,/mean),offaxis_angle=offaxis_angle)
 	cir_area = !pi * radius[0] * radius[0] * 2.353e-11 ; steradian
-	Flux = (n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) ) $
-			/ ( dt * dE * average(EA.eff_area_cm2) * cir_area )
-	Uncertainty = sqrt((n_elements( cdata[ where( cdata.error_flag eq 0 ) ] ) )) $
-			/ ( dt * dE * average(EA.eff_area_cm2) * cir_area )
+	cdata = cdata[ where( cdata.error_flag eq 0 ) ]
+	counts = n_elements(cdata)
+	countsarea = fltarr(energy_dim)
+	
+	for i=0, energy_dim-1 do begin
+		aux = where((cdata.hit_energy[1,*] gt energy_arr[i]) and (cdata.hit_energy[1,*] le energy_arr[i+1]),nc) 
+		countsarea[i] = nc/EA.eff_area_cm2[i]
+	endfor
+	
+	ncounts=total(countsarea)
+	ave_ea = counts/ncounts
+	Flux = ncounts / ( dt * dE * cir_area )
+	Uncertainty = sqrt(counts) / ( ave_ea * dt * dE * cir_area )
+
 	print, 'Flux [photons/(s keV cm2 steradian)]= ', Flux
 	print, 'Poisson Uncertainty = ', Uncertainty
 	print, 'Center [arcsec] = ', Center
@@ -123,6 +135,7 @@ if keyword_set( FLUX ) then begin
 	print, 'Off axis angle [arcmin] = ', offaxis_angle
 	print, 'Effective Area [cm2] = ', average(EA.eff_area_cm2)
 	print, 'circular area [steradian] = ', cir_area
+	stop
 	return, Flux
 endif
 
