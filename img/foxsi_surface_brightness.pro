@@ -46,7 +46,7 @@ FUNCTION FOXSI_SURFACE_BRIGHTNESS, DATA,TARGET,CENTER=CENTER,RADIUS=RADIUS,ERANG
 COMMON FOXSI_PARAM
 default, center, target
 default, radius, [200.]
-default, erange, [4.,15.]
+default, erange, [4.,10.]
 default, thr_n, 4.		; n-side keV threshold
 
 detnum = data[0].det_num
