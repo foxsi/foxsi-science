@@ -13,10 +13,15 @@ FUNCTION	TIME_CUT, DATA, Ti, Tf, GOOD=GOOD, YEAR=YEAR, ENERGY=ENERGY, STOP=STOP
 	
 	COMMON FOXSI_PARAM
 
+<<<<<<< HEAD
 	if keyword_set(good) then begin
 		cut = where(data.error_flag eq 0)
 		if cut[0] ne -1 then data_mod = data[ cut ] else return, -1
 	endif else data_mod = data
+=======
+	if keyword_set(good) then data_mod = data[ where(data.error_flag eq 0) ] $
+		else data_mod = data
+>>>>>>> 615f6d77d241af0b8a9c81ce7f1988bf61022d1d
 	
 	; Allow for the possibility that the user has input times in seconds-of-day or in 
 	; seconds-since-launch.

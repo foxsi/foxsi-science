@@ -11,20 +11,21 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		THREE:		If set, return the summed energy from all three strips, 
 ;					not just the highest value (default 0)
 ;		SPLIT_LIMIT:	threshold on each strip for the three-strip case.
+;		LOG:		set for logarithmic binning
 ;
 ;	Return value:
 ;		Returns a structure with tags energy, n-side spectrum, and p-side spectrum.
 ;		Spectral units are counts per keV.
 ;
-;	Example 1:
+;	Example 1: 
 ;
-;		i=where( data_level2_D6.error flag eq 0 )
-;		spex = make_spectrum( data_level2_D6[i], binwidth=0.5 )
+;		i=where( data_lvl2_d6.error_flag eq 0 )
+;		spex = make_spectrum( data_lvl2_D6[i], binwidth=0.5 )
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;
 ;	Example 2: (probably most used)
 ;
-;		spex = make_spectrum( data_level2_D6, binwidth=0.5, /corr )
+;		spex = make_spectrum( data_lvl2_d6, binwidth=0.5, /corr )
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;
 ;	History

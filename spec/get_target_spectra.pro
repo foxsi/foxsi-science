@@ -2,15 +2,35 @@ FUNCTION	GET_TARGET_SPECTRA, TARGET, CORRECT=CORRECT, BINWIDTH=BINWIDTH, GOOD=GO
 			YEAR=YEAR, LOG=LOG, STOP=STOP
 
 ;	Returns structure array (7 elements) holding spectra for all detectors
-;   for the selected target.  (Targets numbered 1-6.)
+;	for the selected target.  (Targets numbered 1-6.)
 ;	Units are counts per keV per second.
 ;
+;	FOXSI-1		Target 1: AR1
+;			Target 2: AR2
+;			Target 3: Quiet Sun
+;			Target 4: Flare
+;			Target 5: Correction attempt (~10 sec)
+;			Target 6: Back to the flare
+;
+;	FOXSI-2		Target 1: AR1, after all repointings
+;			Target 2: AR2, after all repointings
+;			Target 3: AR3, after all repointings
+;			Target 4: Quiet Sun, prior to shutter
+;			Target 5: AR1, with shutter in
+;
+;	Inputs:
+;		TARGET:		Options are 1-6 (FOXSI-1) or 1-5 (FOXSI-2); see index above
+;		BINWIDTH:	width of energy bins for spectrum
+;		GOOD:		Only return events with error_flag eq 0
+;		YEAR:		2012 or 2014, default 2014
+;		LOG:		set for logarithmic binning
+;
+;	2016 Jun	Julie	Changed default year to 2014, added input info
 ;	2014 Feb	Linz	Added keyword GOOD
 ;
 
 COMMON FOXSI_PARAM
 default, binwidth, 0.5
-
 
 if tlaunch eq 69060 then begin
 	t1_start = t1_pos2_start + t_launch
@@ -23,7 +43,7 @@ if tlaunch eq 69060 then begin
 	t4_end   = t_shtr_start + t_launch
 	t5_start = t5_start + t_launch
 	t5_end   = t5_end + t_launch
-endif 
+endif
 
 case target of
 	1:  t1 = t1_start
