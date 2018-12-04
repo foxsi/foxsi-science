@@ -43,6 +43,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;		file = 'data_2012/foxsi_level2_data.sav'
 ;
 ; History:	
+;     2018-Nov-27 Sophie Added hit_asic and hit_strip in the LEVEL1 structure
 ;			2015-Feb-2	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Adjustments to work with 2014 data, specifically
 ;								allowing for lvl0 and lvl1 data lengths to be
@@ -91,6 +92,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 		det_num:uint(0),		$	; same for all frames; from input keyword
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
 		livetime:double(0),		$	; Livetime in microsec since previous event
+		hit_asic:intarr(2)-1,   $ ; which ASIC is likely hit, [p,n]
+		hit_strip:uintarr(2),   $ ; strip with highest ADC value, [p,n]
 		hit_energy:fltarr(2), 	$	; Energy value for hit strip, [n,p]
 		hit_xy_det:fltarr(2),		$	; Hit position in detector coordinates [strips]
 		hit_xy_pay:fltarr(2),		$	; Hit position in payload coordinates [arcsec]
@@ -132,6 +135,8 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 	data_struct.inflight      = data1.inflight
 	data_struct.altitude	  = data1.altitude
 	data_struct.error_flag	  = data1.error_flag
+	data_struct.hit_asic      = data1.hit_asic
+	data_struct.hit_strip     = data1.hit_strip
 	data_struct.hit_xy_det 	  = data1.hit_xy_det
 	
 	;;;; WHAT DO YOU WANT TO DO ABOUT LIVETIME??? ;;;;

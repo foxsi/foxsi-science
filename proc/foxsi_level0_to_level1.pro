@@ -32,6 +32,7 @@
 ;		file = 'data_2014/foxsi_level1_data.sav'
 ;
 ; History:	
+;     2018-Nov-27 Sophie Added hit_asic and hit_strip in the LEVEL1 structure
 ;			2015-Mar-03	Linz	Added CdTe keyword for different error flag determination.
 ;			2015-Feb-02	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Updated to work with 2014 data --
@@ -70,6 +71,8 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 		det_num:uint(0),	$	; same for all frames; from input keyword
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
 		livetime:double(0),	$	; Livetime in microsec since previous event
+		hit_asic:intarr(2)-1,   $ ; which ASIC is likely hit, [p,n]
+		hit_strip:uintarr(2),   $ ; strip with highest ADC value, [p,n]
 		hit_adc:uintarr(2), 	$	; highest ADC value, [n,p], no CM subtraction
 		hit_cm:uintarr(2), 	$	; common mode for hit ASIC (also applicable for associated)
 		hit_adc_sub:intarr(2), $	; highest ADC value, [n,p], CM subtracted.
@@ -97,6 +100,8 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	data_struct.trigger_time  = data0.trigger_time
 	data_struct.inflight      = data0.inflight
 	data_struct.channel_mask  = data0.channel_mask
+	data_struct.hit_asic      = data0.hit_asic
+	data_struct.hit_strip     = data0.hit_strip
 	data_struct.hit_adc	  = data0.hit_adc
 	
 	; if CHAN MASK is all zero, it's a USB file and don't worry about livetime.
