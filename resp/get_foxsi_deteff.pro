@@ -1,4 +1,4 @@
-FUNCTION old_get_foxsi_deteff, ENERGY_ARR = energy_arr, DET_THICK = det_thick, PLOT = plot, $
+FUNCTION get_foxsi_deteff, ENERGY_ARR = energy_arr, DET_THICK = det_thick, PLOT = plot, $
 	type = type, NO_LET = no_let, DATA_DIR = data_dir, LET_FILE = let_file
 
 ; PURPOSE: Get the FOXSI Detector efficiency (Si)
