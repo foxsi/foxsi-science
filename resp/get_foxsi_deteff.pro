@@ -35,12 +35,9 @@ ENDIF ELSE BEGIN
     ENDIF
 
     IF TYPE EQ 'cdte' THEN BEGIN 
-;        restore, '$FOXSIPKG'+'/'+data_dir + "cdte_xray_data.dat"
-        restore, '$FOXSIPKG'+'/'+data_dir + "cdte_atten_len.dat"
-;        energy_keV = result.energy_keV
-        energy_keV = result.energy_eV/1000.     
-;        atten_len_um = 1/(result.atten_len_photo_cm)*10000
-	atten_len_um = result.atten_len_um
+        restore, '$FOXSIPKG'+'/'+data_dir + "cdte_xray_data.dat"
+        energy_keV = result.energy_keV    
+        atten_len_um = 1/(result.atten_len_photo_cm)*10000
     ENDIF
 
 ENDELSE
