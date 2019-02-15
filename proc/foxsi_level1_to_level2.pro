@@ -1,5 +1,5 @@
 FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
-			CALIB_FILE = CALIB_FILE, GROUND = GROUND, YEAR = YEAR, STOP = STOP
+			CALIB_FILE = CALIB_FILE, GROUND = GROUND, YEAR = YEAR, CDTE = CDTE, STOP = STOP
 
 ;+
 ; This function reads in Level 0 and Level 1 FOXSI data files (*.sav) and processes
@@ -18,6 +18,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;		CALIB_FILE	Calibration file to use. Must be the correct detector!
 ;		GROUND		Indicates this is calibration, not flight data.
 ;		YEAR			Specify 2012 or 2014.  Default 2014
+;		CDTE      Set to 1 for CdTe detectors. Default is 0
 ;
 ; Example:
 ; 	To process level 1 data into Level 2 IDL structures and save them:
@@ -43,6 +44,12 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;		file = 'data_2012/foxsi_level2_data.sav'
 ;
 ; History:	
+;     2019-Feb-05 Sophie Added a xy_offset variable for each flight, needed to calculate the correct solar coordinates
+;     2018-Dec-06 Sophie Added Date_creation and Calib_filename fields in the level 2 structure
+;                        Added case of year=2018 to define t_launch and liss_dir
+;     2018-Nov-28 Sophie Added y axis flip for Si data to calculate payload coordinates for associated events
+;                        Added CDTE keyword
+;                        Added CDTE keyword in call to get_payload_coords
 ;     2018-Nov-27 Sophie Added hit_asic and hit_strip in the LEVEL1 structure
 ;			2015-Feb-2	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Adjustments to work with 2014 data, specifically
@@ -53,6 +60,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 ;-
 
 	default, year, 2014
+	default, cdte, 0
 	
 	if not keyword_set(calib_file) then begin
 		print, 'No calibration file given.'
@@ -107,13 +115,15 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 		altitude:float(0),		$	; altitude data, interpolated betw 0.5 sec cadence
 		pitch:float(0),			$	; SPARCS pitch
 		yaw:float(0),			$	; SPARCS yaw
-		error_flag:uint(0)		$	; '1' if obvious error is noticed in that frame's data
+		error_flag:uint(0),		$	; '1' if obvious error is noticed in that frame's data
+		date_creation:string(0),   $ ; Date and time of level2 structure creation, from OS (local time)
+		calib_filename:string(0)    $ ; name of the calibration file used to calculate the level2 data
     }
     	data_struct = replicate(data_struct, nEvts)
 
 	if keyword_set(stop) then stop
 
-	if year eq 2014 then begin
+	if year ge 2014 then begin
 		; Because data0 and data1 have different sizes, restrict data0 events to those
 		; with HV=200V. (As of 2014.)
 		tempHV = ishft(data0.HV, -4)/8
@@ -230,7 +240,14 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 	data_struct.hit_xy_pay = data1.hit_xy_pay
 	for i=0, 2 do begin
 		for j=0, 2 do begin
-			temp = get_payload_coords( reform(data1.assoc_xy[i,j,*,*]), detector )
+		  IF cdte eq 0 THEN BEGIN
+		   ; for silicon, we have to invert the y axis
+		    assoc_xy_temp = reform(data1.assoc_xy[i,j,*,*])
+		    assoc_xy_temp[*,1] = 127 - assoc_xy_temp[*,1]
+		  ENDIF ELSE BEGIN
+		    assoc_xy_temp = reform(data1.assoc_xy[i,j,*,*])
+      ENDELSE
+			temp = get_payload_coords( assoc_xy_temp, detector, cdte=cdte )
 			data_struct.assoc_xy_pay[i,j,*,*] = reform( temp, [1,1,2,n_elements(data1)] )
 		endfor
 	endfor
@@ -238,10 +255,31 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 	; Get SPARCS pointing data and put in solar coords.
 	if not keyword_set(ground) then begin
 	
-		if year eq 2014 then liss_dir = 'data_2014/' else if year eq 2012 then liss_dir = 'data_2012/'
-		if year eq 2014 then t_launch = 69060 else if year eq 2012 then t_launch = 64500
-
-		pitch_struct = read_ascii( liss_dir+'LISS_pitch.txt' )
+    IF year EQ 2018 THEN BEGIN
+      liss_dir = 'data_2018/'
+      t_launch = 62460
+      xy_offset = [0.,0.] ; this is not the final value, to be checked 
+      roll_angle_deg = fltarr(n_elements(data_struct))*0. ; this is not the final value, to be checked
+      roll_center = fltarr(n_elements(data_struct),2)*0.  ; this is not the final value, to be checked
+    ENDIF
+    IF year EQ 2014 THEN BEGIN
+      liss_dir = 'data_2014/'
+      t_launch = 69060
+      xy_offset = [360.,-180.]
+      roll_angle_deg = fltarr(n_elements(data_struct))*0. 
+      roll_center = fltarr(n_elements(data_struct),2)*0.  
+    ENDIF
+    IF year EQ 2012 THEN BEGIN
+      liss_dir = 'data_2012/'
+      t_launch = 64500
+      xy_offset = [0.,0.]
+      roll_angle_deg = fltarr(n_elements(data_struct))*0. 
+      roll_center = fltarr(n_elements(data_struct),2)*0.  
+    ENDIF
+    
+    roll_angle_rad = roll_angle_deg*!pi/180.
+	
+	  pitch_struct = read_ascii( liss_dir+'LISS_pitch.txt' )
 		pitch_time = pitch_struct.field1[0,*]
 		pitch = pitch_struct.field1[1,*]
 
@@ -262,13 +300,28 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 		
 		; Combine pitch and yaw with hit position.
 		; Don't forget yaw has sign reversed.
-		data_struct.hit_xy_solar[0] = data_struct.hit_xy_pay[0] + data_struct.pitch
-		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1] - data_struct.yaw
+		x_solar_before_roll = data_struct.hit_xy_pay[0] + data_struct.pitch + xy_offset[0]
+		y_solar_before_roll =  data_struct.hit_xy_pay[1] - data_struct.yaw + xy_offset[1]
 		
+		; calculate polar coordinates in respect to roll center
+		r = sqrt((x_solar_before_roll-roll_center[0])^2 + (y_solar_before_roll-roll_center[1])^2)
+		alpha = atan((y_solar_before_roll-roll_center[1]), (x_solar_before_roll-roll_center[0]))
+
+		; apply roll correction
+		data_struct.hit_xy_solar[0] = roll_center[*,0] + cos(roll_angle_rad)*r*cos(alpha) + sin(roll_angle_rad)*r*sin(alpha)
+		data_struct.hit_xy_solar[1] = roll_center[*,1] + cos(roll_angle_rad)*r*sin(alpha) - sin(roll_angle_rad)*r*cos(alpha)
+
 	endif else begin
 		data_struct.hit_xy_solar[0] = data_struct.hit_xy_pay[0]
-		data_struct.hit_xy_solar[1] =  data_struct.hit_xy_pay[1]
+		data_struct.hit_xy_solar[1] = data_struct.hit_xy_pay[1]
 	endelse	
+	
+	; read the time and assign to the structure
+  data_struct.date_creation[0] = systim()
+  
+  ; record the calibration filename in the structure
+  strcalib = strsplit(calib_file, '/\', /extract)
+  data_struct.calib_filename[0] = strcalib[n_elements(strcalib)-1]
 
 	if keyword_set(stop) then stop
 		

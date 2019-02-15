@@ -14,6 +14,7 @@
 ;				Default entire flight
 ;		THR_N	Threshold to use for n-side data.
 ;		YEAR	2012 or 2014 flight.  Default 2014.
+;		CDTE Set to 1 if CdTe detector
 ;		KEEPALL	Keep all events, not just the "good" ones (i.e. those w/no error flags)
 ;		FLATFIELD		Apply flatfielding correction.
 ;
@@ -26,6 +27,7 @@
 ;	time=time, id='D6' )
 ;
 ; History:	
+;		2018 Oct 29 Sophie Added CdTe keyword and restrict the flip on Y axis to Silicon detectors
 ;		2015 Jul 23	Linz	Added flatfielding capability
 ;		2015 Jan 19	Linz	Drawing flight parameters from file instead of hardcoding.
 ;		2014 Dec	Linz	Updated to work for 2014 data too.
@@ -34,14 +36,15 @@
 ;-
 
 FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
-                          THR_N = THR_N, KEEPALL = KEEPALL, $
+                          THR_N = THR_N, KEEPALL = KEEPALL, cdte=cdte, $
                           YEAR=YEAR, flatfield=flatfield, STOP = STOP
     COMMON FOXSI_PARAM
-	default, erange, [4.,15.]
+	  default, erange, [4.,15.]
 ;  	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
-	default, thr_n, 4.		; n-side keV threshold
+	  default, thr_n, 4.		; n-side keV threshold
   	default, year, 2014
   	default, trange, [0,500]
+  	default, cdte, 0
   	
   	detector = data[0].det_num
 
@@ -52,18 +55,18 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
 	data2 = data2[ where( data2.hit_energy[1] gt erange[0] and data2.hit_energy[1] lt erange[1]$
 				 and data2.hit_energy[0] gt thr_n ) ]
 
-	  	istart=long(0)
-	  	i_times = where( data2.wsmr_time ge (trange[0]+tlaunch) and data2.wsmr_time le (trange[1]+tlaunch) )
-		if i_times[0] eq -1 then begin
+	istart=long(0)
+	i_times = where( data2.wsmr_time ge (trange[0]+tlaunch) and data2.wsmr_time le (trange[1]+tlaunch) )
+  if i_times[0] eq -1 then begin
 			print, 'No events in time range.'
 			return, -1
-		endif
-		istart = i_times[0]
-		iend = i_times[n_elements(i_times)-1]
+	endif
+	istart = i_times[0]
+	iend = i_times[n_elements(i_times)-1]
 
-  	img = fltarr( 128, 128 )
+  img = fltarr( 128, 128 )
 
-  	for i=istart, iend-1 do begin
+  for i=istart, iend-1 do begin
 
 	; Note: values are pinned to a pixel corner in data structure.
 	; Change this to the pixel center.
@@ -77,7 +80,7 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
   
 	if keyword_set(stop) then stop
 
-	img = reverse( img, 2 )
+	IF CDTE EQ 0 THEN img = reverse( img, 2 )
 	
 	; Apply flatfield correction
 	if keyword_set( flatfield ) then begin

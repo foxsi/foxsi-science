@@ -45,7 +45,7 @@ default, thr_n, 4.		; n-side keV threshold
 default, year, 2014
 default, trange, [0,500]
 default, fov, 20.
-
+default, flatfield, 0
 	xc = center[0]
 	yc = center[1]
 	
@@ -56,12 +56,15 @@ default, fov, 20.
 	time = anytim( time, /yo )
 
 	; Basic image production
-	if keyword_set( CDTE ) then $
-		image = foxsi_image_det_cdte( data, trange=trange, erange=erange, $
-						keepall=keepall, year=year, thr_n=thr_n )	$
-		else $
+;	if keyword_set( CDTE ) then $
+;		image = foxsi_image_det_cdte( data, trange=trange, erange=erange, $
+;						keepall=keepall, year=year, thr_n=thr_n )	$
+;		else $
 		image = foxsi_image_det( data, trange=trange, erange=erange, $
-						keepall=keepall, year=year, thr_n=thr_n, flatfield=flatfield )
+						keepall=keepall, year=year, cdte=cdte, thr_n=thr_n, flatfield=flatfield )
+
+print, 'min et max image produced by foxsi_image_det'
+print, minmax(image)
 
 	if keyword_set( CDTE ) then stripsize = 6.1879 else stripsize = 7.7349
 		
@@ -75,7 +78,7 @@ default, fov, 20.
 	image = temp
 
 	map = make_map( image, dx=stripsize, dy=stripsize, xcen=xc, ycen=yc, $
-		time=time, id='Det'+strtrim(detnum,2), fov=2*fov )
+		time=time, id='Det'+strtrim(detnum,2), fov=2*fov, dur=trange[1]-trange[0] )
 
 ;	help, map.data
 
