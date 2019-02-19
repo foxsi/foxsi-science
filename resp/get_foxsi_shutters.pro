@@ -45,10 +45,10 @@ default, mylar_um, 76.2
 default, al_um, 2.5
 default, kapton_um, 50.8
 
-IF keyword_set(NONSTD) THEN total_th_um = [0.0,0.0,0.0,0.0]
-
 material = ['mylar','Be', 'Al', 'Kapton']
 total_th_um = [mylar_um, be_um, al_um, kapton_um]
+
+IF keyword_set(NONSTD) THEN total_th_um = [0.0,0.0,0.0,0.0]
 
 f = '$FOXSIPKG'+'/'+data_dir + ["mylar_atten_len.dat","be_atten_len.dat", "al_atten_len.dat", "kapton_atten_len.dat"]
 
