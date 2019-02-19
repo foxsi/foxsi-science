@@ -2,61 +2,53 @@ FUNCTION get_foxsi_shutters, ENERGY_ARR = energy_arr, PLOT = plot, $
 	MYLAR_UM = mylar_um, BE_UM = be_um, AL_UM = al_um, KAPTON_UM = kapton_um, $
 	DATA_DIR = data_dir, NONSTD = nonstd
 
-;PURPOSE: Get the FOXSI shutter absorption as a function of energy. 
-;			Defining material thicknesses are always added to the 
-;			optical path.
-;
+;PURPOSE: Get the FOXSI shutter/blanketing absorption as a function of energy. 
+;			
 ;	Note from Lindsay:  Running this with default parameters (no inputs for shutters) 
 ;			just gives you the FOXSI optical path, which is also useful.
 ;
-;KEYWORD: MYLAR_UM - set the thickness of mylar
-;         BE_UM - set the thickness of Be
-;		  KAPTON_UM - set the thickness of kapton in microns
-;		  MYLAR_UM - set the thickness of mylar in microns
-;		  ENERGY_ARR - set the energy axis
-;		  PLOT - create a plot for the screen
-;		  NONSTD - set the optical path material to zero
+;KEYWORD: 	
+;	MYLAR_UM - set the thickness of mylar (default for FOXSI-2)
+;       BE_UM - set the thickness of Be (default, 0.0)
+;	KAPTON_UM - set the thickness of kapton in microns (default for FOXSI-2)
+;	AL_UM - set the thickness of Al in microns (default for FOXSI-2)
+;	ENERGY_ARR - set the energy axis
+;	PLOT - create a plot for the screen
+;	NONSTD - set the optical path material to zero
+;
+; FOXSI-1 Values:
+;	mylar - 139.7 um
+;	al - 4.8 um
+; 	kapton - 203.2 um
+;
+; FOXSI-2 Values:
+;	mylar - 76.2 um
+;	al - 2.5 um
+;	kapton - 50.8 um
+;
+; FOXSI-3 Values:
+;	mylar - 76.2 um
+;	al - 2.4 um
+;	kapton - 0.0 um
+;
 ;
 ;WRITTEN: Steven Christe (25-Mar-09)
 ; Updated with nominal flight blanketing defaults, LG March 2013
+; Updated with values for FOXSI-3, JV January 2019
 
 default, data_dir, './'
 
-; New defaults for FOXSI-2:
-default, mylar_um, 63.5
-default, al_um, 2
+default, be_um, 0.0
+
+; FOXSI-2 defaults:
+default, mylar_um, 76.2
+default, al_um, 2.5
 default, kapton_um, 50.8
 
-; Old defaults
-;default, mylar_um, 82.55
-;default, al_um, 2.6
-;default, kapton_um, 203.2
-default, be_um, 0.0
-default, th_um, [0.0, 0.0, 0.0, 0.0]
-
-; old defaults for previous blanketing scenarios
-; default, th_um, [82.6, 0.0, 2.9, 178.0]        
-
-; default, th_um, [140, 0.0, 4.8, 203.0]		
-; default, th_um, [95.5, 0.0, 3.2, 203.0]	
-; proposed redo
-;default, th_um, [140, 0.0, 4.8, 101.5]		
-; proposed redo
-default, th_um, [95.5, 0.0, 3.2, 101.5]		
-; proposed redo
-default, mylar_um, 0.0
-
-;template = ascii_template(data_dir + "mylar_atten_len.dat")
-;restore, data_dir + "atten_len_template.dat", /verbose
-;result = read_ascii(data_dir + "mylar_atten_len.txt", template =template)
-;save, result, filename = "mylar_atten_len.dat"
-
-IF keyword_set(NONSTD) THEN th_um = [0.0,0.0,0.0,0.0]
-
 material = ['mylar','Be', 'Al', 'Kapton']
-add_um = [mylar_um, be_um, al_um, kapton_um]
+total_th_um = [mylar_um, be_um, al_um, kapton_um]
 
-total_th_um = th_um + add_um
+IF keyword_set(NONSTD) THEN total_th_um = [0.0,0.0,0.0,0.0]
 
 f = '$FOXSIPKG'+'/'+data_dir + ["mylar_atten_len.dat","be_atten_len.dat", "al_atten_len.dat", "kapton_atten_len.dat"]
 
