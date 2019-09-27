@@ -39,9 +39,8 @@ FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, cdte=cdte, $
                           YEAR=YEAR, flatfield=flatfield, STOP = STOP
     COMMON FOXSI_PARAM
-	  default, erange, [4.,15.]
-;  	if not keyword_set(trange) then trange=[108.3,498.3] ; time range in sec (from launch)
-	  default, thr_n, 4.		; n-side keV threshold
+	default, erange, [4.,15.]
+        default, thr_n, 4.		; n-side keV threshold
   	default, year, 2014
   	default, trange, [0,500]
   	default, cdte, 0
