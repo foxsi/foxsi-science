@@ -27,6 +27,11 @@ endif ;else print, 'Using low-energy threshold file ', let_file
 
 IF NOT keyword_set(det_thick) THEN det_thick_um = 500 ELSE det_thick_um = det_thick
 
+IF (type ne 'si') and (type ne 'cdte') and (type ne 'czt') then begin
+        print, 'ERROR: Detector type not allowed! Please choose si, cdte, or czt.'
+        return, -1
+ENDIF
+
 IF ((NOT keyword_set(TYPE)) OR (TYPE EQ 'si')) THEN BEGIN
 
     restore, '$FOXSIPKG'+'/'+data_dir + "si_atten_len.dat" 
