@@ -56,10 +56,6 @@ default, flatfield, 0
 	time = anytim( time, /yo )
 
 	; Basic image production
-;	if keyword_set( CDTE ) then $
-;		image = foxsi_image_det_cdte( data, trange=trange, erange=erange, $
-;						keepall=keepall, year=year, thr_n=thr_n )	$
-;		else $
 		image = foxsi_image_det( data, trange=trange, erange=erange, $
 						keepall=keepall, year=year, cdte=cdte, thr_n=thr_n, flatfield=flatfield )
 
