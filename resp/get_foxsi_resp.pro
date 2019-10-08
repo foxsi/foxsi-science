@@ -33,7 +33,7 @@ energy = findgen(elements, increment=bin, start=erange[0])
 
 ; compute diagonal response
 resp_diag = get_foxsi_effarea( energy_arr=energy, module=det, type = type, $
-	offaxis_angle=offaxis_arcmin, _extra=_extra )
+	offaxis_angle=offaxis_arcmin, foxsi1=foxsi1, _extra=_extra )
 diag = resp_diag.eff_area_cm2
 ndiag = n_elements( diag )
 nondiag = fltarr(ndiag,ndiag)	; create 2D array for nondiagonal response
@@ -75,7 +75,9 @@ if keyword_set(save_file) then begin
 	oa = string(offaxis_arcmin,format='(f20.1)')
 	oa = strtrim(oa,2)
 
-	save, resp, filename = 'foxsi2_det'+det2+'_E'+e0+'-'+e1+'_b'+bin2+'_offaxis'+oa+'_resp.sav'
+	if keyword_set(foxsi1) then flight = 'foxsi1' else flight = 'foxsi2' 
+
+	save, resp, filename = flight+'_det'+det2+'_E'+e0+'-'+e1+'_b'+bin2+'_offaxis'+oa+'_resp.sav'
 
 endif
 
