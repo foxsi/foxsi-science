@@ -59,7 +59,7 @@ default, flatfield, 0
 		image = foxsi_image_det( data, trange=trange, erange=erange, $
 						keepall=keepall, year=year, cdte=cdte, thr_n=thr_n, flatfield=flatfield )
 
-print, 'min et max image produced by foxsi_image_det'
+print, 'min and max image produced by foxsi_image_det'
 print, minmax(image)
 
 	if keyword_set( CDTE ) then stripsize = 6.1879 else stripsize = 7.7349
