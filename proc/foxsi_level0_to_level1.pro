@@ -277,14 +277,9 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
     ENDIF
   ENDELSE
 
-  ; Change hit position to payload coordinates: makes the distinction between Si and Cdte
-  IF CDTE EQ 0 THEN BEGIN
+  ; Change hit position to payload coordinates: makes the distinction between Si and Cdte in the call to get_payload_coords
     xy_det = data_struct.hit_xy_det
-;    xy_det[1,*] = 127 - xy_det[1,*] ; reverse Y axis to be in the right detector coordinates
     data_struct.hit_xy_pay = get_payload_coords( xy_det, detector, cdte=cdte )
-  ENDIF ELSE BEGIN
-    data_struct.hit_xy_pay = get_payload_coords( data_struct.hit_xy_det, detector, cdte=cdte )
-  ENDELSE
 
 	; Record position (detector pix coords only) for associated and unrelated pixels.
 ;	data_struct.assoc_adc[0,*,0] = assoc_adc[*,0,*]
