@@ -145,22 +145,10 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 
   ; identify in different cases in nside (ASIC 0 and 1) are on y axis (value=1) or x axis (value=0)
   ; and what are the shift to associate XY detector coordinates
-  IF CDTE EQ 0 THEN BEGIN
 	  nside = 1
 	  pside = 0
 	  strip_shift = [127,63]
-	ENDIF ELSE BEGIN
-	 ; IF year EQ 2014 THEN BEGIN
-	 ;   nside = 0
-	 ;   pside = 1
-	 ;   strip_shift = [63,127]
-	 ; ENDIF 
-	 ; IF year EQ 2018 THEN BEGIN
-	    nside = 1
-	    pside = 0
-	    strip_shift = [127,63]
-	 ; ENDIF
-	ENDELSE
+
   
 	; Identify events where the highest n-side ADC value was on ASIC 0
 	; --------------------
