@@ -15,7 +15,8 @@
 ;			DETECTOR	Detector number (0-6).  Each detector data
 ;			   			must be processed individually.  Default D0
 ;			GROUND		Indicates this is calibration, not flight data.
-;			CDTE      Set to 1 for CdTe detectors. Default is 0.
+;                       YEAR		Year of the flight. Default is 2014.
+;			CDTE      	Set to 1 for CdTe detectors. Default is 0.
 ;
 ; Example:
 ; 	To process level 0 data into Level 1 IDL structures and save them:
