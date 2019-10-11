@@ -1,5 +1,6 @@
-FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
-			CORRECT = CORRECT, THREE = THREE, SPLIT_LIMIT = SPLIT_LIMIT, LOG=LOG
+FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH = BINWIDTH, PLOT = PLOT, STOP = STOP, $
+			CORRECT = CORRECT, THREE = THREE, SPLIT_LIMIT = SPLIT_LIMIT, LOG=LOG, $
+			SINGLE = SINGLE 
 
 ;	This function takes a FOXSI level 2 data structure and returns an energy spectrum.
 ;	
@@ -12,6 +13,8 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;					not just the highest value (default 0)
 ;		SPLIT_LIMIT:	threshold on each strip for the three-strip case.
 ;		LOG:		set for logarithmic binning
+;		SINGLE:		if selected, will only include "single strip" events in the spectrum
+;				(i.e. events where neighboring strips both below the set split_limit)   
 ;
 ;	Return value:
 ;		Returns a structure with tags energy, n-side spectrum, and p-side spectrum.
@@ -29,6 +32,8 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 ;		plot, spex.energy_kev, spex.spec_p, psym=10, xr=[0,15]
 ;
 ;	History
+;	2018-jul-03  JV		Updated code to allow for selection of only single strip events and 
+;				corrects energy calculation for multi-strip events
 ; 	2012-jul-19  LG		Fixed a bug in which energy array was 1 larger than spectrum array.
 ;-
 
@@ -47,30 +52,45 @@ FUNCTION	MAKE_SPECTRUM, DATA, BINWIDTH=BINWIDTH, PLOT=PLOT, STOP=STOP, $
 
 	energy = findgen(100/binwidth)*binwidth
 
-	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy)-1, $
-						min=min(energy), max=max(energy), omin=omin, omax=omax )
-	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy)-1, $
-						min=min(energy), max=max(energy) )
+        if keyword_set(three) then begin
 
-	if keyword_set(three) then begin
-
+                ;adds in energy of neighboring strips if energies above set split limit for n-side
 		i=where( data_good.assoc_energy[0,1,0] gt split_limit )
-		spec_n = spec_n + histogram( data_good[i].assoc_energy[0,1,0], $
-									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) )
-		i=where( data_good.assoc_energy[2,1,0] gt split_limit )
-		spec_n = spec_n + histogram( data_good[i].assoc_energy[2,1,0], $
-									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) )
-		i=where( data_good.assoc_energy[1,0,1] gt split_limit )
-		spec_p = spec_p + histogram( data_good[i].assoc_energy[1,0,1], $
-									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) )
-		i=where( data_good.assoc_energy[1,2,1] gt split_limit )
-		spec_p = spec_p + histogram( data_good[i].assoc_energy[1,2,1], $
-									 nbins=n_elements(energy), min=min(energy), $
-									 max=max(energy) )
-	endif
+                data_good[i].hit_energy[0] = data_good[i].hit_energy[0] + data_good[i].assoc_energy[0,1,0]
+                                        
+                i=where( data_good.assoc_energy[2,1,0] gt split_limit )
+		data_good[i].hit_energy[0] = data_good[i].hit_energy[0] + data_good[i].assoc_energy[2,1,0]
+
+		;adds in energy of neighboring strips if energies above set split limit for p-side
+                i=where( data_good.assoc_energy[1,0,1] gt split_limit )
+		data_good[i].hit_energy[1] = data_good[i].hit_energy[1] + data_good[i].assoc_energy[1,0,1]
+
+                i=where( data_good.assoc_energy[1,2,1] gt split_limit )
+		data_good[i].hit_energy[1] = data_good[i].hit_energy[1] + data_good[i].assoc_energy[1,2,1]
+
+        endif
+
+        if keyword_set(single) then begin	;allows for selection of only single strip events
+
+		;check if neighboring strip energies below set split limit
+                i=where( (data_good.assoc_energy[0,1,0] lt split_limit) and (data_good.assoc_energy[2,1,0] lt split_limit) and $
+			( data_good.assoc_energy[1,0,1] lt split_limit ) and ( data_good.assoc_energy[1,2,1] lt split_limit ) )
+
+		spec_n = histogram( data_good[i].hit_energy[0], nbins=n_elements(energy)-1, $
+                                                min=min(energy), max=max(energy), omin=omin, omax=omax )
+        	spec_p = histogram( data_good[i].hit_energy[1], nbins=n_elements(energy)-1, $
+                                                min=min(energy), max=max(energy) )
+
+		;recalculate good event ratio to account for reduction to only single-strip events
+		ratio_good = float(n_elements(i)) / n_elements( data[where(data.inflight eq 1)] )
+
+	endif else begin
+	
+        	spec_n = histogram( data_good.hit_energy[0], nbins=n_elements(energy)-1, $
+                                                min=min(energy), max=max(energy), omin=omin, omax=omax )
+        	spec_p = histogram( data_good.hit_energy[1], nbins=n_elements(energy)-1, $
+                                                min=min(energy), max=max(energy) )
+	endelse
 
 ;	energy = energy + binwidth/2.
 	energy = get_edges( energy, /mean )  ; make energy array the midpoints of the bins.
