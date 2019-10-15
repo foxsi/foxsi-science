@@ -20,6 +20,7 @@ PRO foxsi_level2_fxbw, filename, level2_data, year=year, max_string_length=max_s
   ;
   ; CALLS
   ;   foxsi_level2_fxbh
+  ;   foxsi_structure_for_fits
   ;   
   ; EXAMPLE
   ;   restore, 'foxsi_level2_data.sav'
