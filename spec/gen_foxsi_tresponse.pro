@@ -57,6 +57,7 @@ for i=0, 5 do oplot, logte, dem_resp_overarea_ppixel[6,i,*],  color=i+2, thick=1
 al_legend, ['4.5 keV','5.5 keV','6.5 keV','7.5 keV','8.5 keV','9.5 keV'], $
 	textcol=[2,3,4,5,6,7], thick=6, charsi=1.2, box=0, /bottom, /right
 
-save,logte,dem_resp_overarea_ppixel,filename='foxsi_Si_temperature_response.sav'
+data_dir = '/calibration_data/'
+save,logte,dem_resp_overarea_ppixel,filename='$FOXSIPKG' +data_dir+'foxsi_Si_temperature_response.sav'
 
 END
