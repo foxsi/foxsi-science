@@ -11,9 +11,11 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	
 	detnum = data[0].det_num
 	
-	if keyword_set(good) then data_mod = data[ where(data.error_flag eq 0) ] $
-		else data_mod = data
-		
+	if keyword_set(good) then begin
+		cut = where(data.error_flag eq 0)
+		if cut[0] ne -1 then data_mod = data[ cut ] else return, -1
+	endif else data_mod = data
+
 	case detnum of
 		0: shift = shift0
 		1: shift = shift1
