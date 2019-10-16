@@ -9,10 +9,11 @@
 ; use wsmr_data_to_level0.pro
 ;
 ; Inputs:
-;		FILENAME	File to process. Must be a WSMR .log file.
-;			   		Default is the 2012 Nov 2 flight data file.
 ;
 ; Keywords:	
+;		FILENAME	File to process. Must be a WSMR .log file.
+;			   		Default is the 2012 Nov 2 flight data file.
+;		YEAR	Year of the flight. Options are: 2012, 2014, 2018
 ;
 ; Example:
 ;
@@ -23,13 +24,20 @@
 ;	save, hskp_data, file = 'data_2012/foxsi_level0_hskp_data.sav'
 ;
 ; History:	
-;			2013-Jan-28	Linz	Created routine
+;		2019-Oct-16	Sophie	Change Filename to a keyword, add year keyword, and selection of files for FOXSI2 and FOXSI3	
+;		2013-Jan-28	Linz	Created routine
 ;-
 
-FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME, STOP=STOP
+FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME=filename, YEAR=YEAR, STOP=STOP
 
-	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
-
+	IF not keyword_set(filename) then begin
+		case year of
+   			2012: filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+    			2014: filename = 'data_2014/36_295_Krucker_FLIGHT_HOT_TM2.log'
+    			2018: filename = 'data_2018/36_325_Glesener_FLIGHT_HOT_TM2.log'
+  		endcase
+	ENDIF
+	
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
 
 	; Read in data file.
