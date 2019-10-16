@@ -1,4 +1,4 @@
-PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, YEAR=YEAR, $
+PRO		DRAW_FOV, DET=DET, ALL=ALL, GOOD=GOOD, TARGET=TARGET, XYCOR=XYCOR, $
 							  SHIFT=SHIFT, _EXTRA=_EXTRA
 
 ; This procedure draws the detector FOV on a previously plotted FOXSI map.
