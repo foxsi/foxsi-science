@@ -71,7 +71,6 @@ area = get_foxsi_effarea( $
 ;if keyword_set(stop) then stop
 
 ; fold flux with FOXSI response
-eff_fudge = (1-0.05)
 counts = flux*area.eff_area_cm2  ; now the units are counts per second per keV
 
 ; Smear to account for imperfect energy resolution (~0.5 keV).
@@ -82,7 +81,7 @@ if keyword_set(smear) then begin
 	s = smooth( counts[i], nbins )
 	;PSA added  the following to get the flux to counts with smear
 	if i[ni-1] ge (n_elements(counts)-1) then ncounts = [counts[0:i[0]-1],s] $
-		else counts2 = [counts[0:i[0]-1],s,counts[ni+1:n_elements(counts)-1]]
+		else ncounts = [counts[0:i[0]-1],s,counts[ni+1:n_elements(counts)-1]]
 	; use coarser, user-specified energy bins
 	counts_smear=ncounts
 	e1_smear_coarse = findgen(20./binsize+1)*binsize
