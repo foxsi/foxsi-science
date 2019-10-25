@@ -2,7 +2,7 @@ PRO foxsi_ospex, filename, det=det, bin=bin, erange=erange, $
 		trange=trange, center=center, radius=radius, offaxis=offaxis, $
 		cen_map=cen_map,fwhm=fwhm, let_file=let_file, type=type, $
 		split_limit=split_limit, three=three, single=single, year=year, $
-		_extra=_extra  
+		stop=stop, _extra=_extra  
 
 ;
 ; PURPOSE: 
@@ -31,8 +31,9 @@ PRO foxsi_ospex, filename, det=det, bin=bin, erange=erange, $
 ;	LET_FILE : 	data file to use for low energy threshold efficiency
 ;	TYPE : 		detector type ('si' or 'cdte')
 ;	SPLIT_LIMIT : 	threshold on each strip for the three-strip case
-;	THREE : 	If set, return the summed energy from all three strips, not just the highest value
+;	THREE : 	if set, return the summed energy from all three strips, not just the highest value
 ;	YEAR :		year of FOXSI flight (2012, 2014, or 2018)
+;	STOP : 		if set, stop procedure before exiting
 ;
 ;
 ; NOTES : 
@@ -195,5 +196,7 @@ o-> dofit
 o-> savefit, outfile = filename+'.fits'
 
 save, eff, ltime, filename=filename+'.sav'
+
+if keyword_set(stop) then stop
 
 end
