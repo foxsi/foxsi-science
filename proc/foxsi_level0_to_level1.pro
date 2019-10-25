@@ -15,6 +15,8 @@
 ;			DETECTOR	Detector number (0-6).  Each detector data
 ;			   			must be processed individually.  Default D0
 ;			GROUND		Indicates this is calibration, not flight data.
+;                       YEAR		Year of the flight. Default is 2014.
+;			CDTE      	Set to 1 for CdTe detectors. Default is 0.
 ;
 ; Example:
 ; 	To process level 0 data into Level 1 IDL structures and save them:
@@ -32,6 +34,15 @@
 ;		file = 'data_2014/foxsi_level1_data.sav'
 ;
 ; History:	
+;     2019-Feb-05 Sophie fixed a problem in the xy_det for FOXSI-2 CdTe
+;     2018-Dec-06 Sophie add a variable t_launch to have different values for different flights when used
+;     2018-Nov-28 Sophie Use CdTe and year keywords to differentiate detector coordinates
+;                           for different detectors (Si, FOXSI2 CdTe, FOXSI3 CdTe)
+;                        Also differentiate the payload coordinates calculation with
+;                           a Y reflexion applied to the Si detector coordinates just before
+;                           calling get_payload_coords.pro
+;                        Add CdTe keyword when calling get_payload_coords.pro
+;     2018-Nov-27 Sophie Added hit_asic and hit_strip in the LEVEL1 structure
 ;			2015-Mar-03	Linz	Added CdTe keyword for different error flag determination.
 ;			2015-Feb-02	Linz	Added keyword YEAR
 ;			2014-Dec	Linz	Updated to work with 2014 data --
@@ -44,7 +55,14 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 			GROUND = GROUND, YEAR = YEAR, CDTE = CDTE
 
 	default, year, 2014
+	default, cdte, 0
 	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
+
+  case year of
+    2012: t_launch = 64500
+    2014: t_launch = 69060
+    2018: t_launch = 62460
+  endcase
 
 	restore, filename, /v
 	if detector eq 0 then data0 = data_lvl0_D0
@@ -70,6 +88,8 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 		det_num:uint(0),	$	; same for all frames; from input keyword
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
 		livetime:double(0),	$	; Livetime in microsec since previous event
+		hit_asic:intarr(2)-1,   $ ; which ASIC is likely hit, [p,n]
+		hit_strip:uintarr(2),   $ ; strip with highest ADC value, [p,n]
 		hit_adc:uintarr(2), 	$	; highest ADC value, [n,p], no CM subtraction
 		hit_cm:uintarr(2), 	$	; common mode for hit ASIC (also applicable for associated)
 		hit_adc_sub:intarr(2), $	; highest ADC value, [n,p], CM subtracted.
@@ -97,6 +117,8 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	data_struct.trigger_time  = data0.trigger_time
 	data_struct.inflight      = data0.inflight
 	data_struct.channel_mask  = data0.channel_mask
+	data_struct.hit_asic      = data0.hit_asic
+	data_struct.hit_strip     = data0.hit_strip
 	data_struct.hit_adc	  = data0.hit_adc
 	
 	; if CHAN MASK is all zero, it's a USB file and don't worry about livetime.
@@ -121,6 +143,13 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 
 	; Identifying hits, associated values, and unrelated values...
 
+  ; identify in different cases in nside (ASIC 0 and 1) are on y axis (value=1) or x axis (value=0)
+  ; and what are the shift to associate XY detector coordinates
+	  nside = 1
+	  pside = 0
+	  strip_shift = [127,63]
+
+  
 	; Identify events where the highest n-side ADC value was on ASIC 0
 	; --------------------
 	i0 = where(data0.hit_asic[0] eq 0)
@@ -135,13 +164,13 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	data_struct[i0].unrel_adc[*,1,0] = reform(data0[i0].adc[1,*] )
 	data_struct[i0].unrel_adc[*,2,0] = reform(data0[i0].adc[1,*] )
 
-	data_struct[i0].assoc_xy[*,0,1] = 127 - reform(data0[i0].strips[0,*] )
-	data_struct[i0].assoc_xy[*,1,1] = 127 - reform(data0[i0].strips[0,*] )
-	data_struct[i0].assoc_xy[*,2,1] = 127 - reform(data0[i0].strips[0,*] )
+	data_struct[i0].assoc_xy[*,0,nside] = strip_shift[0] - reform(data0[i0].strips[0,*] )
+	data_struct[i0].assoc_xy[*,1,nside] = strip_shift[0] - reform(data0[i0].strips[0,*] )
+	data_struct[i0].assoc_xy[*,2,nside] = strip_shift[0] - reform(data0[i0].strips[0,*] )
 
-	data_struct[i0].unrel_xy[*,0,1] = 63 - reform(data0[i0].strips[1,*] )
-	data_struct[i0].unrel_xy[*,1,1] = 63 - reform(data0[i0].strips[1,*] )
-	data_struct[i0].unrel_xy[*,2,1] = 63 - reform(data0[i0].strips[1,*] )
+	data_struct[i0].unrel_xy[*,0,nside] = strip_shift[1] - reform(data0[i0].strips[1,*] )
+	data_struct[i0].unrel_xy[*,1,nside] = strip_shift[1] - reform(data0[i0].strips[1,*] )
+	data_struct[i0].unrel_xy[*,2,nside] = strip_shift[1] - reform(data0[i0].strips[1,*] )
 	; ---------------------
 
 	; Identify events where the highest n-side ADC value was on ASIC 1
@@ -158,13 +187,13 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	data_struct[i1].unrel_adc[*,1,0] = reform(data0[i1].adc[0,*] )
 	data_struct[i1].unrel_adc[*,2,0] = reform(data0[i1].adc[0,*] )
 
-	data_struct[i1].assoc_xy[*,0,1] = 63 - reform(data0[i1].strips[1,*] )
-	data_struct[i1].assoc_xy[*,1,1] = 63 - reform(data0[i1].strips[1,*] )
-	data_struct[i1].assoc_xy[*,2,1] = 63 - reform(data0[i1].strips[1,*] )
+	data_struct[i1].assoc_xy[*,0,nside] = strip_shift[1] - reform(data0[i1].strips[1,*] )
+	data_struct[i1].assoc_xy[*,1,nside] = strip_shift[1] - reform(data0[i1].strips[1,*] )
+	data_struct[i1].assoc_xy[*,2,nside] = strip_shift[1] - reform(data0[i1].strips[1,*] )
 
-	data_struct[i1].unrel_xy[*,0,1] = 127 - reform(data0[i1].strips[0,*] )
-	data_struct[i1].unrel_xy[*,1,1] = 127 - reform(data0[i1].strips[0,*] )
-	data_struct[i1].unrel_xy[*,2,1] = 127 - reform(data0[i1].strips[0,*] )
+	data_struct[i1].unrel_xy[*,0,nside] = strip_shift[0] - reform(data0[i1].strips[0,*] )
+	data_struct[i1].unrel_xy[*,1,nside] = strip_shift[0] - reform(data0[i1].strips[0,*] )
+	data_struct[i1].unrel_xy[*,2,nside] = strip_shift[0] - reform(data0[i1].strips[0,*] )
 	; ---------------------
 
 	; Identify events where the highest p-side ADC value was on ASIC 2
@@ -182,13 +211,13 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	data_struct[i2].unrel_adc[1,*,1] = data0[i2].adc[3,*]
 	data_struct[i2].unrel_adc[2,*,1] = data0[i2].adc[3,*]
 
-	data_struct[i2].assoc_xy[0,*,0] = 63 - data0[i2].strips[2,*]
-	data_struct[i2].assoc_xy[1,*,0] = 63 - data0[i2].strips[2,*]
-	data_struct[i2].assoc_xy[2,*,0] = 63 - data0[i2].strips[2,*]
+	data_struct[i2].assoc_xy[0,*,pside] = strip_shift[1] - data0[i2].strips[2,*]
+	data_struct[i2].assoc_xy[1,*,pside] = strip_shift[1] - data0[i2].strips[2,*]
+	data_struct[i2].assoc_xy[2,*,pside] = strip_shift[1] - data0[i2].strips[2,*]
 
-	data_struct[i2].unrel_xy[0,*,0] = 127 - data0[i2].strips[3,*]
-	data_struct[i2].unrel_xy[1,*,0] = 127 - data0[i2].strips[3,*]
-	data_struct[i2].unrel_xy[2,*,0] = 127 - data0[i2].strips[3,*]
+	data_struct[i2].unrel_xy[0,*,pside] = strip_shift[0] - data0[i2].strips[3,*]
+	data_struct[i2].unrel_xy[1,*,pside] = strip_shift[0] - data0[i2].strips[3,*]
+	data_struct[i2].unrel_xy[2,*,pside] = strip_shift[0] - data0[i2].strips[3,*]
 	
 	endif
 	; ---------------------
@@ -207,27 +236,50 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	data_struct[i3].unrel_adc[1,*,1] = data0[i3].adc[2,*]
 	data_struct[i3].unrel_adc[2,*,1] = data0[i3].adc[2,*]
 
-	data_struct[i3].assoc_xy[0,*,0] = 127 - data0[i3].strips[3,*]
-	data_struct[i3].assoc_xy[1,*,0] = 127 - data0[i3].strips[3,*]
-	data_struct[i3].assoc_xy[2,*,0] = 127 - data0[i3].strips[3,*]
+	data_struct[i3].assoc_xy[0,*,pside] = strip_shift[0] - data0[i3].strips[3,*]
+	data_struct[i3].assoc_xy[1,*,pside] = strip_shift[0] - data0[i3].strips[3,*]
+	data_struct[i3].assoc_xy[2,*,pside] = strip_shift[0] - data0[i3].strips[3,*]
 
-	data_struct[i3].unrel_xy[0,*,0] = 63 - data0[i3].strips[2,*]
-	data_struct[i3].unrel_xy[1,*,0] = 63 - data0[i3].strips[2,*]
-	data_struct[i3].unrel_xy[2,*,0] = 63 - data0[i3].strips[2,*]
+	data_struct[i3].unrel_xy[0,*,pside] = strip_shift[1] - data0[i3].strips[2,*]
+	data_struct[i3].unrel_xy[1,*,pside] = strip_shift[1] - data0[i3].strips[2,*]
+	data_struct[i3].unrel_xy[2,*,pside] = strip_shift[1] - data0[i3].strips[2,*]
 	; ---------------------
 
 	; Subtract common mode for hit
 	data_struct.hit_adc_sub = fix(data_struct.hit_adc) - fix(data_struct.hit_cm)
 
 	; Determine hit position
-	; First, in detector pixel coords.
-	data_struct[i0].hit_xy_det[1] = 127 - data0[i0].hit_strip[0]
-	data_struct[i1].hit_xy_det[1] = 63 - data0[i1].hit_strip[0]
-	if i2[0] ne -1 then data_struct[i2].hit_xy_det[0] = 63 - data0[i2].hit_strip[1]
-	data_struct[i3].hit_xy_det[0] = 127 - data0[i3].hit_strip[1]
+  ; First, in detector pixel coords. ; distinct calculation for Si and CdTe
+  IF cdte eq 0 THEN BEGIN
+    ; this is the way it has been done for FOXSI 1 and 2 Si detectors
+    data_struct[i0].hit_xy_det[1] = 127 - data0[i0].hit_strip[0]
+    data_struct[i1].hit_xy_det[1] = 63 - data0[i1].hit_strip[0]
+    if i2[0] ne -1 then data_struct[i2].hit_xy_det[0] = 63 - data0[i2].hit_strip[1]
+    data_struct[i3].hit_xy_det[0] = 127 - data0[i3].hit_strip[1]
+    ; note that using this, we need a reflexion in y axis to have the correct coordinates, 
+    ; but historically in the FOXSI software this is done at a later stage, so 
+    ; we keep the calculation in that state for Si detector to make sure this procedure
+    ; is compatible with previous data set and codes
+  ENDIF ELSE BEGIN
+    IF year EQ 2014 THEN BEGIN
+      ; this is the way it should be done for FOXSI2 Cdte, implemented on Nov 28 2018
+      data_struct[i0].hit_xy_det[0] = 63 - data0[i0].hit_strip[0] 
+      data_struct[i1].hit_xy_det[0] = 127 - data0[i1].hit_strip[0]  
+      data_struct[i2].hit_xy_det[1] = 127 - data0[i2].hit_strip[1]
+      data_struct[i3].hit_xy_det[1] = 63 - data0[i3].hit_strip[1]
+    ENDIF
+    IF year EQ 2018 THEN BEGIN
+      ; this is the way it should be done for FOXSI3 Cdte, implemented on Nov 28 2018
+      data_struct[i0].hit_xy_det[1] = 127 - data0[i0].hit_strip[0]
+      data_struct[i1].hit_xy_det[1] = 63 - data0[i1].hit_strip[0]
+      data_struct[i2].hit_xy_det[0] = 63 - data0[i2].hit_strip[1]
+      data_struct[i3].hit_xy_det[0] = 127 - data0[i3].hit_strip[1]
+    ENDIF
+  ENDELSE
 
-	; Change hit position to payload coordinates
-	data_struct.hit_xy_pay = get_payload_coords( data_struct.hit_xy_det, detector )
+  ; Change hit position to payload coordinates: makes the distinction between Si and Cdte in the call to get_payload_coords
+    xy_det = data_struct.hit_xy_det
+    data_struct.hit_xy_pay = get_payload_coords( xy_det, detector, cdte=cdte )
 
 	; Record position (detector pix coords only) for associated and unrelated pixels.
 ;	data_struct.assoc_adc[0,*,0] = assoc_adc[*,0,*]
@@ -250,9 +302,9 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	; Altitude
 	; For level 1, interpolate linearly between each 0.5 sec measurement.
 	; Get altitude data from text file
-	if not keyword_set(ground) then begin
+	if not keyword_set(ground) AND year EQ 2012 then begin ; quick fix from Sophie Dec 7 2018
 		data_alt=read_ascii('data_2012/36255.txt')
-		time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
+		time_alt = data_alt.field01[1,*] + t_launch	; adjust altitude clock for time of launch.
 		altitude = data_alt.field01[9,*]
 
 		; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
@@ -294,7 +346,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 		if keyword_set(ground) then begin
 			check = where(data_struct.hv ne 200)
 		endif else begin
-			check = where(data_struct.hv ne 200 or data_struct.wsmr_time lt 64610)
+			check = where(data_struct.hv ne 200 or data_struct.wsmr_time lt t_launch+90 )  
 		endelse
 		data_struct[check].error_flag = data_struct[check].error_flag + 8
 	
@@ -303,7 +355,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 					  data_struct.hit_cm[1] gt data_struct.hit_adc[1])
 		data_struct[check].error_flag = data_struct[check].error_flag + 16
 	
-		; different geometry for CdTe detectors.
+		; different geometry for CdTe detectors. Now that we changed the way the detector coordinates are calculated for CdTe this should be apply also to CDTE detectors
 		if not keyword_set( CDTE ) then begin
 			check = where(data_struct.hit_xy_det[0] lt 3 or data_struct.hit_xy_det[0] gt 124 or $
 					  	data_struct.hit_xy_det[1] lt 3 or data_struct.hit_xy_det[1] gt 124)
@@ -318,7 +370,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	; Added as of 2nd flight: only pass through data at 200V, to trim the higher-order
 	; data files.
 	
-	if year eq 2014 then data_struct = data_struct[ where( data_struct.hv eq 200 ) ]
+	if year ge 2014 then data_struct = data_struct[ where( data_struct.hv eq 200 ) ]
 	
 	if keyword_set(stop) then stop
 
