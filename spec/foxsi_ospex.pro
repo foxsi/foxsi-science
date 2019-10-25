@@ -46,6 +46,7 @@ PRO foxsi_ospex, filename, det=det, bin=bin, erange=erange, $
 ;		trange = [t1_pos2_start, t1_pos2_end], center = flare1, radius = 100., $
 ;		offaxis = 0.4, cen_map = cen1_pos2, fwhm = 0.5, let_file = 'efficiency_averaged.sav', $
 ;		type = 'si'  
+;	fit_results = spex_read_fit_results('example_spectral_analysis.fits') 	;read fit results 
 ;
 ;
 ; HISTORY :
