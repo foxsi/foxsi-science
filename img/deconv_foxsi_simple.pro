@@ -7,7 +7,7 @@ FUNCTION DECONV_FOXSI_SIMPLE, MAP, $
 					   IMG_SMOOTH=IMG_SMOOTH, ROTATION=ROTATION, $
 					   STOP = STOP, FIRST = FIRST, $
 					   PSF_map=PSF_map, FIX4=FIX4, iter=iter, $
-					   RECONV_map = reconv_map, CSTAT=cstat, year=year
+					   RECONV_map = reconv_map, CSTAT=cstat
 					   
 					   
  
@@ -22,9 +22,6 @@ FUNCTION DECONV_FOXSI_SIMPLE, MAP, $
 	default, rotation, 79
 	default, iter, [1,2,3,4,5,10,20,40,80,100]
 		
-	;if year eq 2012 then flare=[967,-207] $	; from RHESSI flarelist
-	;	else flare=[0,-200]
-	
 	dim = fov*60./pix
 
 	loadct, 5
