@@ -9,7 +9,7 @@
 ;
 ; Keywords:	DETECTOR	Detector number (0-6).  Each detector data
 ;						must be processed individually.  Default D0
-;			YEAR		Specify 2012 or 2014. This is a temporary fix while we
+;			YEAR		Specify 2012, 2014 or 2018. This is a temporary fix while we
 ;						wait for altitude data for FOXSI-2.
 ;
 ; To process flight data into Level 0 IDL structures and save them:
