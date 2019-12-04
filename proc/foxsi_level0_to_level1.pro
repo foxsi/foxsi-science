@@ -57,7 +57,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 
 	default, year, 2014
 	default, cdte, 0
-	if not keyword_set(filename) then filename = 'data_2012/foxsi_level0_data.sav'
+	if not keyword_set(filename) then filename = 'data_2014/foxsi_level0_data.sav'
 
   case year of
     2012: t_launch = 64500
