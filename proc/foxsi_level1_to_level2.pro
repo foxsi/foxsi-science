@@ -142,6 +142,7 @@ FUNCTION	FOXSI_LEVEL1_TO_LEVEL2, FILE_DATA0, FILE_DATA1, DETECTOR = DETECTOR, $
 	data_struct.hv			  = data1.hv
 	data_struct.temperature	  = data1.temperature
 	data_struct.trigger_time  = data1.trigger_time
+	data_struct.livetime      = data1.livetime
 	data_struct.inflight      = data1.inflight
 	data_struct.altitude	  = data1.altitude
 	data_struct.error_flag	  = data1.error_flag
