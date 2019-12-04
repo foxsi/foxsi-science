@@ -2,7 +2,7 @@
 FUNCTION FOXSI_IMAGE_SOLAR, DATA_IN, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE, $
                                   CENTER = CENTER, PSIZE = PSIZE, SIZE = SIZE, $
                                   XYCOR = XYCOR, THR_N = THR_N, STOP = STOP, ROT=ROT, $
-                                  KEEP_BAD = KEEP_BAD, YEAR = YEAR
+                                  KEEP_BAD = KEEP_BAD
 
 ; 2015 Feb 18			Adding functionality for FOXSI-2.
 ; 2014 March Linz	Reworking this to use foxsi_image_det as a starting point, to 
@@ -28,7 +28,7 @@ FUNCTION FOXSI_IMAGE_SOLAR, DATA_IN, DETECTOR, ERANGE = ERANGE, TRANGE = TRANGE,
 ;		 ROT		Detector rotation put in by hand.  If not set, detector-dependent
 ;					default is used.  (For normal analysis, do not use this keyword.)
 ;		 KEEP_BAD	Include events with a nonzero error flag.
-;				YEAR			Year of flight; default 2014
+;				
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

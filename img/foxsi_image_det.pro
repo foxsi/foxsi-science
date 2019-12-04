@@ -13,7 +13,6 @@
 ;		TRANGE	Time range to include in image (in seconds *from launch*)
 ;				Default entire flight
 ;		THR_N	Threshold to use for n-side data.
-;		YEAR	2012 or 2014 flight.  Default 2014.
 ;		CDTE Set to 1 if CdTe detector
 ;		KEEPALL	Keep all events, not just the "good" ones (i.e. those w/no error flags)
 ;		FLATFIELD		Apply flatfielding correction.
@@ -22,7 +21,7 @@
 ; Example:
 ; 	To make an image for D6 for the FOXSI-2 flight:
 ;
-;	image6 = foxsi_image_det( data_lvl2_d6, year=2014 )
+;	image6 = foxsi_image_det( data_lvl2_d6 )
 ;	map6 = make_map( image6, dx=7.78, dy=7.78, xcen=xc, ycen=yc, $
 ;	time=time, id='D6' )
 ;
@@ -37,11 +36,10 @@
 
 FUNCTION FOXSI_IMAGE_DET, DATA, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, cdte=cdte, $
-                          YEAR=YEAR, flatfield=flatfield, STOP = STOP
+                          flatfield=flatfield, STOP = STOP
     COMMON FOXSI_PARAM
 	default, erange, [4.,15.]
         default, thr_n, 4.		; n-side keV threshold
-  	default, year, 2014
   	default, trange, [0,500]
   	default, cdte, 0
   	

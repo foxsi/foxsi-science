@@ -14,7 +14,6 @@
 ;				Default entire flight
 ;		CENTER	Map center
 ;		THR_N	Threshold to use for n-side data.
-;		YEAR	2012 or 2014 flight.  Default 2014.
 ;		KEEPALL	Keep all events, not just the "good" ones (i.e. those w/no error flags)
 ;		XYCORR	If set, use the position offset for that detector.
 ;		CDTE	Signifies CdTe detector.  Use alternate imaging routine.
@@ -36,13 +35,12 @@
 
 FUNCTION FOXSI_IMAGE_MAP, DATA,  CENTER, ERANGE = ERANGE, TRANGE = TRANGE, $
                           THR_N = THR_N, KEEPALL = KEEPALL, SMOOTH = SMOOTH, $
-                          YEAR=YEAR, XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, $
+                          XYCORR=XYCORR, CDTE=CDTE, FOV=FOV, $
                           flatfield=flatfield, STOP = STOP
 
 COMMON FOXSI_PARAM
 default, erange, [4.,15.]
 default, thr_n, 4.		; n-side keV threshold
-default, year, 2014
 default, trange, [0,500]
 default, fov, 20.
 default, flatfield, 0
@@ -57,7 +55,7 @@ default, flatfield, 0
 
 	; Basic image production
 		image = foxsi_image_det( data, trange=trange, erange=erange, $
-						keepall=keepall, year=year, cdte=cdte, thr_n=thr_n, flatfield=flatfield )
+						keepall=keepall, cdte=cdte, thr_n=thr_n, flatfield=flatfield )
 
 print, 'min and max image produced by foxsi_image_det'
 print, minmax(image)

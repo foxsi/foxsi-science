@@ -1,6 +1,6 @@
 FUNCTION get_foxsi_resp, det = det, bin = bin, erange = erange, fwhm = fwhm, $
-	offaxis_arcmin=offaxis_arcmin, save_file = save_file, type = type, $
-	foxsi1 = foxsi1, _extra = _extra 
+	offaxis_arcmin=offaxis_arcmin, save_idl = save_idl, save_fits = save_fits, $ 
+	type = type, foxsi1 = foxsi1, _extra = _extra 
 
 ;
 ; PURPOSE: Produce FOXSI instrument response for single detector-optic pairing which 
@@ -12,7 +12,8 @@ FUNCTION get_foxsi_resp, det = det, bin = bin, erange = erange, fwhm = fwhm, $
 ;	ERANGE: 	energy range, include start and end values (keV)
 ;	FWHM:		energy resolution of detector (0.5 keV for Si, 1.0 keV for CdTe)
 ;	OFFAXIS_ARCMIN:	offaxis position of source (arcmin) 
-;	SAVE_FILE: 	set this keyword to save the response in an IDL .sav file
+;	SAVE_IDL: 	set this keyword to save the response in an IDL .sav file
+;	SAVE_FITS:	set this keyword to save the response to a FITS file
 ;	TYPE: 		set detector type ('si' or 'cdte')
 ;	FOXSI1: 	set this keyword for FOXSI-1 response (default is FOXSI-2)
 ;
@@ -33,7 +34,7 @@ energy = findgen(elements, increment=bin, start=erange[0])
 
 ; compute diagonal response
 resp_diag = get_foxsi_effarea( energy_arr=energy, module=det, type = type, $
-	offaxis_angle=offaxis_arcmin, foxsi1=foxsi1, _extra=_extra )
+	offaxis_angle=offaxis_arcmin,foxsi1=foxsi1, _extra=_extra )
 diag = resp_diag.eff_area_cm2
 ndiag = n_elements( diag )
 nondiag = fltarr(ndiag,ndiag)	; create 2D array for nondiagonal response
@@ -58,27 +59,32 @@ endfor
 ; create structure with energy array and nondiagonal response
 resp = create_struct('energy_keV', energy, 'nondiag', nondiag)
 
+; convert parameters to strings for filename
+det2 = strtrim(det,2)
+
+e0 = string(erange[0],format='(f20.1)')
+e1 = string(erange[1],format='(f20.1)')
+e0 = strtrim(e0,2)
+e1 = strtrim(e1,2)
+
+bin2 = string(bin, format='(f20.1)')
+bin2 = strtrim(bin2,2)
+
+oa = string(offaxis_arcmin,format='(f20.1)')
+oa = strtrim(oa,2)
+
+if keyword_set(foxsi1) then flight = 'foxsi1' else flight = 'foxsi2' 
+
+filename = flight+'_det'+det2+'_E'+e0+'-'+e1+'_b'+bin2+'_offaxis'+oa+'_resp'
+
 ; save response to an IDL .sav file
-if keyword_set(save_file) then begin
+if keyword_set(save_idl) then begin
+	save, resp, filename = filename+'.sav'
+endif
 
-	; convert parameters to strings for filename
-	det2 = strtrim(det,2)
-
-	e0 = string(erange[0],format='(f20.1)')
-	e1 = string(erange[1],format='(f20.1)')
-	e0 = strtrim(e0,2)
-	e1 = strtrim(e1,2)
-
-	bin2 = string(bin, format='(f20.1)')
-	bin2 = strtrim(bin2,2)
-
-	oa = string(offaxis_arcmin,format='(f20.1)')
-	oa = strtrim(oa,2)
-
-	if keyword_set(foxsi1) then flight = 'foxsi1' else flight = 'foxsi2' 
-
-	save, resp, filename = flight+'_det'+det2+'_E'+e0+'-'+e1+'_b'+bin2+'_offaxis'+oa+'_resp.sav'
-
+; save response to a FITS file
+if keyword_set(save_fits) then begin
+	foxsi_resp_fxbw, filename+'.fits', resp
 endif
 
 return, resp
