@@ -28,7 +28,7 @@ COMMON FOXSI_PARAM
 @undefine_previous_param
 
 if not keyword_set(year) then begin 
-	print,'Please provide the year of the FOXSI flight (2012 or 2014).'
+	print,'Please provide the year of the FOXSI flight (2012, 2014 or 2018).'
 	print,'       Example: foxsi,2014'
 endif else begin
 
