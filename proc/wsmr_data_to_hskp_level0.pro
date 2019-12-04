@@ -12,7 +12,6 @@
 ;
 ; Keywords:	
 ;		FILENAME	File to process. Must be a WSMR .log file.
-;			   		Default is the 2012 Nov 2 flight data file.
 ;		YEAR	Year of the flight. Options are: 2012, 2014, 2018
 ;
 ; Example:
