@@ -16,13 +16,14 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 ;			PLOT - plot to the current device
 ;			BE_UM - set the thickness of a Be shutter
 ;			TYPE - element of the detector (e.g. cdte, DEFAULT is Si)
-;			FOXSI1 - get the effective area for the older FOXSI1
+;			YEAR - year of the flight. Default is 2014. Other options are 2012 and 2018
 ;			OFFAXIS_ANGLE:	off-axis angle.  If nonzero, off-axis response routine is called.
 ;			USE_THEORETICAL:	Use the theoretical values for EA instead of the measured ones.
 ;					This is what we did for much of the FOXSI-1 analysis, before we had the updated
 ;					calibration data for FOXSI-2.
 ;			MODULE_NUMBER - the module number (0 through 6).  if not set, EA for the entire
 ;					set of optics (all 7) is returned.
+;					Detector convention is used for the numbering.
 ;
 ;WRITTEN: Steven Christe (20-Mar-09)
 ;UPDATED: Steven Christe (3-Nov-09)
@@ -30,24 +31,29 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 ; Updated: LG, 2013-Mar-03
 ; Updated: LG, 2015 feb to get the optics area from get_foxsi_optics_effarea instead.
 ;					Also changed keyword to FOXSI-1 instead of FOXSI-2.  Now FOXSI-2 is the default.
+; Updated, SM, 2019/12/04 Replace the FOXSI1 keyword by a YEAR keyword
 
 
 default, type, 'si'
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, 0.0
+default, year, 2014
 ;default, let_file, 'efficiency_averaged.sav'
+
+; define optic numbers for each flight, each module (detector) position
+
+foxsi1_optic_modules = [6,1,2,3,4,5,0]
+foxsi2_optic_modules = [6,1,2,3,4,5,0]
+foxsi3_optic_modules = [8,5,4,1,0,2,7]
 
 IF NOT keyword_set(DET_THICK) THEN det_thick = 500.0
 IF NOT keyword_set(BE_UM) THEN be_um = 0.0
 
 ; IF keyword_set(PER_MODULE) THEN num_modules = 1.0 ELSE num_modules = 7.0
 
-if not keyword_set(FOXSI1) and not keyword_set(QUIET) then $
-	print, 'COMPUTING FOXSI-2 AREA! FOR FOXSI-1 USE KEYWORD /FOXSI1'
-
 if keyword_set(USE_THEORETICAL) then begin
 
-	restore, '$FOXSIPKG' + '/' + data_dir + "eff_area_permodules2.dat"
+	restore,  GETENV('FOXSIPKG') + '/' + data_dir + "eff_area_permodules2.dat"
 	eff_area = eff_area_permod.eff_area2
 	energy = eff_area_permod.energy
 	IF keyword_set(FOXSI1) THEN eff_area = eff_area_permod.eff_area
@@ -60,7 +66,11 @@ if keyword_set(USE_THEORETICAL) then begin
 endif else begin
 
 	if exist( module_number ) then begin
-		area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=module_number, $
+		IF year EQ 2012 THEN optic_module = foxsi1_optic_modules[module_number]
+		IF year EQ 2014 THEN optic_module = foxsi2_optic_modules[module_number]
+		IF year EQ 2018 THEN optic_module = foxsi3_optic_modules[module_number]
+
+		area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optic_module, $
 								offaxis_angle=offaxis_angle, data_dir=data_dir, plot=plot, _extra=_extra )
 		energy = area.energy_kev
 		eff_area = area.eff_area_cm2
@@ -68,13 +78,18 @@ endif else begin
 				eff_area = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, $
 																		 data_dir=data_dir )
 	endif else begin
+		IF year EQ 2012 THEN optics = foxsi1_optic_modules
+		IF year EQ 2014 THEN optics = foxsi2_optic_modules
+		IF year EQ 2018 THEN optics = foxsi3_optic_modules
 		for i=0, 6 do begin
-				area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=i, $
+				area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optics[i], $
 								offaxis_angle=offaxis_angle, data_dir=data_dir )
 				if i eq 0 then energy = area.energy_kev
 				if i eq 0 then eff_area = area.eff_area_cm2
-				if keyword_set( FOXSI1 ) and (i eq 6 or i eq 2) then $
+				; for FOXSI-1 The effective area of module 6 and 2 is calculated as the average of the 5 7-shell modules of FOXSI-2
+				if year EQ 2012 and (i eq 6 or i eq 2) then $
 						area.eff_area_cm2 = average_5_optics( energy_arr=energy_arr, $
+								offaxis_angle=offaxis_angle, data_dir=data_dir )
 																				 offaxis_angle=offaxis_angle, data_dir=data_dir )
 				if i gt 0 then eff_area += area.eff_area_cm2
 		endfor
