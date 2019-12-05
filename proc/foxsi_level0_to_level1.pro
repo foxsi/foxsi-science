@@ -316,7 +316,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 		FOR i=0, n_elements(data_struct)-1 then begin
 			alt_interp = interpol(altitude,time_alt,data_struct[i].wsmr_time)
 			data_struct[i].altitude = alt_interp
-		endif
+		endfor
 	endif
 
 	; Last step: check for obvious errors and flag these.
