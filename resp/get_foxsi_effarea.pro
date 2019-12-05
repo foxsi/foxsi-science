@@ -1,6 +1,6 @@
 FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_number, $
 	PLOT = plot, NODET = nodet, NOSHUT = noshut, BE_UM = be_um, DET_THICK = det_thick, $
-	TYPE = type, FOXSI1 = FOXSI1, NOPATH = nopath, LET_FILE = let_file, $
+	TYPE = type, YEAR = YEAR, NOPATH = nopath, LET_FILE = let_file, $
 	DATA_DIR = data_dir, OFFAXIS_ANGLE = offaxis_angle, USE_THEORETICAL = use_theoretical, $
 	QUIET = QUIET, _EXTRA = _extra
 
@@ -31,7 +31,9 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 ; Updated: LG, 2013-Mar-03
 ; Updated: LG, 2015 feb to get the optics area from get_foxsi_optics_effarea instead.
 ;					Also changed keyword to FOXSI-1 instead of FOXSI-2.  Now FOXSI-2 is the default.
-; Updated, SM, 2019/12/04 Replace the FOXSI1 keyword by a YEAR keyword
+; Updated, SM, 2019/12/04 Replaced the FOXSI1 keyword by a YEAR keyword
+;				updated the way to call get_foxsi_optics_effarea
+;				included options for FOXSI-3
 
 
 default, type, 'si'
@@ -117,7 +119,7 @@ IF NOT keyword_set(nodet) THEN BEGIN
 			print, 'No low-energy threshold file specified, using FOXSI-1 average.'
 			let_file = 'efficiency_averaged.sav'
 		endif else begin
-			if keyword_set( FOXSI1 ) then begin
+			if year EQ 2012 then begin
 				; 2012 flight
 				case module_number of
 					0:  let_file = 'efficiency_det108_avg.sav'
@@ -128,8 +130,11 @@ IF NOT keyword_set(nodet) THEN BEGIN
 					5:  let_file = 'efficiency_det105_avg.sav'
 					6:  let_file = 'efficiency_det106_avg.sav'
 				endcase
-			endif else begin
+			endif
+			if year EQ 2014 then begin
 				; 2014 flight
+				if (module_number eq 2 or module_number eq 3) then $
+					print, 'Warning: efficiency curve for CdTe dets not done yet!'
 				case module_number of
 					0:  let_file = 'efficiency_det108_avg.sav'
 					1:  let_file = 'efficiency_det101_avg.sav'
@@ -139,9 +144,21 @@ IF NOT keyword_set(nodet) THEN BEGIN
 					5:  let_file = 'efficiency_det105_avg.sav'
 					6:  let_file = 'efficiency_det102_avg.sav'
 				endcase
-			endelse
-			if not keyword_set( FOXSI1 ) and (module_number eq 2 or module_number eq 3) then $
-				print, 'Warning: efficiency curve for CdTe dets not done yet!'
+			endif
+			if year EQ 2018 then begin
+				if module_number eq 1 then print, 'Warning: no HXR data for detector 1 in 2018!'
+				if (module_number eq 5 or module_number eq 3) then $
+					print, 'Warning: efficiency curve for CdTe dets not done yet!'
+				; 2018 flight
+				case module_number of
+					0:  let_file = 'efficiency_det105_avg.sav'
+					2:  let_file = 'efficiency_det106_avg.sav'
+					3:  let_file = 'efficiency_averaged.sav'
+					4:  let_file = 'efficiency_det102_avg.sav'
+					5:  let_file = 'efficiency_averaged.sav'
+					6:  let_file = 'efficiency_det101_avg.sav'
+				endcase
+			endif
 		endelse
 	endif
 			
