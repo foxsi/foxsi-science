@@ -76,25 +76,58 @@ endif else begin
 								offaxis_angle=offaxis_angle, data_dir=data_dir, plot=plot, _extra=_extra )
 		energy = area.energy_kev
 		eff_area = area.eff_area_cm2
-		if keyword_set( FOXSI1 ) and (module_number eq 6 or module_number eq 2) then $
-				eff_area = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, $
-																		 data_dir=data_dir )
+		if YEAR EQ 2012 and (module_number eq 6 or module_number eq 2) then $
+				eff_area = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
+		if YEAR EQ 2018 and (module_number eq 6 or module_number eq 0) then $
+				eff_area = AVERAGE_2_10SHELL_OPTICS( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
 	endif else begin
-		IF year EQ 2012 THEN optics = foxsi1_optic_modules
-		IF year EQ 2014 THEN optics = foxsi2_optic_modules
-		IF year EQ 2018 THEN optics = foxsi3_optic_modules
-		for i=0, 6 do begin
+		IF year EQ 2012 THEN BEGIN
+			; sum all optics modules of FOXSI-1. FOR THE 2 7-SHELL modules which became 10-shells in FOXSI-2,
+			; need to average the eff area of the other 7 shell data
+			optics = foxsi1_optic_modules
+			FOR i=0,6 DO BEGIN
+				IF (i NE 2) AND (i NE 6) THEN BEGIN
+					area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optics[i], $
+								offaxis_angle=offaxis_angle, data_dir=data_dir )
+					if i eq 0 then energy = area.energy_kev
+					if i eq 0 then eff_area = area.eff_area_cm2
+					if i gt 0 then eff_area += area.eff_area_cm2
+				ENDIF
+				; add the effective area for modules 2 and 6
+				10_shell_effarea = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
+				eff_area += 2*10_shell_effarea
+			ENDFOR
+		ENDIF
+		IF year EQ 2014 THEN BEGIN 
+			optics = foxsi2_optic_modules
+			; sum all optics modules of FOXSI-2
+			for i=0, 6 do begin
 				area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optics[i], $
 								offaxis_angle=offaxis_angle, data_dir=data_dir )
 				if i eq 0 then energy = area.energy_kev
 				if i eq 0 then eff_area = area.eff_area_cm2
-				; for FOXSI-1 The effective area of module 6 and 2 is calculated as the average of the 5 7-shell modules of FOXSI-2
-				if year EQ 2012 and (i eq 6 or i eq 2) then $
-						area.eff_area_cm2 = average_5_optics( energy_arr=energy_arr, $
-								offaxis_angle=offaxis_angle, data_dir=data_dir )
-																				 offaxis_angle=offaxis_angle, data_dir=data_dir )
 				if i gt 0 then eff_area += area.eff_area_cm2
-		endfor
+			endfor
+		ENDIF
+		IF year EQ 2018 THEN BEGIN
+			optics = foxsi3_optic_modules
+			; sum all optics modules of FOXSI-3. FOR THE 2 new 10-SHELL modules,
+			; need to average the eff area of the FOXSI-2 10-shell data
+			FOR i=0,6 DO BEGIN
+				; exclude the two new 10-shell modules
+				IF (i NE 0) AND (i NE 6) THEN BEGIN
+					area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optics[i], $
+								offaxis_angle=offaxis_angle, data_dir=data_dir )
+					if i eq 1 then energy = area.energy_kev
+					if i eq 1 then eff_area = area.eff_area_cm2
+					if i gt 1 then eff_area += area.eff_area_cm2
+				ENDIF
+				; add an approximation for the 2 new 10-shell modules
+				new_10_shell_effarea = AVERAGE_2_10SHELL_OPTICS( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
+				eff_area += 2*new_10_shell_effarea
+			ENDFOR
+		ENDIF
+		
 	endelse
 
 endelse
