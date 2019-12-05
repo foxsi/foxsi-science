@@ -34,6 +34,7 @@ FUNCTION get_foxsi_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_numb
 ; Updated, SM, 2019/12/04 Replaced the FOXSI1 keyword by a YEAR keyword
 ;				updated the way to call get_foxsi_optics_effarea
 ;				included options for FOXSI-3
+;				added correcting factor for collimator
 
 
 default, type, 'si'
@@ -47,6 +48,8 @@ default, year, 2014
 foxsi1_optic_modules = [6,1,2,3,4,5,0]
 foxsi2_optic_modules = [6,1,2,3,4,5,0]
 foxsi3_optic_modules = [8,5,4,1,0,2,7]
+
+collimator_ratio = 0.673
 
 IF NOT keyword_set(DET_THICK) THEN det_thick = 500.0
 IF NOT keyword_set(BE_UM) THEN be_um = 0.0
@@ -76,10 +79,15 @@ endif else begin
 								offaxis_angle=offaxis_angle, data_dir=data_dir, plot=plot, _extra=_extra )
 		energy = area.energy_kev
 		eff_area = area.eff_area_cm2
+		; take care of 10-shell modules that were 7-shells on FOXSI-1 --> replacing by average over 7-shell modules
 		if YEAR EQ 2012 and (module_number eq 6 or module_number eq 2) then $
 				eff_area = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
+		; take care of new 10-shell modules in FOXSI-3: average FOXSI-2 10-shell modules
 		if YEAR EQ 2018 and (module_number eq 6 or module_number eq 0) then $
 				eff_area = AVERAGE_2_10SHELL_OPTICS( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
+		; take care of collimators on FOXSI-3
+		if YEAR EQ 2018 AND (module_number EQ 1 OR module_number EQ 2) then$
+			eff_area = eff_area*collimator_ratio
 	endif else begin
 		IF year EQ 2012 THEN BEGIN
 			; sum all optics modules of FOXSI-1. FOR THE 2 7-SHELL modules which became 10-shells in FOXSI-2,
@@ -118,6 +126,8 @@ endif else begin
 				IF (i NE 0) AND (i NE 6) THEN BEGIN
 					area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optics[i], $
 								offaxis_angle=offaxis_angle, data_dir=data_dir )
+					; take care of collimator
+					IF (i EQ 1 or i EQ 2) THEN area.eff_area_cm2 = area.eff_area_cm2*collimator_ratio
 					if i eq 1 then energy = area.energy_kev
 					if i eq 1 then eff_area = area.eff_area_cm2
 					if i gt 1 then eff_area += area.eff_area_cm2
@@ -215,6 +225,7 @@ ENDIF
 ;    shut_eff = get_foxsi_shutters(energy_arr = energy_arr, be_um = be_um, /nonstd, data_dir = data_dir, _EXTRA = _EXTRA)    
 ;    eff_area = eff_area*shut_eff.shut_eff
 ;ENDIF
+
 
 IF keyword_set(PLOT) THEN BEGIN
 
