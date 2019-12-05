@@ -4,12 +4,13 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ;PURPOSE: Get the FOXSI optics effective area in cm^2 as a function of energy
 ;           and off-axis angle.
 ;
-;KEYWORD:   MODULE_NUMBER - the module number (0 through 6).  Detector convention is used.
+;KEYWORD:   MODULE_NUMBER - the module number (0 through 8).  Optic number is used, this is DIFFERENT FROM THE DETECTOR NUMBER.
 ;			PLOT - plot to the current device
 ;			OFFAXIS_ANGLE - off-axis angle. if array then [pan, tilt] in arcmin
 ;
 ;WRITTEN: Steven Christe (21-Jan-15)
 ;	modified:	LG	2015 Feb	Switched X0->D6 and X6->D0
+;	modified:	SM	2019 Dec	Switched to optic module numbers instead of detector position
 
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
@@ -18,11 +19,11 @@ default, module_number, 0
 IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
     ELSE angle = offaxis_angle
 
-; Switch X0->D6 and X6->D0
-if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
-		else MODULE = MODULE_NUMBER
+; Switch X0->D6 and X6->D0 - we do not need this now that we follow the optic number convention
+;if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
+;		else MODULE = MODULE_NUMBER
 		
-files = '$FOXSIPKG' + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(module) + '_EA_pan.txt', $
+files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(module) + '_EA_pan.txt', $
          'Module_X-' + num2str(module) + '_EA_tilt.txt']
 
 ; todo: these need to be provided by the data files themselves
