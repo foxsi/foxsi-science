@@ -34,6 +34,7 @@
 ;		file = 'data_2014/foxsi_level1_data.sav'
 ;
 ; History:	
+;     2019-Dec-5  Sophie included altitude calculation for FOXSI-2
 ;     2019-Oct-15 Sophie fixed altitude calculation and included it for the FOXSI-3 data
 ;     2019-Feb-05 Sophie fixed a problem in the xy_det for FOXSI-2 CdTe
 ;     2018-Dec-06 Sophie add a variable t_launch to have different values for different flights when used
@@ -303,8 +304,9 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 	; Altitude
 	; For level 1, interpolate linearly between each 0.5 sec measurement.
 	; Get altitude data from text file
-	if not keyword_set(ground) AND (year EQ 2012 OR year EQ 2018) then begin ; 
+	if not keyword_set(ground) then begin ; 
 		IF year EQ 2012 THEN data_alt=read_ascii('data_2012/36255.txt')
+		IF year EQ 2014 THEN data_alt=read_ascii('data_2014/foxsi2_altitude.txt')
 		IF year EQ 2018 THEN data_alt=read_ascii('data_2018/altitude.txt')
 		time_alt = data_alt.field01[1,*] + t_launch	; adjust altitude clock for time of launch.
 		altitude = data_alt.field01[9,*]
