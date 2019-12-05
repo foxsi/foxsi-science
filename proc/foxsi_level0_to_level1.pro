@@ -313,7 +313,7 @@ FUNCTION	FOXSI_LEVEL0_TO_LEVEL1, FILENAME, DETECTOR = DETECTOR, STOP = STOP, $
 
 		; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
 		; interpolate the post-flight values.
-		FOR i=0, n_elements(data_struct)-1 then begin
+		FOR i=0, n_elements(data_struct)-1 do begin
 			alt_interp = interpol(altitude,time_alt,data_struct[i].wsmr_time)
 			data_struct[i].altitude = alt_interp
 		endfor
