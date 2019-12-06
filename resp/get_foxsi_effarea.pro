@@ -86,7 +86,7 @@ endif else begin
 		if YEAR EQ 2018 and (module_number eq 6 or module_number eq 0) then $
 				eff_area = AVERAGE_2_10SHELL_OPTICS( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
 		; take care of collimators on FOXSI-3
-		if YEAR EQ 2018 AND (module_number EQ 1 OR module_number EQ 2) then$
+		if YEAR EQ 2018 AND (module_number EQ 1 OR module_number EQ 2) then $
 			eff_area = eff_area*collimator_ratio
 	endif else begin
 		IF year EQ 2012 THEN BEGIN
