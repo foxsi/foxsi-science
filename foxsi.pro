@@ -58,6 +58,10 @@ endif else begin
 			FOR det=0, 6 DO BEGIN
 				detstr = strtrim(string(det),2)
 				file = file_search(fits_dir, foxsistr+'_level2_det'+detstr+'.fits')
+				IF n_elements(file) GT 1 THEN BEGIN
+				  PRINT,'More than one file found, selecting the first one:'
+				  file=file[0]
+				ENDIF
 				IF file NE '' THEN BEGIN
 					print, 'loading file ', file[0]
 					IF det EQ 0 THEN foxsi_level2_fxbr, file[0], DATA_LVL2_D0
@@ -68,8 +72,12 @@ endif else begin
 					IF det EQ 5 THEN foxsi_level2_fxbr, file[0], DATA_LVL2_D5
 					IF det EQ 6 THEN foxsi_level2_fxbr, file[0], DATA_LVL2_D6
 				ENDIF
-			ENDIF
+			ENDFOR
 			
+			print, 'You just load all the parameters and data needed'
+			print, 'to do the analysis of the FOXSI '+strtrim(string(year),2)+' observations.'
+			print
+			print, 'Type help if you want to check the '+strtrim(string(year),2)+'-parameters.'
 			
 		ENDIF ELSE BEGIN
 
