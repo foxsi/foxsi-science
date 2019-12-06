@@ -158,6 +158,12 @@ ENDELSE
 ; Detector efficiency, including low-energy cutoff curve
 ;
 
+; take care of the fact that we do not have the efficiency curve for phoenix
+IF year EQ 2018 and module_number EQ 1 THEN BEGIN
+  nodet = 1
+  PRINT, 'No data on PHOENIX detector. Returning effective area without detector efficiency.'
+endif
+
 IF NOT keyword_set(nodet) THEN BEGIN
 
 	if not keyword_set( LET_FILE ) then begin
