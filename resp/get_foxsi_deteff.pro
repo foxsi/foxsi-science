@@ -34,14 +34,14 @@ ENDIF
 
 IF ((NOT keyword_set(TYPE)) OR (TYPE EQ 'si')) THEN BEGIN
 
-    restore, '$FOXSIPKG'+'/'+data_dir + "si_atten_len.dat" 
+    restore, GETENV('FOXSIPKG')+'/'+data_dir + "si_atten_len.dat" 
     atten_len_um = result.atten_len_um
     energy_keV = result.energy_ev/1000.0
 ENDIF ELSE BEGIN
 
     IF TYPE EQ 'czt' THEN BEGIN 
         ;det thick in file is 1000 um
-        restore, '$FOXSIPKG'+'/'+data_dir + "czt_xray_data.dat"
+        restore, GETENV('FOXSIPKG')+'/'+data_dir + "czt_xray_data.dat"
         energy_keV = result.energy_keV
         atten_len_um = 1/(result.atten_len_photo_cm)*10000
     ENDIF
@@ -49,7 +49,7 @@ ENDIF ELSE BEGIN
     IF TYPE EQ 'cdte' THEN BEGIN 
 
 	;attenuation length for CdTe
-        restore, '$FOXSIPKG'+'/'+data_dir + "cdte_atten_len.dat"
+        restore, GETENV('FOXSIPKG')+'/'+data_dir + "cdte_atten_len.dat"
         energy_keV = result.energy_eV/1000.
         atten_len_um = result.atten_len_um
 
@@ -58,13 +58,13 @@ ENDIF ELSE BEGIN
 ;        atten_len_um = 1/(result.atten_len_photo_cm)*10000
 
 	;attenuation length for Au electrodes
-	restore, '$FOXSIPKG'+'/'+data_dir + "au_atten_len.dat"
+	restore, GETENV('FOXSIPKG')+'/'+data_dir + "au_atten_len.dat"
 	energy_keV_au = data.energy_ev/1000. 
 	atten_len_um_au = data.atten_len_um
 	au_thick_um = 0.1 
 
 	;attenuation length for Pt electrodes
-	restore, '$FOXSIPKG'+'/'+data_dir + "pt_atten_len.dat"
+	restore, GETENV('FOXSIPKG')+'/'+data_dir + "pt_atten_len.dat"
 	energy_keV_pt = data.energy_ev/1000.
 	atten_len_um_pt = data.atten_len_um
 	pt_thick_um = .05
@@ -95,7 +95,7 @@ endelse
 
 if not keyword_set(no_let) then begin
 	
-	restore, '$FOXSIPKG'+'/'+data_dir + let_file
+	restore, GETENV('FOXSIPKG')+'/'+data_dir + let_file
 	if is_struct(efficiency) then begin
 		let = interpol(efficiency.efficiency, efficiency.energy_keV, energy_arr)
 
