@@ -23,8 +23,8 @@ IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offax
 ;if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
 ;		else MODULE = MODULE_NUMBER
 		
-files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(module) + '_EA_pan.txt', $
-         'Module_X-' + num2str(module) + '_EA_tilt.txt']
+files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+         'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
 
 ; todo: these need to be provided by the data files themselves
 angles = [-9, -7, -5, -3, -1, 0, 1, 3, 5, 7, 9]
