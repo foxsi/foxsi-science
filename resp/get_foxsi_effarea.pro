@@ -58,10 +58,11 @@ IF NOT keyword_set(BE_UM) THEN be_um = 0.0
 
 if keyword_set(USE_THEORETICAL) then begin
 
+	IF year Eq 2018 THEN print, 'No theoretical value for FOXSI-3. Returns FOXSI-2 theoretical values.'
 	restore,  GETENV('FOXSIPKG') + '/' + data_dir + "eff_area_permodules2.dat"
 	eff_area = eff_area_permod.eff_area2
 	energy = eff_area_permod.energy
-	IF keyword_set(FOXSI1) THEN eff_area = eff_area_permod.eff_area
+	IF year EQ 2012 THEN eff_area = eff_area_permod.eff_area
 	if not exist(MODULE_NUMBER) then eff_area = eff_area*7
 	if offaxis_angle gt 0 then begin
 		offaxis_area = get_foxsi_offaxis_resp( energy_arr=energy_arr, offaxis_angle=offaxis_angle )
@@ -238,13 +239,13 @@ ENDIF
 
 IF keyword_set(PLOT) THEN BEGIN
 
-	plot, energy_arr, num_modules*eff_area_orig, psym = -4, $
+	plot, energy_arr, eff_area_orig, psym = -4, $
 		xtitle = "Energy [keV]", ytitle = "Effective Area [cm!U2!N]", charsize = 1.5, /xstyle, xrange = [min(energy_arr), max(energy_arr)], _EXTRA = _EXTRA, /nodata
 		
 	;xyouts, 0.6, 0.85, 'Optics', /normal, charsize = 1.5
 	
 	txt = ['Optics', '+Optical Path']
-	oplot, energy_arr, num_modules*eff_area_orig, psym = -4, color = 7
+	oplot, energy_arr, eff_area_orig, psym = -4, color = 7
 	oplot, energy_arr, eff_area, psym = -4, color = 6
     ssw_legend, txt, textcolor = [7,6], /right
     
