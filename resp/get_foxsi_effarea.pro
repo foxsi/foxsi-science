@@ -102,8 +102,8 @@ endif else begin
 					if i gt 0 then eff_area += area.eff_area_cm2
 				ENDIF
 				; add the effective area for modules 2 and 6
-				10_shell_effarea = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
-				eff_area += 2*10_shell_effarea
+				ten_shell_effarea = average_5_optics( energy_arr=energy_arr, offaxis_angle=offaxis_angle, data_dir=data_dir )
+				eff_area += 2*ten_shell_effarea
 			ENDFOR
 		ENDIF
 		IF year EQ 2014 THEN BEGIN 
