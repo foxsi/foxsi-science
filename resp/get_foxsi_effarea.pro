@@ -75,6 +75,9 @@ endif else begin
 		IF year EQ 2014 THEN optic_module = foxsi2_optic_modules[module_number]
 		IF year EQ 2018 THEN optic_module = foxsi3_optic_modules[module_number]
 
+		; placeholder for the two new modules on FOXSI-3 - the data is not yet available. 
+		IF year EQ 2018 AND (module_number EQ 0 OR module_number EQ 6) THEN optic_module=0
+
 		area = get_foxsi_optics_effarea( energy_arr=energy_arr, module_number=optic_module, $
 								offaxis_angle=offaxis_angle, data_dir=data_dir, plot=plot, _extra=_extra )
 		energy = area.energy_kev
