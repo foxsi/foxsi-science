@@ -68,7 +68,6 @@ default, radius, 150.
 default, offaxis, 0.
 default, cen_map, cen1_pos2
 default, fwhm, 0.5
-default, let_file, 'efficiency_averaged.sav'
 default, type, 'si'
 default, split_limit, 3.
 default, year, 2014
