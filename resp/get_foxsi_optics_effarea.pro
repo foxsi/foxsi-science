@@ -14,6 +14,9 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ; modified: MB  2020 Jan  Differenciate among the three foxsi flights using the DATE keyword.
 
 COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
+default, datefoxsi1, 1.0679040e+09 ; FOXSI1 Launch Date
+default, datefoxsi2, 1.1342592e+09 ; FOXSI2 Launch Date
+default, datefoxsi3, 1.2522816e+09 ; FOXSI3 Launch Date
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
 default, module_number, 0
@@ -26,18 +29,36 @@ IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offax
 ;		else MODULE = MODULE_NUMBER
 
 
-CASE DATE OF
-    ; foxsi1
-    1.0679040e+09: files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
-                       'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt'] ; for foxsi1 we used the same EA files as for foxsi2.    
-    ; foxsi2
-    1.1342592e+09: files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
-                       'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
-    ; foxsi3
-    1.2522816e+09: files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
-                       'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
-    ELSE: PRINT, 'DATE has an illegal value.'
-ENDCASE
+IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN BEGIN
+    ; foxsi1 :
+    IF (DATE EQ datefoxsi1) THEN BEGIN
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN 
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt'] ; for foxsi1 we used the same EA files as for foxsi2.
+      ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI1. Chose one of 0,1,2,3,4,5 or 6.'
+    ENDIF
+    ; foxsi2 :
+    IF DATE EQ datefoxsi2 THEN BEGIN
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN 
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+      ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI2. Chose one of 0,1,2,3,4,5 or 6.'
+    ENDIF
+    ; foxsi3 :
+    IF DATE EQ datefoxsi3 THEN BEGIN
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,4,5]) NE -1) THEN BEGIN
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+      ENDIF
+      IF (WHERE(MODULE_NUMBER EQ [7,8]) NE -1) THEN BEGIN
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+          'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']      
+      ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI3. Chose one of 0,1,2,4,5,7 or 8.'
+    ENDIF
+ENDIF ELSE BEGIN
+    PRINT, 'DATE has an illegal value.'
+ENDELSE
+
 
 energy = [4.5,  5.5,  6.5,  7.5,  8.5,  9.5, 11. , 13. , 15. , 17. , 19. , 22.5, 27.5]; all effarea use same energy bins
 angles = READ_ASCII(files[0], DATA_START=3, NUM_RECORDS=1, DELIMITER=","); angles provided by the data files themselves
