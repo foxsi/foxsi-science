@@ -1,8 +1,6 @@
 foxsi-science
 =============
 
-# IMPORTANT:
-**For maintenance reasons, FOXSI data will not be available between 12:15 PM and 1:00 PM (PT), 1/28/2020**
 # Flight Info
 
 ## FOXSI-1
