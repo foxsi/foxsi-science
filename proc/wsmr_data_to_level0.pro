@@ -259,6 +259,8 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 		data_struct[ where( ishft(data_struct.hv,-4)/8 gt 190  ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
+; the following extraction of altitude data is kept in this code for FOXSI-1 only for compatibility reasons.
+; altitude data is now read in the procedure foxsi_level0_to_level1 for all FOXSI flights
 	if year eq 2012 then begin
 		; Get altitude data from text file
 		data_alt=read_ascii('data_2012/36255.txt')
