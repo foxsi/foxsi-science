@@ -9,4 +9,4 @@ shift2, shift3, shift6, shift0, shift1, shift4, shift5, $
 flare, flare1, flare2, ar27, ar30, ar32, ar33, ar34, ar35, ar25, ar29, ar31, $
 rot0, rot1, rot2, rot3, rot4, rot5, rot6, $
 detnum0, detnum1, detnum2, detnum3, detnum4, detnum5, detnum6,  $
-DATA_LVL2_D0, DATA_LVL2_D1, DATA_LVL2_D2, DATA_LVL2_D3, DATA_LVL2_D4, DATA_LVL2_D5,DATA_LVL2_D6
+DATA_LVL2_D0, DATA_LVL2_D1, DATA_LVL2_D2, DATA_LVL2_D3, DATA_LVL2_D4, DATA_LVL2_D5,DATA_LVL2_D6 
