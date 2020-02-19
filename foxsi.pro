@@ -50,11 +50,20 @@ endif else begin
 			ENDIF
 			
 			; read the fits files for that year found in the provided directory
-			case year of
-				2012: foxsistr = 'foxsi1'
-				2014: foxsistr = 'foxsi2'
-				2018: foxsistr = 'foxsi3'
-			endcase
+                        case year of
+                                2012: begin
+                                        foxsistr = 'foxsi1'
+                                        @param2012_20160620
+                                end
+                                2014: begin
+                                        foxsistr = 'foxsi2'
+                                        @param2014_20160620
+                                end
+                                2018: begin
+                                        foxsistr = 'foxsi3'
+                                        @param2018_20191015
+                                end
+                        endcase
 			FOR det=0, 6 DO BEGIN
 				detstr = strtrim(string(det),2)
 				file = file_search(fits_dir, foxsistr+'_level2_det'+detstr+'.fits')
