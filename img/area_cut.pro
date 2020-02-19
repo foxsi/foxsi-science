@@ -1,4 +1,4 @@
-FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
+FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, $
 					XYCORR = XYCORR, INDEX=INDEX
 
 	; This function takes in FOXSI level 2 data and returns a clipped version
@@ -7,7 +7,6 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 	; /XYCORR corrects the center position using the "known" xy offset.
 
 	COMMON FOXSI_PARAM
-	default, year, 2014
 	
 	detnum = data[0].det_num
 	
@@ -30,7 +29,6 @@ FUNCTION	AREA_CUT, DATA, CENTER, RADIUS, GOOD=GOOD, STOP=STOP, YEAR=YEAR, $
 		end
 	endcase
 
-;	if keyword_set(xycorr) then cen = center - offset_xy else cen = center
 	if keyword_set(xycorr) then cen = center - (offset_xy+shift) else cen = center
 
 	xy = data_mod.hit_xy_solar
