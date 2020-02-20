@@ -27,11 +27,37 @@ default, erange, [2.0,21.9]
 default, det, 6
 default, fwhm, 0.5
 default, type, 'si'
-default, year, 2014
 
 ; create energy array based on set energy range and bin size
 elements = ((erange[1]-erange[0])/bin)+1.
 energy = findgen(elements, increment=bin, start=erange[0])
+
+; If YEAR is not set then COMMON DATE will be used to know which FOXSI flight the user is working with.
+
+if not keyword_set(year) then begin
+
+        COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
+
+        datefoxsi1 = 1.0679040e+09 ; FOXSI1 Launch Date
+        datefoxsi2 = 1.1342592e+09 ; FOXSI2 Launch Date
+        datefoxsi3 = 1.2522816e+09 ; FOXSI3 Launch Date
+
+        if typename(date) eq 'UNDEFINED' then begin
+                print,'ERROR: Please set the YEAR keyword or run foxsi.pro to load parameters for the appropriate year (2012, 2014, or 2018)'
+                return, -1
+        endif
+
+        if date eq datefoxsi1 then year=2012
+        if date eq datefoxsi2 then year=2014
+        if date eq datefoxsi3 then year=2018
+
+        if (date ne datefoxsi1) and (date ne datefoxsi2) and (date ne datefoxsi3) then begin
+                print,'ERROR: Date does not match any FOXSI flight!'
+                print,'Please set the YEAR keyword or run foxsi.pro to load parameters for the appropriate year (2012, 2014, or 2018)'
+                return, -1
+        endif
+
+endif
 
 ; compute diagonal response
 resp_diag = get_foxsi_effarea( energy_arr=energy, module=det, type = type, $
