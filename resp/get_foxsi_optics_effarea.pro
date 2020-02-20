@@ -1,5 +1,5 @@
 FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = module_number, $
-	OFFAXIS_ANGLE = offaxis_angle, DATA_DIR = data_dir, PLOT = plot, _EXTRA = _extra
+	OFFAXIS_ANGLE = offaxis_angle, DATA_DIR = data_dir, PLOT = plot, _EXTRA = _extra, YEAR = year
 
 ;PURPOSE:   Get the FOXSI optics effective area in cm^2 as a function of energy
 ;           and off-axis angle.
@@ -7,39 +7,66 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ;KEYWORD:   MODULE_NUMBER - the module number (0 through 8).  Optic number is used, this is DIFFERENT FROM THE DETECTOR NUMBER.
 ;			      PLOT - plot to the current device
 ;			      OFFAXIS_ANGLE - off-axis angle. if array then [pan, tilt] in arcmin
+;			      YEAR - year of the FOXSI launch. It can be: 2012, 2014 or 2018. If not set, COMMON DATE will be used instead.
 ;
 ;WRITTEN: Steven Christe (21-Jan-15)
 ;	modified:	LG	2015 Feb	Switched X0->D6 and X6->D0
 ;	modified:	SM	2019 Dec	Switched to optic module numbers instead of detector position
 ; modified: MB  2020 Jan  Differenciate among the three foxsi flights using the DATE keyword.
+;               2020 Feb  Add a YEAR keyword that can be used when the user don't want to load all FOXSI COMMON variables.
 
-COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
-default, datefoxsi1, 1.0679040e+09 ; FOXSI1 Launch Date
-default, datefoxsi2, 1.1342592e+09 ; FOXSI2 Launch Date
-default, datefoxsi3, 1.2522816e+09 ; FOXSI3 Launch Date
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
 default, module_number, 0
 
-IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
-    ELSE angle = offaxis_angle
-
-; Switch X0->D6 and X6->D0 - we do not need this now that we follow the optic number convention
-;if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
-;		else MODULE = MODULE_NUMBER
-
-
-IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN BEGIN
+IF KEYWORD_SET(YEAR) THEN BEGIN
+  IF ((YEAR EQ 2012) OR (YEAR EQ 2014) OR (YEAR EQ 2018)) THEN BEGIN
+    ; foxsi1 :
+    IF (YEAR EQ 2012) THEN BEGIN
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt'] ; for foxsi1 we used the same EA files as for foxsi2.
+      ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI1. Chose one of 0,1,2,3,4,5 or 6.'
+    ENDIF
+    ; foxsi2 :
+    IF YEAR EQ 2014 THEN BEGIN
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+      ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI2. Chose one of 0,1,2,3,4,5 or 6.'
+    ENDIF
+    ; foxsi3 :
+    IF YEAR EQ 2018 THEN BEGIN
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,4,5]) NE -1) THEN BEGIN
+        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+      ENDIF ELSE BEGIN
+        IF (WHERE(MODULE_NUMBER EQ [7,8]) NE -1) THEN BEGIN
+          files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                   'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+        ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI3. Chose one of 0,1,2,4,5,7 or 8.'
+      ENDELSE
+    ENDIF
+  ENDIF ELSE BEGIN
+    PRINT, 'YEAR has an illegal value.'
+  ENDELSE
+ENDIF ELSE BEGIN
+  ; If YEAR is not set then COMMON DATE will be used to know wich FOXSI flight the user is working with. 
+  COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
+  default, datefoxsi1, 1.0679040e+09 ; FOXSI1 Launch Date
+  default, datefoxsi2, 1.1342592e+09 ; FOXSI2 Launch Date
+  default, datefoxsi3, 1.2522816e+09 ; FOXSI3 Launch Date  
+  IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN BEGIN
     ; foxsi1 :
     IF (DATE EQ datefoxsi1) THEN BEGIN
-      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN 
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN
         files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
                  'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt'] ; for foxsi1 we used the same EA files as for foxsi2.
       ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI1. Chose one of 0,1,2,3,4,5 or 6.'
     ENDIF
     ; foxsi2 :
     IF DATE EQ datefoxsi2 THEN BEGIN
-      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN 
+      IF (WHERE(MODULE_NUMBER EQ [0,1,2,3,4,5,6]) NE -1) THEN BEGIN
         files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
                  'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
       ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI2. Chose one of 0,1,2,3,4,5 or 6.'
@@ -49,16 +76,25 @@ IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN B
       IF (WHERE(MODULE_NUMBER EQ [0,1,2,4,5]) NE -1) THEN BEGIN
         files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
                  'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
-      ENDIF
-      IF (WHERE(MODULE_NUMBER EQ [7,8]) NE -1) THEN BEGIN
-        files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
-          'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']      
-      ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI3. Chose one of 0,1,2,4,5,7 or 8.'
+      ENDIF ELSE BEGIN
+        IF (WHERE(MODULE_NUMBER EQ [7,8]) NE -1) THEN BEGIN
+          files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
+                   'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+        ENDIF ELSE PRINT, 'Invalid Module_number for FOXSI3. Chose one of 0,1,2,4,5,7 or 8.'
+      ENDELSE
     ENDIF
-ENDIF ELSE BEGIN
-    PRINT, 'DATE has an illegal value.'
+  ENDIF ELSE BEGIN
+    PRINT, 'You MUST either set the YEAR variable or load FOXSI, YEAR to make this routine work.'
+  ENDELSE
 ENDELSE
 
+
+IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
+    ELSE angle = offaxis_angle
+
+; Switch X0->D6 and X6->D0 - we do not need this now that we follow the optic number convention
+;if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
+;		else MODULE = MODULE_NUMBER
 
 energy = [4.5,  5.5,  6.5,  7.5,  8.5,  9.5, 11. , 13. , 15. , 17. , 19. , 22.5, 27.5]; all effarea use same energy bins
 angles = READ_ASCII(files[0], DATA_START=3, NUM_RECORDS=1, DELIMITER=","); angles provided by the data files themselves
