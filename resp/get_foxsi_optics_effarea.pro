@@ -19,6 +19,9 @@ default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
 default, module_number, 0
 
+IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
+ELSE angle = offaxis_angle
+
 IF KEYWORD_SET(YEAR) THEN BEGIN
   IF ((YEAR EQ 2012) OR (YEAR EQ 2014) OR (YEAR EQ 2018)) THEN BEGIN
     ; foxsi1 :
@@ -88,10 +91,6 @@ ENDIF ELSE BEGIN
   ENDELSE
 ENDELSE
 
-
-IF n_elements(offaxis_angle) EQ 1 THEN angle = 1/sqrt(2) * [offaxis_angle, offaxis_angle] $
-    ELSE angle = offaxis_angle
-
 ; Switch X0->D6 and X6->D0 - we do not need this now that we follow the optic number convention
 ;if MODULE_NUMBER eq 0 then MODULE = 6 else if MODULE_NUMBER eq 6 then MODULE = 0 $
 ;		else MODULE = MODULE_NUMBER
@@ -112,14 +111,14 @@ IF keyword_set(energy_arr) THEN BEGIN
     interpol_data = fltarr(2, n_elements(data[0, *, 0]), n_elements(energy_arr))
     ; interpolate data on new energies    
     FOR j = 0, 2 - 1 DO BEGIN
-        FOR i = 0, n_elements(angles)-1 DO BEGIN
+        FOR i = 0, n_elements(angles.field01)-1 DO BEGIN
             eff_area = data[j, i, *]
             interpol_data[j, i, *] = interpol(eff_area, energy, energy_arr)
         ENDFOR
     ENDFOR
 ENDIF ELSE BEGIN 
     interpol_data = data
-	energy_arr = energy
+    energy_arr = energy
 ENDELSE
 
 rnorm = sqrt(angle[0] ^ 2 + angle[1] ^ 2)
