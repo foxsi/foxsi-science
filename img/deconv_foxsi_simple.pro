@@ -34,7 +34,9 @@
 ;		the effects of deconvolution as it progresses.
 ;
 ; OPTIONAL KEYWORDS:
-;	FOV=FOV
+;	CEN=CEN	Center of the region to use for deconvolution.  If this keyword is not set, 
+;			then the code uses a centroid of the input map as the region center.
+;	FOV=FOV	Size (in arcmin) of the region to deconvolve.  Default is 4 arcmin.
 ;	PSF_IN	plot_map structure containing the point spread function.
 ;			If this is not provided, the routine will use a standard on-axis PSF.
 ;			The PSF map must be as large or larger than the FOV requested.
@@ -48,7 +50,7 @@
 ;		2016-oct-30		LG	Created from scraps of my analysis code.
 ;----
 
-FUNCTION DECONV_FOXSI_SIMPLE, MAP, FOV=FOV, PSF_IN=PSF_IN, iter=iter, $
+FUNCTION DECONV_FOXSI_SIMPLE, MAP, CEN=CEN, FOV=FOV, PSF_IN=PSF_IN, iter=iter, $
 					   RECONV_map = reconv_map, CSTAT=cstat, STOP = STOP
 					   					   
 	default, fov, 4.
@@ -73,7 +75,8 @@ FUNCTION DECONV_FOXSI_SIMPLE, MAP, FOV=FOV, PSF_IN=PSF_IN, iter=iter, $
  
 	; Find the source and choose a FOV centered on it.
 	; This is so that you don't have to deconvolve a large image.
-	map_cen = map_centroid( map, thr=0.1*max(map.data) )
+	if keyword_set( CEN ) then map_cen = cen else $
+		map_cen = map_centroid( map, thr=0.2*max(map.data) )
 	raw = make_submap( map, cen=map_cen, fov=fov )
 		
 	;
