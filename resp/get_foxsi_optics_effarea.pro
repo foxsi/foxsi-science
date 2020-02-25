@@ -56,9 +56,9 @@ IF KEYWORD_SET(YEAR) THEN BEGIN
 ENDIF ELSE BEGIN
   ; If YEAR is not set then COMMON DATE will be used to know wich FOXSI flight the user is working with. 
   COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
-  default, datefoxsi1, 1.0679040e+09 ; FOXSI1 Launch Date
-  default, datefoxsi2, 1.1342592e+09 ; FOXSI2 Launch Date
-  default, datefoxsi3, 1.2522816e+09 ; FOXSI3 Launch Date  
+  default, datefoxsi1, anytim('2012-nov-03') ; FOXSI1 Launch Date
+  default, datefoxsi2, anytim('2014-dec-11')anytim('2018-sep-7') ; FOXSI2 Launch Date
+  default, datefoxsi3, anytim('2018-sep-7') ; FOXSI3 Launch Date  
   IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN BEGIN
     ; foxsi1 :
     IF (DATE EQ datefoxsi1) THEN BEGIN
