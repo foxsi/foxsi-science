@@ -6,11 +6,10 @@
 ; data description doc.
 ;
 ; Inputs:	FILENAME	File to process.  Must be a WSMR .log file.
-;			   			Default is the 2014 Dec 11 flight data file.
 ;
 ; Keywords:	DETECTOR	Detector number (0-6).  Each detector data
 ;						must be processed individually.  Default D0
-;			YEAR		Specify 2012 or 2014. This is a temporary fix while we
+;			YEAR		Specify 2012, 2014 or 2018. This is a temporary fix while we
 ;						wait for altitude data for FOXSI-2.
 ;
 ; To process flight data into Level 0 IDL structures and save them:
@@ -28,6 +27,9 @@
 ;		file = 'data_2012/foxsi_level0_data.sav'
 ;
 ; History:	
+;		2019-Oct-15	Sophie	Delete the default selection of filename. If we want a selection of the filename, 
+;						we can change this input into a keyword and select the filename using the year keyword
+;					Added file option for FOXSI-3
 ;		2015-feb-2	Linz	Changed default to 2014 flight, and fixed a bug in the wsmr_time tag
 ;											that was interpreting milliseconds incorrectly.
 ;		2015-Dec	Linz	Updated to work for 2014 data too.
@@ -40,9 +42,13 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 
 	add_path, 'util/'
 	default, year, 2014
-;	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
-	if not keyword_set(filename) then filename = 'data_2014/36.36_295_Krucker_FLIGHT_HOT_TM2.log'
 
+	case year of
+    		2012: t_launch = 64500
+    		2014: t_launch = 69060
+    		2018: t_launch = 62460
+  	endcase
+	
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
 
 	; Read in data file.
@@ -61,7 +67,7 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
   	print, '  Creating data structure.'
   	data_struct = {foxsi_level0, $
 		frame_counter:ulong(0),	$	; formatter frame counter value, 32 bits
-    wsmr_time:double(0.),  	$	; WSMR ground station time, to milliseconds
+   		wsmr_time:double(0.),  	$	; WSMR ground station time, to milliseconds
 		frame_time:ulong64(0), 	$	; formatter frame time, 64 bits
 		det_num:uint(0),	$	; same for all frames; from input keyword
 		trigger_time:uint(0), 	$	; raw trigger time value, 16 bits
@@ -215,22 +221,22 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 	; accounted for in this code.
 	i_nonzero = where(data_struct.frame_counter gt 0)
 	temp6 = reform( transpose([ [therm6],[therm6],[therm6],[therm6] ]), 4*n_elements(therm6) )
-	temp6 = [uintarr(i_nonzero[0]),temp6]
+	temp6 = [uint(i_nonzero[0]),temp6]
 	i_diff = n_elements(data_struct) - n_elements(temp6)
 	if i_diff gt 0 then temp6 = [temp6, uintarr(i_diff)]
 	if i_diff lt 0 then temp6 = temp6[0:n_elements(data_struct)-1]
 	temp7 = reform( transpose([ [therm7],[therm7],[therm7],[therm7] ]), 4*n_elements(therm7) )
-	temp7 = [uintarr(i_nonzero[0]),temp7]
+	temp7 = [uint(i_nonzero[0]),temp7]
 	i_diff = n_elements(data_struct) - n_elements(temp7)
 	if i_diff gt 0 then temp7 = [temp7, uintarr(i_diff)]
 	if i_diff lt 0 then temp7 = temp7[0:n_elements(data_struct)-1]
 	temp9 = reform( transpose([ [therm9],[therm9],[therm9],[therm9] ]), 4*n_elements(therm9) )
-	temp9 = [uintarr(i_nonzero[0]),temp9]
+	temp9 = [uint(i_nonzero[0]),temp9]
 	i_diff = n_elements(data_struct) - n_elements(temp9)
 	if i_diff gt 0 then temp9 = [temp9, uintarr(i_diff)]
 	if i_diff lt 0 then temp9 = temp9[0:n_elements(data_struct)-1]
 	temp11 = reform( transpose([ [therm11],[therm11],[therm11],[therm11] ]), 4*n_elements(therm11) )
-	temp11 = [uintarr(i_nonzero[0]),temp11]
+	temp11 = [uint(i_nonzero[0]),temp11]
 	i_diff = n_elements(data_struct) - n_elements(temp11)
 	if i_diff gt 0 then temp11 = [temp11, uintarr(i_diff)]
 	if i_diff lt 0 then temp11 = temp11[0:n_elements(data_struct)-1]
@@ -247,15 +253,18 @@ FUNCTION	WSMR_DATA_TO_LEVEL0, FILENAME, DETECTOR=DETECTOR, STOP=STOP, YEAR=YEAR
 	; Post-ramp events will have a '1' in the 'inflight' tag.
 	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 $
 		or strmatch(filename,'*36_295_Krucker_FLIGHT_HOT_TM2.log') eq 1 $
+		or strmatch(filename,'*36_325_Glesener_FLIGHT_HOT_TM2.log') eq 1 $
 	 	then begin
 		print, "  File is flight data.  Flagging post-launch events."
 		data_struct[ where( ishft(data_struct.hv,-4)/8 gt 190  ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
+; the following extraction of altitude data is kept in this code for FOXSI-1 only for compatibility reasons.
+; altitude data is now read in the procedure foxsi_level0_to_level1 for all FOXSI flights
 	if year eq 2012 then begin
 		; Get altitude data from text file
 		data_alt=read_ascii('data_2012/36255.txt')
-		time_alt = data_alt.field01[1,*] + 64500	; adjust altitude clock for time of launch.
+		time_alt = data_alt.field01[1,*] + t_launch	; adjust altitude clock for time of launch.
 		altitude = data_alt.field01[9,*]
 
 		; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz

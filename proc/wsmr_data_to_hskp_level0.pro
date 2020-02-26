@@ -9,10 +9,10 @@
 ; use wsmr_data_to_level0.pro
 ;
 ; Inputs:
-;		FILENAME	File to process. Must be a WSMR .log file.
-;			   		Default is the 2012 Nov 2 flight data file.
 ;
 ; Keywords:	
+;		FILENAME	File to process. Must be a WSMR .log file.
+;		YEAR	Year of the flight. Options are: 2012, 2014, 2018
 ;
 ; Example:
 ;
@@ -23,13 +23,20 @@
 ;	save, hskp_data, file = 'data_2012/foxsi_level0_hskp_data.sav'
 ;
 ; History:	
-;			2013-Jan-28	Linz	Created routine
+;		2019-Oct-16	Sophie	Change Filename to a keyword, add year keyword, and selection of files for FOXSI2 and FOXSI3	
+;		2013-Jan-28	Linz	Created routine
 ;-
 
-FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME, STOP=STOP
+FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME=filename, YEAR=YEAR, STOP=STOP
 
-	if not keyword_set(filename) then filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
-
+	IF not keyword_set(filename) then begin
+		case year of
+   			2012: filename = 'data_2012/36.255_TM2_Flight_2012-11-02.log'
+    			2014: filename = 'data_2014/36_295_Krucker_FLIGHT_HOT_TM2.log'
+    			2018: filename = 'data_2018/36_325_Glesener_FLIGHT_HOT_TM2.log'
+  		endcase
+	ENDIF
+	
 	wsmr_frame_length = 259						; 256 words (our data) + 3 WSMR time words
 
 	; Read in data file.
@@ -233,21 +240,36 @@ FUNCTION	WSMR_DATA_TO_HSKP_LEVEL0, FILENAME, STOP=STOP
 	; Identify which events occurred after launch (17:55:00), or "in flight"
 	; Do this only if the file is the flight data file.
 	; Post-launch events will have a '1' in the 'inflight' tag.
-	if strmatch(filename,'*36.255_TM2_Flight_2012-11-02.log') eq 1 then begin
+	case year of
+   			2012: flight_filename = '36.255_TM2_Flight_2012-11-02.log'
+    			2014: flight_filename = '36_295_Krucker_FLIGHT_HOT_TM2.log'
+    			2018: flight_filename = '36_325_Glesener_FLIGHT_HOT_TM2.log'
+  	endcase
+	case year of
+   			2012: tlaunch = 64500
+    			2014: tlaunch = 69060
+    			2018: tlaunch = 62460
+  	endcase
+	if strmatch(filename,'*'+flight_filename) eq 1 then begin
 		print, "  File is flight data.  Flagging post-launch events."
-		data_struct[ where( data_struct.wsmr_time gt 64500 ) ].inflight = 1
+		data_struct[ where( data_struct.wsmr_time gt tlaunch ) ].inflight = 1
 	endif else print, "FILE DOES NOT CONTAIN FLIGHT DATA!"
 
 	; Check for obvious errors and flag these.
 	; Errors include:
 	;    -- Frame counter does not increase by 1.  This is mostly
-	i=where(data_struct[1:577851].frame_counter - data_struct[0:577850].frame_counter ne 1)
+	i=where(data_struct[1:-1].frame_counter - data_struct[0:-2].frame_counter ne 1)
 	data_struct[i+1].error_flag = 1
 
 	; Get altitude data from text file
-	data_alt=read_ascii('data_2012/36255.txt')
+	case year of
+   			2012: altitude_file = 'data_2012/36255.txt'
+    			2014: altitude_file = 'data_2014/foxsi2_altitude.txt'
+    			2018: altitude_file = 'data_2018/altitude.txt'
+  	endcase
+	data_alt=read_ascii(altitude_file)
 	time_alt = data_alt.field01[1,*]
-	altitude = data_alt.field01[9,*] + 64500	; adjust altitude clock for time of launch.
+	altitude = data_alt.field01[9,*] + tlaunch	; adjust altitude clock for time of launch.
 
 	; altitude data cadence is 2 Hz; formatter data cadence is 500 Hz
 	; So resize the altitude data by repeating values.
