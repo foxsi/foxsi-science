@@ -60,7 +60,7 @@ ENDIF ELSE BEGIN
     return, -1
   ENDIF
   COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
-  default, datefoxsi1, anytim('2012-nov-03') ; FOXSI1 Launch Date
+  default, datefoxsi1, anytim('2012-nov-02') ; FOXSI1 Launch Date
   default, datefoxsi2, anytim('2014-dec-11') ; FOXSI2 Launch Date
   default, datefoxsi3, anytim('2018-sep-7')  ; FOXSI3 Launch Date  
   IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN BEGIN
