@@ -57,6 +57,7 @@ ENDIF ELSE BEGIN
   ; If YEAR is not set then COMMON DATE will be used to know wich FOXSI flight the user is working with. 
   IF FOXSI_PARAM EQ !NULL THEN BEGIN
     print,'Please initialize the FOXSI common parameter or provide the year of the flight via the YEAR keyword'
+    return, -1
   ENDIF
   COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
   default, datefoxsi1, anytim('2012-nov-03') ; FOXSI1 Launch Date
