@@ -38,7 +38,7 @@ if not keyword_set(year) then begin
 
         COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
 
-        datefoxsi1 = anytim('2012-nov-03') ; FOXSI1 Launch Date
+        datefoxsi1 = anytim('2012-nov-02') ; FOXSI1 Launch Date
         datefoxsi2 = anytim('2014-dec-11') ; FOXSI2 Launch Date
         datefoxsi3 = anytim('2018-sep-7') ; FOXSI3 Launch Date
 
