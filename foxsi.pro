@@ -50,20 +50,20 @@ endif else begin
 			ENDIF
 			
 			; read the fits files for that year found in the provided directory
-                        case year of
-                                2012: begin
-                                        foxsistr = 'foxsi1'
-                                        @param2012_20160620
-                                end
-                                2014: begin
-                                        foxsistr = 'foxsi2'
-                                        @param2014_20160620
-                                end
-                                2018: begin
-                                        foxsistr = 'foxsi3'
-                                        @param2018_20191015
-                                end
-                        endcase
+			case year of
+				2012: begin
+					foxsistr = 'foxsi1'
+					@param2012_20200226
+				end
+				2014: begin
+					foxsistr = 'foxsi2'
+					@param2014_20160620
+				end
+				2018: begin
+					foxsistr = 'foxsi3'
+					@param2018_20191015
+				end
+			endcase
 			FOR det=0, 6 DO BEGIN
 				detstr = strtrim(string(det),2)
 				file = file_search(fits_dir, foxsistr+'_level2_det'+detstr+'.fits')
@@ -124,7 +124,7 @@ endif else begin
 			endif
 			if year eq 2012 then begin
 			; load the Level 2 data.
-			@param2012_20160620
+			@param2012_20200226
 			restore, GETENV('FOXSIDB')+'/data_2012/foxsi_level2_data.sav', /v
 			DATA_LVL2_D0=DATA_LVL2_D0
 			DATA_LVL2_D1=DATA_LVL2_D1
