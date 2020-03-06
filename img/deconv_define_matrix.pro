@@ -5,36 +5,41 @@
 ;	This routine computes a transformation matrix describing FOXSI's imaging instrument 
 ;	response.  It is used for deconvolving FOXSI images.  It defines a matrix that 
 ;	computes the counts in each measured detector strip i due to each source pixel j.  
-;	Source and expected image pixels can be sized differently.
+;	Source and expected image pixels can be sized differently.  No effective area or 
+;	spectral response is included.
 ;
 ;	Notes:
 ;	-- The PSF must be >=3x the source image dimensions, and square.
 ;	-- No actual source is needed at this point.  This computes the transformation
 ;	   matrix that can be used for any source.  This matrix can be applied to any
 ;	   detector image with the specified pixel pitch and dimension.
-;	-- It's not fast!  Computing the matrix with defaults takes about 5 minutes
-;	   on Lindsay's laptop.
-;	-- The matrix *roughly* conserves flux for a centered source, so that most source and 
+;	-- It's not fast!  Computing the matrix with defaults takes several minutes
+;	   on Lindsay's laptop.  There are several ways the routine could be developed to 
+;	   compute the matrix more quickly.
+;	-- The matrix roughly conserves flux for a centered source, so that most source and 
 ;	   measured images on each detector will roughly have the same number of photons.  
 ;      (100k photons/source => 100k photons on each detector.)  This might not be the 
 ;	   physical case -- for off-axis angles about half the flux might fall of the small 
 ;	   region of the detector considered here, but getting it right requires better 
-;	   knowledge of the PSF wings than we currently have.
+;	   knowledge of the PSF wings than we currently have.  Please note that the effective 
+;	   area of the instrument is NOT included in this routine.
 ;
 ; KEYWORDS:
 ;	PSF:	plot_map structure containing the point spread function.  The deconvolved 
 ;			image will have a pixel size equal to the PSF pixel size.  If no PSF is 
-;			supplied then the default is a PSF with 0.8" pixels, at 7 arcmin off-axis 
-;			(the FOXSI-1 flare location).  The PSF FOV should be >3x the image FOV 
-;			(MEASURED_DIM x STRIP PITCH) in order to allow for rotations and "full reach" 
+;			supplied then the default is an on-axis PSF with 1" pixels.  
+;			The PSF FOV should be >3x the image FOV (MEASURED_DIM x STRIP PITCH) in order 
+;			to allow for rotations and "full reach." 
 ;			across the detector.
 ;	MATRIX_FILE:	Save the matrix variable in an IDL save file of this name.
 ;					Default is 'matrix.sav' in current directory.
-;	MEASURED_DIM:	1-element dimension of square 2D expected image array. Default: 10
+;					To use this routine for anything useful, the matrix must be saved.
+;	MEASURED_DIM:	Number of strips across the image.  If this number is n, the 2D image 
+;					has n^2 strip crossings. Default: 10 strips
 ;					This MUST match the size of the image you want to deconvolve.
 ;					Source map dimensions are calculated from this variable (and pitch 
 ;					and PSF pixel size) and so runtime goes as MEASURED_DIM^4.
-;	PITCH:			Detector strip size. Default: 7.735
+;	PITCH:			Detector strip size in arcsec. Default: 7.735
 ;					This MUST match the strip size of the image you want to 
 ;					deconvolve.
 ;
