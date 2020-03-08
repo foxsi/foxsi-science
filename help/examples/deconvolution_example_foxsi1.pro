@@ -92,7 +92,7 @@ print, 'Photons per detector: ', total(map.data)/6.
 
 ; Get the PSF.  Because the foxsi_psf routine was written specifically for the FOXSI-1 
 ; flare, it is at the correct off-axis angle and rotation.
-psf=foxsi_psf( pix = sub.dx, fov=sub.dx*sqrt(n_elements(sub.data))/60. )
+psf=foxsi_psf( pix = map0.dx, fov=map0.dx*sqrt(n_elements(map0.data))/60. )
 
 deconv = deconv_foxsi_simple( map, psf_in=psf, iter=[1,2,5,10,25,50,50,75,100] )
 movie_map, deconv, /noscale
@@ -105,9 +105,10 @@ restore, getenv('FOXSIPKG')+'/data_2012/aia-maps-flare.sav', /v
 cen = map_centroid(aia[i],thresh=0.3*max(aia[i].data))
 fx_map = shift_map( deconv[j], cen[0]-deconv[j].xc+12, cen[1]-deconv[j].yc+2 )
 ref_map = shift_map( deconv[0], cen[0]-deconv[0].xc+7, cen[1]-deconv[0].yc+2 )
-fx_map.data = gauss_smooth(fx_map.data,0.6)
-;;;ref_map.data = gauss_smooth(ref_map.data,0.5)
+fx_map.data = gauss_smooth(fx_map.data,0.5)
+;;;ref_map.data = gauss_smooth(ref_map.data,0.5)	; image doesn't really need smoothing
 aia[i].id = 'AIA 94A'
+fraction = [30,50,70,90]/100.		; fractions of encircled energy for contour levels
 
 popen, 'foxsi1_deconv_simple_on_aia', xsi=7, ysi=7, /port
 	!p.multi=0
@@ -116,7 +117,8 @@ popen, 'foxsi1_deconv_simple_on_aia', xsi=7, ysi=7, /port
 	plot_map, aia[i], fov=1.8, cen=cen, col=255, charsi=1.5, /limb, grid=2, gcol=255, $
 		lcol=255
 	loadct, 7
-	plot_map, fx_map, /over, col=128, th=6, lev=[10,30,50,70,90], /per
+	plot_map, fx_map, /over, col=128, th=6, $
+		levels=levels_encircled_energy( fx_map.data, fraction)
 	xyouts, 910, -170, 'FOXSI 4-15 keV ', col=128, charsi=1.8
 	xyouts, 910, -255, 'Deconvolved '+fx_map.id, col=128, charsi=1.8
 	xyouts, 0.2, 0.94, 'Targets 4+6, Det 0,1,2,4,5,6', /norm, charsi=2
@@ -131,7 +133,8 @@ popen, 'foxsi1_raw_on_aia', xsi=7, ysi=7, /port
 	plot_map, aia[i], fov=1.8, cen=cen, col=255, charsi=1.5, /limb, grid=2, gcol=255, $
 		lcol=255
 	loadct, 7
-	plot_map, ref_map, /over, col=128, th=6, lev=[10,30,50,70,90], /per
+	plot_map, ref_map, /over, col=128, th=6, $
+		levels=levels_encircled_energy( ref_map.data, fraction)
 	xyouts, 910, -170, 'FOXSI 4-15 keV ', col=128, charsi=1.8
 	xyouts, 910, -255, 'Raw map', col=128, charsi=1.8
 	xyouts, 0.2, 0.94, 'Targets 4+6, Det 0,1,2,4,5,6', /norm, charsi=2
@@ -220,6 +223,7 @@ det = [1,1,1,0,1,1,1]
 psf=foxsi_psf( pix = 1, fov=5. )
 
 ; Here's the matrix computation.
+; THIS IS SLOW!  IF YOU HAVE ALREADY DONE IT, DON'T REPEAT.
 matrix = foxsi_define_matrix( matrix=matrix_file, psf=psf, $
 				measured_dim=measured_dim, detector=det )
 
@@ -245,6 +249,7 @@ restore, getenv('FOXSIPKG')+'/data_2012/aia-maps-flare.sav', /v
 cen = map_centroid(aia[i],thresh=0.3*max(aia[i].data))
 fx_map = shift_map( deconv[j], cen[0]-deconv[j].xc+5, cen[1]-deconv[j].yc+3 )
 aia[i].id = 'AIA 94A'
+fraction = [30,50,70,90]/100.		; fractions of encircled energy for contour levels
 
 popen, 'foxsi1_deconv_on_aia', xsi=7, ysi=7, /port
 	!p.multi=0
@@ -252,7 +257,8 @@ popen, 'foxsi1_deconv_on_aia', xsi=7, ysi=7, /port
 	reverse_ct
 	plot_map, aia[i], fov=1.8, cen=cen, col=255, charsi=1.5, /limb, grid=2, gcol=255, lcol=255
 	loadct, 7
-	plot_map, fx_map, /over, col=128, th=6, lev=[10,30,50,70,90], /per
+	plot_map, fx_map, /over, col=128, th=6, $
+		levels=levels_encircled_energy( fx_map.data, fraction)
 	xyouts, 910, -170, 'FOXSI 4-15 keV ', col=128, charsi=1.8
 	xyouts, 910, -255, 'Deconvolved '+fx_map.id, col=128, charsi=1.8
 	xyouts, 0.2, 0.94, 'Targets 4+6, Det 0,1,2,4,5,6', /norm, charsi=2
