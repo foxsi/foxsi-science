@@ -42,6 +42,8 @@
 ;	PITCH:			Detector strip size in arcsec. Default: 7.735
 ;					This MUST match the strip size of the image you want to 
 ;					deconvolve.
+;	DETECTOR_MASK:	Flags to show which detectors you want to include in the transform.
+;					Detectors with zero flags just get zeroes for their transforms.
 ;
 ; HISTORY:
 ;		2016-oct-30		LG	Created, based on my code for FOXSI-SMEX.
@@ -103,7 +105,7 @@ FUNCTION	FOXSI_DEFINE_MATRIX, psf=psf, matrix_file=matrix_file, $
 	print
 	print, 'Computing transformation matrix.'
 	print, w_dim, '^2 source pixels, ', source_pix, ' arcsec'
-	print, h_dim, '^2 measuring strips, ', pitch, ' arcsec'
+	print, h_dim, '^2 strip crossings, ', pitch, ' arcsec'
 	print
 
 	for det=0, 6 do begin		; loop through detectors
