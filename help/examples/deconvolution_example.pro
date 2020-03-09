@@ -102,11 +102,11 @@ det = [1,1,0,0,1,1,1]
 restore, 'calibration_data/foxsi_psf_on_axis.sav', /v		; on-axis PSF
 
 ; Here's the matrix computation.
-matrix = foxsi_define_matrix( matrix=matrix_file, psf=psf, $
+matrix = deconv_define_matrix( matrix=matrix_file, psf=psf, $
 				measured_dim=measured_dim, detector=det )
 
 ; This step actually does the deconvolution.  The output is a set of maps after various 
 ; numbers of deconvolution iterations.  It is up to the user to decide what iteration 
 ; number to go to.
-deconv = foxsi_deconv( maps, matrix_file, max=20 )
+deconv = deconv_foxsi( maps, matrix_file, max=20 )
 movie_map, deconv, /nosc

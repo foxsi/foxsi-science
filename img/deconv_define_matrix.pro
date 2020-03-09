@@ -1,5 +1,5 @@
 ;+
-; NAME: FOXSI_DEFINE_MATRIX
+; NAME: DECONV_DEFINE_MATRIX
 ;
 ; PURPOSE:
 ;	This routine computes a transformation matrix describing FOXSI's imaging instrument 
@@ -51,7 +51,7 @@
 ;-
 
 
-FUNCTION	FOXSI_DEFINE_MATRIX, psf=psf, matrix_file=matrix_file, $
+FUNCTION	DECONV_DEFINE_MATRIX, psf=psf, matrix_file=matrix_file, $
 								 measured_dim=measured_dim, pitch=pitch, $
 								 detector_mask = detector_mask, stop=stop
 

@@ -224,13 +224,13 @@ psf=foxsi_psf( pix = 1, fov=5. )
 
 ; Here's the matrix computation.
 ; THIS IS SLOW!  IF YOU HAVE ALREADY DONE IT, DON'T REPEAT.
-matrix = foxsi_define_matrix( matrix=matrix_file, psf=psf, $
+matrix = deconv_define_matrix( matrix=matrix_file, psf=psf, $
 				measured_dim=measured_dim, detector=det )
 
 ; This step actually does the deconvolution.  The output is a set of maps after various 
 ; numbers of deconvolution iterations.  It is up to the user to decide what iteration 
 ; number to go to.
-deconv = foxsi_deconv( maps, matrix_file, max=100 )
+deconv = deconv_foxsi( maps, matrix_file, max=100 )
 movie_map, deconv, /nosc
 
 print, 'Total photons: ', total(maps.data)

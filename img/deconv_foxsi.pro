@@ -1,5 +1,5 @@
 ;+
-; NAME: FOXSI_DECONV
+; NAME: DECONV_FOXSI
 ;
 ; PURPOSE:
 ;  	Perform maximum likelihood deconvolution on a real or simulated FOXSI image (where 
@@ -10,7 +10,7 @@
 ;	share dimensions, pixel size, and desired source resolution, that matrix is 
 ;	computed in a separate function and saved to file.  That filename must be input to 
 ;	this routine using the MATRIX_FILE keyword.
-;	(See FOXSI_DEFINE_MATRIX.)
+;	(See DECONV_DEFINE_MATRIX.)
 ;
 ;	The matrix should include the transformations for all 7 detectors (but some can be 
 ;	zeros if you don't want to use those detectors).
@@ -40,7 +40,7 @@
 ;-
 
 
-FUNCTION	FOXSI_DECONV, image, matrix_file, max_iter=max_iter, stop=stop
+FUNCTION	DECONV_FOXSI, image, matrix_file, max_iter=max_iter, stop=stop
 
 	default, max_iter, 40
 	
