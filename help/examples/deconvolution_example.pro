@@ -7,8 +7,29 @@
 ;
 
 foxsi, 2014
-file = 'foxsi2_flare1_det6_t1pos0.sav'
-restore, file, /v
+
+;;;;; Create FOXSI map 
+
+dat = data_lvl2_d6	
+cen_map = cen1_pos0
+trange = [t1_pos0_start, t1_pos0_end]	
+t1 = trange[0] + t_launch
+t2 = trange[1] + t_launch
+i = where(dat.wsmr_time gt t1 and dat.wsmr_time lt t2 and dat.error_flag eq 0)
+map = foxsi_image_map(dat[i],erange=[4.,15.],cen_map,/xy)
+
+; Find centroid of FOXSI data
+center = [33,-233]	; this is the centroid for RHESSI data (microflare 1)
+sub_map, map, sub, xrange=[center[0]-100.,center[0]+100.], yrange=[center[1]-100.,center[1]+100.]
+cenmap = map_centroid(sub,threshold=0.05*max(sub.data))
+
+; Refine centroid of FOXSI data
+sub_map, map, sub, xrange=[cenmap[0]-100.,cenmap[0]+100.], yrange=[cenmap[1]-100.,cenmap[1]+100.]
+cenmap = map_centroid(sub,threshold=0.05*max(sub.data))
+
+; Use centroid to shift map to align with RHESSI data
+shiftmap =  center - cenmap
+map = shift_map(map,shiftmap[0],shiftmap[1])
 
 ; Restore whichever PSF you want.
 restore, GETENV('FOXSIDB') + '/../calibration_data/foxsi_psf_targ1_pos0_367.sav'
