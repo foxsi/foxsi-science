@@ -154,17 +154,22 @@ ENDIF
 
 ; 3D-PRINTTED COLLIMATOR EFFECT (foxsi-3)
 ; case when using the YEAR keyword
-;IF KEYWORD_SET(YEAR) THEN BEGIN
-;  IF ((YEAR EQ 2018) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
-;    vignetting = 0.32 - 0.018*offaxis_angle ; 
-;    collimator_oa = total([1.0, 1.0, 1.0, vignetting, vignetting, vignetting, vignetting])/7.
-;    eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
-;  ENDIF
-;ENDIF
-; case when NOT using the YEAR keyword
-;IF ((DATE EQ datefoxsi3) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
-;  print,'hola mundo!'
-;ENDIF
+IF KEYWORD_SET(YEAR) THEN BEGIN
+  IF ((YEAR EQ 2018) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
+    vignetting = 0.32 - 0.018*rnorm ; 
+    collimator_oa = total([1.0, 1.0, 1.0, vignetting, vignetting, vignetting, vignetting])/7.
+    eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
+  ENDIF
+ENDIF
+IF NOT KEYWORD_SET(YEAR) THEN BEGIN
+  ; case when NOT using the YEAR keyword
+  COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
+  IF ((DATE EQ anytim('2018-sep-7')) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
+    vignetting = 0.32 - 0.018*rnorm ;
+    collimator_oa = total([1.0, 1.0, 1.0, vignetting, vignetting, vignetting, vignetting])/7.
+    eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
+  ENDIF
+ENDIF
 
 result = create_struct("energy_keV", energy_arr, "eff_area_cm2", eff_area)
 
