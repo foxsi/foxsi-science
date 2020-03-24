@@ -14,6 +14,7 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ;	modified:	SM	2019 Dec	Switched to optic module numbers instead of detector position
 ; modified: MB  2020 Jan  Differenciate among the three foxsi flights using the DATE keyword.
 ;               2020 Feb  Add a YEAR keyword that can be used when the user don't want to load all FOXSI COMMON variables.
+;               2020 Mar  Add 3D-printed collimator and vignetting effect for X4 and X5 on FOXSI-3.
 
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
@@ -55,7 +56,7 @@ IF KEYWORD_SET(YEAR) THEN BEGIN
   ENDELSE
 ENDIF ELSE BEGIN
   ; If YEAR is not set then COMMON DATE will be used to know wich FOXSI flight the user is working with. 
-  IF FOXSI_PARAM EQ !NULL THEN BEGIN
+  IF TYPENAME(DATE) EQ 'UNDEFINED' THEN BEGIN
     print,'Please initialize the FOXSI common parameter or provide the year of the flight via the YEAR keyword'
     return, -1
   ENDIF
@@ -80,10 +81,12 @@ ENDIF ELSE BEGIN
     ENDIF
     ; foxsi3 :
     IF DATE EQ datefoxsi3 THEN BEGIN
+      ; for X0(10-shell), X1(7-shell), and X2(10-shell), X4(7-shell), or X5(7-shell) use calibration data from FOXSI-2. 
       IF (WHERE(MODULE_NUMBER EQ [0,1,2,4,5]) NE -1) THEN BEGIN
         files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
-                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']    
       ENDIF ELSE BEGIN
+      ; for X7(10-shell) and X8(10-shell) use calibration data from FOXSI-3. These were new modules for FOXSI-3.
         IF (WHERE(MODULE_NUMBER EQ [7,8]) NE -1) THEN BEGIN
           files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
                    'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
@@ -147,6 +150,20 @@ IF keyword_set(PLOT) THEN BEGIN
 	oplot, energy_arr, reform(eff_area), psym = -4
 	ssw_legend, 'pan, tilt = [' + num2str(angle[0]) + ',' + num2str(angle[1]) + ']'
 ENDIF
+
+; 3D-PRINTTED COLLIMATOR EFFECT (foxsi-3)
+; case when using the YEAR keyword
+;IF KEYWORD_SET(YEAR) THEN BEGIN
+;  IF ((YEAR EQ 2018) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
+;    vignetting = 0.32 - 0.018*offaxis_angle ; 
+;    collimator_oa = total([1.0, 1.0, 1.0, vignetting, vignetting, vignetting, vignetting])/7.
+;    eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
+;  ENDIF
+;ENDIF
+; case when NOT using the YEAR keyword
+;IF ((DATE EQ datefoxsi3) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
+;  print,'hola mundo!'
+;ENDIF
 
 result = create_struct("energy_keV", energy_arr, "eff_area_cm2", eff_area)
 
