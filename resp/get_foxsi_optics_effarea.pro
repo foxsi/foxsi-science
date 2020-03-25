@@ -157,7 +157,7 @@ ENDIF
 IF KEYWORD_SET(YEAR) THEN BEGIN
   IF ((YEAR EQ 2018) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
     vignetting = 0.32 - 0.018*rnorm ; 
-    collimator_oa = total([1.0, 1.0, 1.0, vignetting, vignetting, vignetting, vignetting])/7.
+    collimator_oa = (17.4527 + vignetting*16.0986)/33.5513 ; These hard code numbers are the Geom. EA. for the shells.
     eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
   ENDIF
 ENDIF
@@ -165,8 +165,8 @@ IF NOT KEYWORD_SET(YEAR) THEN BEGIN
   ; case when NOT using the YEAR keyword
   COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
   IF ((DATE EQ anytim('2018-sep-7')) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
-    vignetting = 0.32 - 0.018*rnorm ;
-    collimator_oa = total([1.0, 1.0, 1.0, vignetting, vignetting, vignetting, vignetting])/7.
+    vignetting = 0.32 - 0.018*rnorm
+    collimator_oa = (17.4527 + vignetting*16.0986)/33.5513 ; These hard code numbers are the Geom. EA. for the shells. 
     eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
   ENDIF
 ENDIF
