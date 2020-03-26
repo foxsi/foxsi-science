@@ -14,6 +14,7 @@ FUNCTION get_foxsi_optics_effarea, ENERGY_ARR = energy_arr, MODULE_NUMBER = modu
 ;	modified:	SM	2019 Dec	Switched to optic module numbers instead of detector position
 ; modified: MB  2020 Jan  Differenciate among the three foxsi flights using the DATE keyword.
 ;               2020 Feb  Add a YEAR keyword that can be used when the user don't want to load all FOXSI COMMON variables.
+;               2020 Mar  Add 3D-printed collimator and vignetting effect for X4 and X5 on FOXSI-3.
 
 default, data_dir, 'calibration_data/'
 default, offaxis_angle, [0.0, 0.0]
@@ -55,14 +56,15 @@ IF KEYWORD_SET(YEAR) THEN BEGIN
   ENDELSE
 ENDIF ELSE BEGIN
   ; If YEAR is not set then COMMON DATE will be used to know wich FOXSI flight the user is working with. 
-  IF FOXSI_PARAM EQ !NULL THEN BEGIN
-    print,'Please initialize the FOXSI common parameter or provide the year of the flight via the YEAR keyword'
-    return, -1
-  ENDIF
   COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
   default, datefoxsi1, anytim('2012-nov-02') ; FOXSI1 Launch Date
   default, datefoxsi2, anytim('2014-dec-11') ; FOXSI2 Launch Date
-  default, datefoxsi3, anytim('2018-sep-7')  ; FOXSI3 Launch Date  
+  default, datefoxsi3, anytim('2018-sep-7')  ; FOXSI3 Launch Date
+
+  IF TYPENAME(DATE) EQ 'UNDEFINED' THEN BEGIN
+    print,'Please initialize the FOXSI common parameter or provide the year of the flight via the YEAR keyword'
+    return, -1
+  ENDIF
   IF ((DATE EQ datefoxsi1) OR (DATE EQ datefoxsi2) OR (DATE EQ datefoxsi3)) THEN BEGIN
     ; foxsi1 :
     IF (DATE EQ datefoxsi1) THEN BEGIN
@@ -80,10 +82,12 @@ ENDIF ELSE BEGIN
     ENDIF
     ; foxsi3 :
     IF DATE EQ datefoxsi3 THEN BEGIN
+      ; for X0(10-shell), X1(7-shell), and X2(10-shell), X4(7-shell), or X5(7-shell) use calibration data from FOXSI-2. 
       IF (WHERE(MODULE_NUMBER EQ [0,1,2,4,5]) NE -1) THEN BEGIN
         files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI2_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
-                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
+                 'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']    
       ENDIF ELSE BEGIN
+      ; for X7(10-shell) and X8(10-shell) use calibration data from FOXSI-3. These were new modules for FOXSI-3.
         IF (WHERE(MODULE_NUMBER EQ [7,8]) NE -1) THEN BEGIN
           files =  GETENV('FOXSIPKG') + '/' + data_dir + 'FOXSI3_' + ['Module_X-' + num2str(MODULE_NUMBER) + '_EA_pan.txt', $
                    'Module_X-' + num2str(MODULE_NUMBER) + '_EA_tilt.txt']
@@ -146,6 +150,25 @@ IF keyword_set(PLOT) THEN BEGIN
 		xtitle = "Energy [keV]", ytitle = "Effective Area [cm!U2!N]", charsize = 1.5, /xstyle, xrange = [min(energy_arr), max(energy_arr)], _EXTRA = _EXTRA, /nodata
 	oplot, energy_arr, reform(eff_area), psym = -4
 	ssw_legend, 'pan, tilt = [' + num2str(angle[0]) + ',' + num2str(angle[1]) + ']'
+ENDIF
+
+; 3D-PRINTTED COLLIMATOR EFFECT (foxsi-3)
+; case when using the YEAR keyword
+IF KEYWORD_SET(YEAR) THEN BEGIN
+  IF ((YEAR EQ 2018) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
+    vignetting = 0.32 - 0.018*rnorm ; 
+    collimator_oa = (17.4527 + vignetting*16.0986)/33.5513 ; These hard code numbers are the Geom. EA. for the shells.
+    eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
+  ENDIF
+ENDIF
+IF NOT KEYWORD_SET(YEAR) THEN BEGIN
+  ; case when NOT using the YEAR keyword
+  COMMON FOXSI_PARAM ; allows access to the FOXSI COMMON variables.
+  IF ((DATE EQ anytim('2018-sep-7')) AND  (WHERE(MODULE_NUMBER EQ [4,5]) NE -1)) THEN BEGIN
+    vignetting = 0.32 - 0.018*rnorm
+    collimator_oa = (17.4527 + vignetting*16.0986)/33.5513 ; These hard code numbers are the Geom. EA. for the shells. 
+    eff_area = collimator_oa * eff_area ; Multiply the EA by the collimator open area.
+  ENDIF
 ENDIF
 
 result = create_struct("energy_keV", energy_arr, "eff_area_cm2", eff_area)
