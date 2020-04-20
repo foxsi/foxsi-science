@@ -48,6 +48,7 @@ obs time (UT) | 19:12:51 - 19:19:25
 
     2014: ftp://apollo.ssl.berkeley.edu/pub/foxsi/data_2014/
 
+    Servers will be down on Wednesday, April 22 10am -12pm (PT).
 
     To know whether your installation was a success, run @image-example-1
     and you should get an image of the first target.
